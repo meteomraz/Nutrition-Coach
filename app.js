@@ -146,12 +146,100 @@ function exportCsv(){
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'nutrition-report.csv'; a.click();
 }
 
+
+function exportExcel(){
+  const t = totals();
+  const date = $('reportDate').value || new Date().toISOString().slice(0,10);
+  const targetKcal = Number($('targetKcal').value);
+  const targetProtein = Number($('targetProtein').value);
+  const targetCarbs = Number($('targetCarbs').value);
+  const targetFat = Number($('targetFat').value);
+
+  const esc = (v) => String(v ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
+
+  const rows = report.map(x => `
+    <tr>
+      <td>${esc(x.meal)}</td>
+      <td>${esc(x.name)}</td>
+      <td class="num">${x.grams}</td>
+      <td class="num">${x.kcal}</td>
+      <td class="num">${x.protein}</td>
+      <td class="num">${x.carbs}</td>
+      <td class="num">${x.fat}</td>
+    </tr>`).join('');
+
+  const html = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <meta charset="utf-8">
+      <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Jídelníček</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+      <style>
+        body { font-family: Arial, sans-serif; }
+        table { border-collapse: collapse; width: 100%; }
+        th { background: #d9ead3; font-weight: bold; }
+        th, td { border: 1px solid #999; padding: 6px; }
+        .title { font-size: 20px; font-weight: bold; background: #274e13; color: white; }
+        .subtitle { font-weight: bold; background: #f3f6f4; }
+        .num { text-align: right; }
+        .total { font-weight: bold; background: #fff2cc; }
+      </style>
+    </head>
+    <body>
+      <table>
+        <tr><td class="title" colspan="7">Denní jídelníček / report maker</td></tr>
+        <tr><td class="subtitle">Datum</td><td colspan="6">${esc(date)}</td></tr>
+        <tr><td colspan="7"></td></tr>
+        <tr>
+          <th>Jídlo</th><th>Potravina</th><th>Gramy</th><th>Kcal</th><th>Bílkoviny</th><th>Sacharidy</th><th>Tuky</th>
+        </tr>
+        ${rows}
+        <tr class="total">
+          <td colspan="3">CELKEM</td>
+          <td class="num">${round(t.kcal)}</td>
+          <td class="num">${round(t.protein)}</td>
+          <td class="num">${round(t.carbs)}</td>
+          <td class="num">${round(t.fat)}</td>
+        </tr>
+        <tr>
+          <td colspan="7"></td>
+        </tr>
+        <tr class="subtitle">
+          <td colspan="3">CÍL</td>
+          <td class="num">${targetKcal}</td>
+          <td class="num">${targetProtein}</td>
+          <td class="num">${targetCarbs}</td>
+          <td class="num">${targetFat}</td>
+        </tr>
+        <tr>
+          <td colspan="3">ZBÝVÁ / PŘESAH</td>
+          <td class="num">${round(targetKcal - t.kcal)}</td>
+          <td class="num">${round(targetProtein - t.protein)}</td>
+          <td class="num">${round(targetCarbs - t.carbs)}</td>
+          <td class="num">${round(targetFat - t.fat)}</td>
+        </tr>
+      </table>
+    </body>
+    </html>`;
+
+  const blob = new Blob(['\ufeff', html], {type:'application/vnd.ms-excel;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `jidelnicek-${date}.xls`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 function clearDay(){ if(confirm('Opravdu vymazat dnešní report?')){ report=[]; save(); render(); } }
 
 $('reportDate').value = new Date().toISOString().slice(0,10);
 $('addFoodBtn').onclick = addFood;
 $('copyBtn').onclick = copyReport;
 $('csvBtn').onclick = exportCsv;
+$('excelBtn').onclick = exportExcel;
 $('clearBtn').onclick = clearDay;
 $('foodImport').addEventListener('change', importFoods);
 $('exportFoodsBtn').onclick = exportFoods;
