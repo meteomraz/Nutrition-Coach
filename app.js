@@ -232,17 +232,21 @@ function totals(type = currentDayType){
 }
 
 function metric(label, value, target, unit=''){
-  const rawPct = target ? Math.round(value / target * 100) : 0;
+  const numericValue = Number(value) || 0;
+  const numericTarget = Number(target) || 0;
+  const rawPct = numericTarget ? Math.round(numericValue / numericTarget * 100) : 0;
   const pct = Math.min(100, rawPct);
-  const exceeded = target && value > target;
-  const diff = target ? round(target - value) : 0;
-  const status = exceeded ? `Přesah: ${round(value - target)}${unit}` : `Zbývá: ${diff}${unit}`;
-  return `<div class="metric ${exceeded ? 'over-limit' : ''}">
+  const exceeded = numericTarget > 0 && numericValue > numericTarget;
+  const diff = numericTarget ? round(numericTarget - numericValue) : 0;
+  const status = exceeded ? `Přesah: ${round(numericValue - numericTarget)}${unit}` : `Zbývá: ${diff}${unit}`;
+  const fillStyle = exceeded ? `width:${pct}%;background:#dc2626;` : `width:${pct}%`;
+
+  return `<div class="metric ${exceeded ? 'over-limit over-target' : ''}" data-exceeded="${exceeded}">
     <span>${label}</span>
-    <strong>${round(value)}${unit}</strong>
-    <span>Cíl: ${target}${unit} · ${rawPct}%</span>
+    <strong>${round(numericValue)}${unit}</strong>
+    <span>Cíl: ${numericTarget}${unit} · ${rawPct}%</span>
     <em>${status}</em>
-    <div class="bar"><div class="fill" style="width:${pct}%"></div></div>
+    <div class="bar"><div class="fill" style="${fillStyle}"></div></div>
   </div>`;
 }
 

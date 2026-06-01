@@ -117,3 +117,26 @@ button:hover,.file-button:hover{box-shadow:0 14px 28px rgba(21,94,239,.30)}
 @media(max-width:820px){.app{padding:12px}.hero{grid-template-columns:1fr}.grid,.summary{grid-template-columns:1fr}.section-head{display:block}.actions{margin-top:12px}.card{padding:20px;border-radius:24px}button,.file-button{width:100%;text-align:center}h1{font-size:34px}.summary{gap:10px}th,td{padding:12px}.metric strong{font-size:25px}}
 
 @media(max-width:820px){.meal-title{display:block}.meal-title span{display:block;margin-top:4px}}
+
+
+/* Překročený cíl maker/kcal – vždy červeně */
+.metric.over-limit,
+.metric.over-target,
+.metric[data-exceeded="true"]{
+  border-color:#fca5a5 !important;
+  background:linear-gradient(180deg,#fff5f5,#fee2e2) !important;
+  box-shadow:0 8px 24px rgba(220,38,38,.16) !important;
+}
+.metric.over-limit strong,
+.metric.over-target strong,
+.metric[data-exceeded="true"] strong,
+.metric.over-limit em,
+.metric.over-target em,
+.metric[data-exceeded="true"] em{
+  color:#dc2626 !important;
+}
+.metric.over-limit .fill,
+.metric.over-target .fill,
+.metric[data-exceeded="true"] .fill{
+  background:#dc2626 !important;
+}
