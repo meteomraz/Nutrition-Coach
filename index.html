@@ -79,8 +79,20 @@
     </section>
 
     <section class="card">
-      <h2>Databáze potravin</h2>
-      <p class="muted">Zatím je v souboru <strong>foods.json</strong>. Tam budeš postupně doplňovat hodnoty z Kalorických tabulek na 100 g.</p>
+      <div class="section-head">
+        <div>
+          <h2>Databáze potravin</h2>
+          <p class="muted">Potraviny se načítají z <strong>foods.json</strong>. Na Androidu můžeš importovat i stejný obsah uložený jako <strong>.txt</strong>.</p>
+        </div>
+        <div class="actions">
+          <label class="file-button" for="foodImport">Import JSON/TXT</label>
+          <input id="foodImport" class="hidden-file" type="file" accept=".json,.txt,application/json,text/plain" />
+          <button id="exportFoodsBtn" class="secondary">Export potravin</button>
+          <button id="resetFoodsBtn" class="danger">Vrátit původní</button>
+        </div>
+      </div>
+      <div id="importStatus" class="status muted">Aktuálně načteno: 0 potravin.</div>
+      <p class="muted small">Formát souboru musí být pole objektů. Každá potravina má minimálně <strong>name, kcal, protein, carbs, fat</strong> hodnoty na 100 g.</p>
     </section>
   </main>
   <script src="app.js"></script>
