@@ -232,8 +232,55 @@ function totals(type = currentDayType){
 }
 
 function metric(label, value, target, unit=''){
-  const pct = target ? Math.min(100, Math.round(value / target * 100)) : 0;
-  return `<div class="metric"><span>${label}</span><strong>${round(value)}${unit}</strong><span>Cíl: ${target}${unit} · ${pct}%</span><div class="bar"><div class="fill" style="width:${pct}%"></div></div></div>`;
+  const rawPct = target ? Math.round(value / target * 100) : 0;
+  const pct = Math.min(100, rawPct);
+  const exceeded = target && value > target;
+  const diff = target ? round(target - value) : 0;
+  const status = exceeded ? `Přesah: ${round(value - target)}${unit}` : `Zbývá: ${diff}${unit}`;
+  return `<div class="metric ${exceeded ? 'over-limit' : ''}">
+    <span>${label}</span>
+    <strong>${round(value)}${unit}</strong>
+    <span>Cíl: ${target}${unit} · ${rawPct}%</span>
+    <em>${status}</em>
+    <div class="bar"><div class="fill" style="width:${pct}%"></div></div>
+  </div>`;
+}
+
+function mealTotals(items){
+  return items.reduce((a,x)=>({
+    kcal:a.kcal+x.kcal,
+    protein:a.protein+x.protein,
+    carbs:a.carbs+x.carbs,
+    fat:a.fat+x.fat
+  }), {kcal:0,protein:0,carbs:0,fat:0});
+}
+
+function renderReportRows(){
+  const data = sortedReport();
+  if(!data.length){
+    return `<tr class="empty-row"><td colspan="8">Zatím není přidané žádné jídlo pro ${dayTypeLabel().toLowerCase()}.</td></tr>`;
+  }
+
+  const knownMealRows = mealOrder.map(meal => {
+    const items = data.filter(x => x.meal === meal);
+    if(!items.length) return '';
+    const mt = mealTotals(items);
+    const header = `<tr class="meal-divider"><td colspan="8">
+      <div class="meal-title"><strong>${meal}</strong><span>${round(mt.kcal)} kcal · B ${round(mt.protein)} g · S ${round(mt.carbs)} g · T ${round(mt.fat)} g</span></div>
+    </td></tr>`;
+    const rows = items.map((x)=>`<tr class="meal-item"><td>${x.meal}</td><td>${x.name}</td><td>${x.grams}</td><td>${x.kcal}</td><td>${x.protein}</td><td>${x.carbs}</td><td>${x.fat}</td><td><button onclick="removeItem(${x.originalIndex})">X</button></td></tr>`).join('');
+    return header + rows;
+  }).join('');
+
+  const otherItems = data.filter(x => !mealOrder.includes(x.meal));
+  const otherRows = otherItems.length ? (() => {
+    const mt = mealTotals(otherItems);
+    const header = `<tr class="meal-divider"><td colspan="8"><div class="meal-title"><strong>Ostatní</strong><span>${round(mt.kcal)} kcal · B ${round(mt.protein)} g · S ${round(mt.carbs)} g · T ${round(mt.fat)} g</span></div></td></tr>`;
+    const rows = otherItems.map((x)=>`<tr class="meal-item"><td>${x.meal}</td><td>${x.name}</td><td>${x.grams}</td><td>${x.kcal}</td><td>${x.protein}</td><td>${x.carbs}</td><td>${x.fat}</td><td><button onclick="removeItem(${x.originalIndex})">X</button></td></tr>`).join('');
+    return header + rows;
+  })() : '';
+
+  return knownMealRows + otherRows;
 }
 
 function render(){
@@ -246,7 +293,7 @@ function render(){
     metric('Tuky', t.fat, targets.fat, ' g')
   ].join('');
 
-  $('reportBody').innerHTML = sortedReport().map((x)=>`<tr><td>${x.meal}</td><td>${x.name}</td><td>${x.grams}</td><td>${x.kcal}</td><td>${x.protein}</td><td>${x.carbs}</td><td>${x.fat}</td><td><button onclick="removeItem(${x.originalIndex})">X</button></td></tr>`).join('');
+  $('reportBody').innerHTML = renderReportRows();
   $('textReport').value = buildTextReport(t);
   updateDayTypeHint();
 }
