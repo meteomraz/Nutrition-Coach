@@ -1,0 +1,10 @@
+[
+  { "name": "Kuřecí prsa syrová", "kcal": 110, "protein": 23, "carbs": 0, "fat": 1.5 },
+  { "name": "Rýže basmati vařená", "kcal": 130, "protein": 2.7, "carbs": 28, "fat": 0.3 },
+  { "name": "Brambory vařené", "kcal": 77, "protein": 2, "carbs": 17, "fat": 0.1 },
+  { "name": "Vejce celé", "kcal": 143, "protein": 13, "carbs": 1.1, "fat": 9.5 },
+  { "name": "Ovesné vločky", "kcal": 370, "protein": 13.5, "carbs": 60, "fat": 7 },
+  { "name": "Banán", "kcal": 89, "protein": 1.1, "carbs": 23, "fat": 0.3 },
+  { "name": "Olivový olej", "kcal": 884, "protein": 0, "carbs": 0, "fat": 100 },
+  { "name": "Tvaroh odtučněný", "kcal": 67, "protein": 12, "carbs": 4, "fat": 0.5 }
+]
