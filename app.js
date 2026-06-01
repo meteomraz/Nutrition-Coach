@@ -292,7 +292,7 @@ function worksheetXml(type){
   const targets = getTargets(type);
   const sheetName = type === 'training' ? 'Tréninkový den' : 'Netréninkový den';
 
-  const itemRows = data.map(x => row([
+  const itemRows = data.map((x, idx) => row([
     [x.meal, 'String'],
     [x.name, 'String'],
     [x.grams, 'Number'],
@@ -300,21 +300,21 @@ function worksheetXml(type){
     [x.protein, 'Number'],
     [x.carbs, 'Number'],
     [x.fat, 'Number']
-  ])).join('');
+  ], idx % 2 === 0 ? 'Body' : 'BodyAlt')).join('');
 
   return `
     <Worksheet ss:Name="${xmlEsc(sheetName)}">
       <Table>
         <Column ss:Width="110"/><Column ss:Width="230"/><Column ss:Width="70"/><Column ss:Width="80"/><Column ss:Width="80"/><Column ss:Width="80"/><Column ss:Width="80"/>
-        ${row([`Jídelníček - ${sheetName}`, '', '', '', '', '', ''], 'Title')}
-        ${row(['Datum', date, '', '', '', '', ''], 'Subtitle')}
-        ${row(['Řazení', 'Podle chodů: Snídaně, Svačina, Oběd, Před tréninkem, Po tréninku, Večeře', '', '', '', '', ''], 'Subtitle')}
+        ${row([`NUTRITION COACH - ${sheetName}`, '', '', '', '', '', ''], 'Title')}
+        ${row(['Datum', date, '', '', '', '', ''], 'Meta')}
+        ${row(['Řazení', 'Podle chodů: Snídaně, Svačina, Oběd, Před tréninkem, Po tréninku, Večeře', '', '', '', '', ''], 'Meta')}
         ${row(['', '', '', '', '', '', ''])}
         ${row(['Jídlo','Potravina','Gramy','Kcal','Bílkoviny','Sacharidy','Tuky'], 'Header')}
         ${itemRows}
         ${row(['CELKEM','', '', [round(t.kcal),'Number'], [round(t.protein),'Number'], [round(t.carbs),'Number'], [round(t.fat),'Number']], 'Total')}
-        ${row(['CÍL','', '', [targets.kcal,'Number'], [targets.protein,'Number'], [targets.carbs,'Number'], [targets.fat,'Number']], 'Subtitle')}
-        ${row(['ZBÝVÁ / PŘESAH','', '', [round(targets.kcal - t.kcal),'Number'], [round(targets.protein - t.protein),'Number'], [round(targets.carbs - t.carbs),'Number'], [round(targets.fat - t.fat),'Number']])}
+        ${row(['CÍL','', '', [targets.kcal,'Number'], [targets.protein,'Number'], [targets.carbs,'Number'], [targets.fat,'Number']], 'Goal')}
+        ${row(['ZBÝVÁ / PŘESAH','', '', [round(targets.kcal - t.kcal),'Number'], [round(targets.protein - t.protein),'Number'], [round(targets.carbs - t.carbs),'Number'], [round(targets.fat - t.fat),'Number']], 'Delta')}
       </Table>
     </Worksheet>`;
 }
@@ -329,11 +329,15 @@ function exportExcel(){
     xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
     xmlns:html="http://www.w3.org/TR/REC-html40">
     <Styles>
-      <Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Center"/><Font ss:FontName="Arial" ss:Size="10"/></Style>
-      <Style ss:ID="Title"><Font ss:Bold="1" ss:Size="16"/><Interior ss:Color="#D9EAD3" ss:Pattern="Solid"/></Style>
-      <Style ss:ID="Subtitle"><Font ss:Bold="1"/><Interior ss:Color="#F3F6F4" ss:Pattern="Solid"/></Style>
-      <Style ss:ID="Header"><Font ss:Bold="1"/><Interior ss:Color="#D9EAD3" ss:Pattern="Solid"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/></Borders></Style>
-      <Style ss:ID="Total"><Font ss:Bold="1"/><Interior ss:Color="#FFF2CC" ss:Pattern="Solid"/></Style>
+      <Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Center"/><Font ss:FontName="Arial" ss:Size="10"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E7EEF8"/></Borders></Style>
+      <Style ss:ID="Title"><Font ss:FontName="Arial" ss:Bold="1" ss:Size="18" ss:Color="#FFFFFF"/><Interior ss:Color="#155EEF" ss:Pattern="Solid"/><Alignment ss:Vertical="Center"/></Style>
+      <Style ss:ID="Meta"><Font ss:Bold="1" ss:Color="#344054"/><Interior ss:Color="#EEF4FF" ss:Pattern="Solid"/></Style>
+      <Style ss:ID="Header"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#101828" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
+      <Style ss:ID="Body"><Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/></Style>
+      <Style ss:ID="BodyAlt"><Interior ss:Color="#F8FBFF" ss:Pattern="Solid"/></Style>
+      <Style ss:ID="Total"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#12B76A" ss:Pattern="Solid"/></Style>
+      <Style ss:ID="Goal"><Font ss:Bold="1"/><Interior ss:Color="#D1FADF" ss:Pattern="Solid"/></Style>
+      <Style ss:ID="Delta"><Font ss:Bold="1"/><Interior ss:Color="#FEF0C7" ss:Pattern="Solid"/></Style>
     </Styles>
     ${worksheetXml('training')}
     ${worksheetXml('rest')}
