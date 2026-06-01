@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nutrition Report</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="card hero">
+      <div>
+        <p class="eyebrow">Nutrition Report</p>
+        <h1>Denní report jídel a maker</h1>
+        <p>Vyber potravinu, zadej gramy a aplikace dopočítá kcal, bílkoviny, sacharidy i tuky.</p>
+      </div>
+      <div class="date-box">
+        <label for="reportDate">Datum</label>
+        <input id="reportDate" type="date" />
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Přidat jídlo</h2>
+        <div class="form">
+          <label>Jídlo / část dne
+            <select id="mealType">
+              <option>Snídaně</option>
+              <option>Svačina</option>
+              <option>Oběd</option>
+              <option>Před tréninkem</option>
+              <option>Po tréninku</option>
+              <option>Večeře</option>
+            </select>
+          </label>
+          <label>Potravina
+            <select id="foodSelect"></select>
+          </label>
+          <label>Množství v gramech
+            <input id="gramsInput" type="number" min="1" step="1" value="100" />
+          </label>
+          <button id="addFoodBtn">Přidat do reportu</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Cíle dne</h2>
+        <div class="targets">
+          <label>Kcal <input id="targetKcal" type="number" value="3000"></label>
+          <label>Bílkoviny <input id="targetProtein" type="number" value="220"></label>
+          <label>Sacharidy <input id="targetCarbs" type="number" value="350"></label>
+          <label>Tuky <input id="targetFat" type="number" value="70"></label>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Report</h2>
+        <div class="actions">
+          <button id="copyBtn" class="secondary">Kopírovat text</button>
+          <button id="csvBtn" class="secondary">Export CSV</button>
+          <button id="clearBtn" class="danger">Vymazat den</button>
+        </div>
+      </div>
+      <div class="summary" id="summary"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Jídlo</th><th>Potravina</th><th>g</th><th>kcal</th><th>B</th><th>S</th><th>T</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="reportBody"></tbody>
+        </table>
+      </div>
+      <textarea id="textReport" readonly></textarea>
+    </section>
+
+    <section class="card">
+      <h2>Databáze potravin</h2>
+      <p class="muted">Zatím je v souboru <strong>foods.json</strong>. Tam budeš postupně doplňovat hodnoty z Kalorických tabulek na 100 g.</p>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
