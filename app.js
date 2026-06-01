@@ -291,34 +291,59 @@ function worksheetXml(type){
   const t = totals(type);
   const targets = getTargets(type);
   const sheetName = type === 'training' ? 'Tréninkový den' : 'Netréninkový den';
+  const targetRows = [
+    row(['Přehled cílů', '', '', '', '', '', ''], 'TargetHeader'),
+    row(['Makro', 'Cíl', 'Snědeno', 'Zbývá / přesah', '', '', ''], 'Header'),
+    row(['Kalorie', [targets.kcal, 'Number'], [round(t.kcal), 'Number'], [round(targets.kcal - t.kcal), 'Number'], '', '', ''], 'Goal'),
+    row(['Bílkoviny', [targets.protein, 'Number'], [round(t.protein), 'Number'], [round(targets.protein - t.protein), 'Number'], '', '', ''], 'Goal'),
+    row(['Sacharidy', [targets.carbs, 'Number'], [round(t.carbs), 'Number'], [round(targets.carbs - t.carbs), 'Number'], '', '', ''], 'Goal'),
+    row(['Tuky', [targets.fat, 'Number'], [round(t.fat), 'Number'], [round(targets.fat - t.fat), 'Number'], '', '', ''], 'Goal'),
+    row(['', '', '', '', '', '', ''])
+  ].join('');
 
-  const itemRows = data.map((x, idx) => row([
-    [x.meal, 'String'],
-    [x.name, 'String'],
-    [x.grams, 'Number'],
-    [x.kcal, 'Number'],
-    [x.protein, 'Number'],
-    [x.carbs, 'Number'],
-    [x.fat, 'Number']
-  ], idx % 2 === 0 ? 'Body' : 'BodyAlt')).join('');
+  const mealRows = mealOrder.map(meal => {
+    const items = data.filter(x => x.meal === meal);
+    const header = row([meal, '', '', '', '', '', ''], 'MealHeader');
+    if(!items.length){
+      return header + row(['', 'Bez položek', '', '', '', '', ''], 'Empty');
+    }
+    return header + items.map((x, idx) => row([
+      [x.meal, 'String'],
+      [x.name, 'String'],
+      [x.grams, 'Number'],
+      [x.kcal, 'Number'],
+      [x.protein, 'Number'],
+      [x.carbs, 'Number'],
+      [x.fat, 'Number']
+    ], idx % 2 === 0 ? 'Body' : 'BodyAlt')).join('');
+  }).join('');
+
+  const otherItems = data.filter(x => !mealOrder.includes(x.meal));
+  const otherRows = otherItems.length
+    ? row(['Ostatní', '', '', '', '', '', ''], 'MealHeader') + otherItems.map((x, idx) => row([
+      [x.meal, 'String'], [x.name, 'String'], [x.grams, 'Number'], [x.kcal, 'Number'], [x.protein, 'Number'], [x.carbs, 'Number'], [x.fat, 'Number']
+    ], idx % 2 === 0 ? 'Body' : 'BodyAlt')).join('')
+    : '';
 
   return `
     <Worksheet ss:Name="${xmlEsc(sheetName)}">
       <Table>
-        <Column ss:Width="110"/><Column ss:Width="230"/><Column ss:Width="70"/><Column ss:Width="80"/><Column ss:Width="80"/><Column ss:Width="80"/><Column ss:Width="80"/>
+        <Column ss:Width="120"/><Column ss:Width="240"/><Column ss:Width="70"/><Column ss:Width="85"/><Column ss:Width="85"/><Column ss:Width="85"/><Column ss:Width="85"/>
         ${row([`NUTRITION COACH - ${sheetName}`, '', '', '', '', '', ''], 'Title')}
         ${row(['Datum', date, '', '', '', '', ''], 'Meta')}
-        ${row(['Řazení', 'Podle chodů: Snídaně, Svačina, Oběd, Před tréninkem, Po tréninku, Večeře', '', '', '', '', ''], 'Meta')}
+        ${row(['Typ dne', sheetName, '', '', '', '', ''], 'Meta')}
         ${row(['', '', '', '', '', '', ''])}
+        ${targetRows}
         ${row(['Jídlo','Potravina','Gramy','Kcal','Bílkoviny','Sacharidy','Tuky'], 'Header')}
-        ${itemRows}
+        ${mealRows}
+        ${otherRows}
+        ${row(['', '', '', '', '', '', ''])}
         ${row(['CELKEM','', '', [round(t.kcal),'Number'], [round(t.protein),'Number'], [round(t.carbs),'Number'], [round(t.fat),'Number']], 'Total')}
-        ${row(['CÍL','', '', [targets.kcal,'Number'], [targets.protein,'Number'], [targets.carbs,'Number'], [targets.fat,'Number']], 'Goal')}
+        ${row(['CÍL','', '', [targets.kcal,'Number'], [targets.protein,'Number'], [targets.carbs,'Number'], [targets.fat,'Number']], 'GoalStrong')}
         ${row(['ZBÝVÁ / PŘESAH','', '', [round(targets.kcal - t.kcal),'Number'], [round(targets.protein - t.protein),'Number'], [round(targets.carbs - t.carbs),'Number'], [round(targets.fat - t.fat),'Number']], 'Delta')}
       </Table>
     </Worksheet>`;
 }
-
 function exportExcel(){
   const date = $('reportDate').value || new Date().toISOString().slice(0,10);
   const workbook = `<?xml version="1.0"?>
@@ -333,10 +358,14 @@ function exportExcel(){
       <Style ss:ID="Title"><Font ss:FontName="Arial" ss:Bold="1" ss:Size="18" ss:Color="#FFFFFF"/><Interior ss:Color="#155EEF" ss:Pattern="Solid"/><Alignment ss:Vertical="Center"/></Style>
       <Style ss:ID="Meta"><Font ss:Bold="1" ss:Color="#344054"/><Interior ss:Color="#EEF4FF" ss:Pattern="Solid"/></Style>
       <Style ss:ID="Header"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#101828" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
+      <Style ss:ID="TargetHeader"><Font ss:Bold="1" ss:Size="12" ss:Color="#155EEF"/><Interior ss:Color="#DBEAFE" ss:Pattern="Solid"/></Style>
+      <Style ss:ID="MealHeader"><Font ss:Bold="1" ss:Size="12" ss:Color="#FFFFFF"/><Interior ss:Color="#344054" ss:Pattern="Solid"/></Style>
       <Style ss:ID="Body"><Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/></Style>
       <Style ss:ID="BodyAlt"><Interior ss:Color="#F8FBFF" ss:Pattern="Solid"/></Style>
+      <Style ss:ID="Empty"><Font ss:Italic="1" ss:Color="#667085"/><Interior ss:Color="#F2F4F7" ss:Pattern="Solid"/></Style>
       <Style ss:ID="Total"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#12B76A" ss:Pattern="Solid"/></Style>
       <Style ss:ID="Goal"><Font ss:Bold="1"/><Interior ss:Color="#D1FADF" ss:Pattern="Solid"/></Style>
+      <Style ss:ID="GoalStrong"><Font ss:Bold="1" ss:Color="#065F46"/><Interior ss:Color="#A7F3D0" ss:Pattern="Solid"/></Style>
       <Style ss:ID="Delta"><Font ss:Bold="1"/><Interior ss:Color="#FEF0C7" ss:Pattern="Solid"/></Style>
     </Styles>
     ${worksheetXml('training')}
