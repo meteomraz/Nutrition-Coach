@@ -49,10 +49,20 @@
       <div class="card">
         <h2>Cíle dne</h2>
         <div class="targets">
+          <label>Typ dne
+            <select id="dayType">
+              <option value="training">Tréninkový den</option>
+              <option value="rest">Netréninkový den</option>
+            </select>
+          </label>
           <label>Kcal <input id="targetKcal" type="number" value="3000"></label>
           <label>Bílkoviny <input id="targetProtein" type="number" value="220"></label>
           <label>Sacharidy <input id="targetCarbs" type="number" value="350"></label>
           <label>Tuky <input id="targetFat" type="number" value="70"></label>
+          <div class="actions compact-actions">
+            <button id="saveTargetsBtn" class="secondary" type="button">Uložit cíle pro tento typ dne</button>
+          </div>
+          <p id="dayTypeHint" class="muted small"></p>
         </div>
       </div>
     </section>

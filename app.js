@@ -1,6 +1,11 @@
 let foods = [];
 let defaultFoods = [];
 let report = JSON.parse(localStorage.getItem('nutritionReport') || '[]');
+let currentDayType = localStorage.getItem('nutritionDayType') || 'training';
+let targetPresets = JSON.parse(localStorage.getItem('nutritionTargetPresets') || JSON.stringify({
+  training: { kcal: 3000, protein: 220, carbs: 350, fat: 70 },
+  rest: { kcal: 2600, protein: 220, carbs: 220, fat: 85 }
+}));
 
 const $ = (id) => document.getElementById(id);
 const round = (n) => Math.round(n * 10) / 10;
@@ -138,6 +143,47 @@ function calc(food, grams){
 
 function save(){ localStorage.setItem('nutritionReport', JSON.stringify(report)); }
 
+function dayTypeLabel(){
+  return currentDayType === 'training' ? 'Tréninkový den' : 'Netréninkový den';
+}
+
+function getTargets(){
+  return {
+    kcal: Number($('targetKcal').value),
+    protein: Number($('targetProtein').value),
+    carbs: Number($('targetCarbs').value),
+    fat: Number($('targetFat').value)
+  };
+}
+
+function applyTargetsForDayType(){
+  const preset = targetPresets[currentDayType] || targetPresets.training;
+  $('targetKcal').value = preset.kcal;
+  $('targetProtein').value = preset.protein;
+  $('targetCarbs').value = preset.carbs;
+  $('targetFat').value = preset.fat;
+  updateDayTypeHint();
+  render();
+}
+
+function saveTargetsForDayType(){
+  targetPresets[currentDayType] = getTargets();
+  localStorage.setItem('nutritionTargetPresets', JSON.stringify(targetPresets));
+  updateDayTypeHint('Cíle uloženy.');
+}
+
+function updateDayTypeHint(prefix = ''){
+  if(!$('dayTypeHint')) return;
+  const t = targetPresets[currentDayType] || getTargets();
+  $('dayTypeHint').textContent = `${prefix ? prefix + ' ' : ''}${dayTypeLabel()}: ${t.kcal} kcal | B ${t.protein} g | S ${t.carbs} g | T ${t.fat} g`;
+}
+
+function changeDayType(){
+  currentDayType = $('dayType').value;
+  localStorage.setItem('nutritionDayType', currentDayType);
+  applyTargetsForDayType();
+}
+
 function addFood(){
   const food = findFoodBySearch();
   const grams = Number($('gramsInput').value);
@@ -175,14 +221,14 @@ function render(){
 
 function buildTextReport(t){
   const date = $('reportDate').value || new Date().toISOString().slice(0,10);
-  const lines = [`Denní report ${date}`, '', ...report.map(x => `${x.meal}: ${x.name} ${x.grams} g | ${x.kcal} kcal | B ${x.protein} g | S ${x.carbs} g | T ${x.fat} g`), '', `CELKEM: ${round(t.kcal)} kcal | B ${round(t.protein)} g | S ${round(t.carbs)} g | T ${round(t.fat)} g`];
+  const lines = [`Denní report ${date}`, `Typ dne: ${dayTypeLabel()}`, '', ...report.map(x => `${x.meal}: ${x.name} ${x.grams} g | ${x.kcal} kcal | B ${x.protein} g | S ${x.carbs} g | T ${x.fat} g`), '', `CELKEM: ${round(t.kcal)} kcal | B ${round(t.protein)} g | S ${round(t.carbs)} g | T ${round(t.fat)} g`];
   return lines.join('\n');
 }
 
 function copyReport(){ navigator.clipboard.writeText($('textReport').value); alert('Report zkopírován.'); }
 
 function exportCsv(){
-  const rows = [['Jídlo','Potravina','Gramy','Kcal','Bílkoviny','Sacharidy','Tuky'], ...report.map(x=>[x.meal,x.name,x.grams,x.kcal,x.protein,x.carbs,x.fat])];
+  const rows = [['Typ dne', dayTypeLabel()], [], ['Jídlo','Potravina','Gramy','Kcal','Bílkoviny','Sacharidy','Tuky'], ...report.map(x=>[x.meal,x.name,x.grams,x.kcal,x.protein,x.carbs,x.fat])];
   const csv = rows.map(r => r.map(v => `"${String(v).replaceAll('"','""')}"`).join(';')).join('\n');
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'nutrition-report.csv'; a.click();
@@ -234,6 +280,7 @@ function exportExcel(){
       <table>
         <tr><td class="title" colspan="7">Denní jídelníček / report maker</td></tr>
         <tr><td class="subtitle">Datum</td><td colspan="6">${esc(date)}</td></tr>
+        <tr><td class="subtitle">Typ dne</td><td colspan="6">${esc(dayTypeLabel())}</td></tr>
         <tr><td colspan="7"></td></tr>
         <tr>
           <th>Jídlo</th><th>Potravina</th><th>Gramy</th><th>Kcal</th><th>Bílkoviny</th><th>Sacharidy</th><th>Tuky</th>
@@ -278,7 +325,11 @@ function exportExcel(){
 function clearDay(){ if(confirm('Opravdu vymazat dnešní report?')){ report=[]; save(); render(); } }
 
 $('reportDate').value = new Date().toISOString().slice(0,10);
+$('dayType').value = currentDayType;
+applyTargetsForDayType();
 $('addFoodBtn').onclick = addFood;
+$('dayType').onchange = changeDayType;
+$('saveTargetsBtn').onclick = saveTargetsForDayType;
 $('foodSearch').addEventListener('input', (event) => {
   refreshFoodSuggestions(event.target.value);
   updateFoodHint();
@@ -296,5 +347,5 @@ $('clearBtn').onclick = clearDay;
 $('foodImport').addEventListener('change', importFoods);
 $('exportFoodsBtn').onclick = exportFoods;
 $('resetFoodsBtn').onclick = resetFoods;
-['targetKcal','targetProtein','targetCarbs','targetFat'].forEach(id => $(id).addEventListener('input', render));
+['targetKcal','targetProtein','targetCarbs','targetFat'].forEach(id => $(id).addEventListener('input', () => { render(); updateDayTypeHint('Neuložená změna.'); }));
 loadFoods();
