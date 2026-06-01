@@ -35,7 +35,9 @@
             </select>
           </label>
           <label>Potravina
-            <select id="foodSelect"></select>
+            <input id="foodSearch" type="text" list="foodSuggestions" placeholder="Začni psát např. kuř..." autocomplete="off" />
+            <datalist id="foodSuggestions"></datalist>
+            <span id="foodHint" class="muted small">Našeptávač nabízí potraviny podle začátku názvu.</span>
           </label>
           <label>Množství v gramech
             <input id="gramsInput" type="number" min="1" step="1" value="100" />

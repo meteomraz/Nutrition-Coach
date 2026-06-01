@@ -15,8 +15,47 @@ async function loadFoods(){
   render();
 }
 
+function normalizeText(value){
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+
 function refreshFoodSelect(){
-  $('foodSelect').innerHTML = foods.map((f,i)=>`<option value="${i}">${f.name}</option>`).join('');
+  refreshFoodSuggestions('');
+  updateFoodHint();
+}
+
+function refreshFoodSuggestions(query){
+  if(!$('foodSuggestions')) return;
+  const normalizedQuery = normalizeText(query);
+  const filtered = foods
+    .filter(f => !normalizedQuery || normalizeText(f.name).startsWith(normalizedQuery))
+    .slice(0, 50);
+
+  $('foodSuggestions').innerHTML = filtered
+    .map(f => `<option value="${f.name}">${f.kcal} kcal | B ${f.protein} | S ${f.carbs} | T ${f.fat}</option>`)
+    .join('');
+}
+
+function findFoodBySearch(){
+  const value = $('foodSearch').value;
+  const normalizedValue = normalizeText(value);
+  if(!normalizedValue) return null;
+
+  return foods.find(f => normalizeText(f.name) === normalizedValue)
+    || foods.find(f => normalizeText(f.name).startsWith(normalizedValue))
+    || foods.find(f => normalizeText(f.name).includes(normalizedValue));
+}
+
+function updateFoodHint(){
+  if(!$('foodHint')) return;
+  const food = findFoodBySearch();
+  $('foodHint').textContent = food
+    ? `Vybráno: ${food.name} | ${food.kcal} kcal, B ${food.protein} g, S ${food.carbs} g, T ${food.fat} g / 100 g`
+    : 'Začni psát název potraviny. Nabízí se položky začínající na zadaná písmena.';
 }
 
 function validateFoods(data){
@@ -100,10 +139,13 @@ function calc(food, grams){
 function save(){ localStorage.setItem('nutritionReport', JSON.stringify(report)); }
 
 function addFood(){
-  const food = foods[Number($('foodSelect').value)];
+  const food = findFoodBySearch();
   const grams = Number($('gramsInput').value);
   if(!food || grams <= 0) return alert('Zadej platnou potravinu a gramy.');
   report.push({ meal: $('mealType').value, name: food.name, grams, ...calc(food, grams) });
+  $('foodSearch').value = '';
+  refreshFoodSuggestions('');
+  updateFoodHint();
   save(); render();
 }
 
@@ -237,6 +279,16 @@ function clearDay(){ if(confirm('Opravdu vymazat dnešní report?')){ report=[];
 
 $('reportDate').value = new Date().toISOString().slice(0,10);
 $('addFoodBtn').onclick = addFood;
+$('foodSearch').addEventListener('input', (event) => {
+  refreshFoodSuggestions(event.target.value);
+  updateFoodHint();
+});
+$('foodSearch').addEventListener('keydown', (event) => {
+  if(event.key === 'Enter'){
+    event.preventDefault();
+    addFood();
+  }
+});
 $('copyBtn').onclick = copyReport;
 $('csvBtn').onclick = exportCsv;
 $('excelBtn').onclick = exportExcel;
