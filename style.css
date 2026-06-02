@@ -218,3 +218,8 @@ button:hover,.file-button:hover{box-shadow:0 14px 28px rgba(21,94,239,.30)}
   .macro-edit{width:70px;min-width:70px}
   .table-select{width:130px;min-width:130px}
 }
+
+.quantity-row{display:flex;gap:8px;align-items:center}
+.quantity-row input{flex:1}
+.quantity-row select{width:86px}
+.amount-label{display:block;font-size:11px;color:#667085;margin-top:4px}

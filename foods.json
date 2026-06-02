@@ -2472,7 +2472,9 @@
     "carbs": 3.6,
     "fat": 27,
     "unit": "100g",
-    "source": "orientační databáze fitness 100g"
+    "source": "orientační databáze fitness 100g",
+    "pieceName": "ks",
+    "pieceWeight": 17
   },
   {
     "id": "bilek-vajecny-grilovane",
@@ -3308,7 +3310,9 @@
     "carbs": 23,
     "fat": 0.3,
     "unit": "100g",
-    "source": "orientační databáze fitness 100g"
+    "source": "orientační databáze fitness 100g",
+    "pieceName": "ks",
+    "pieceWeight": 120
   },
   {
     "id": "boruvky",
@@ -3429,7 +3433,9 @@
     "carbs": 14,
     "fat": 0.2,
     "unit": "100g",
-    "source": "orientační databáze fitness 100g"
+    "source": "orientační databáze fitness 100g",
+    "pieceName": "ks",
+    "pieceWeight": 150
   },
   {
     "id": "jahody",
@@ -3506,7 +3512,9 @@
     "carbs": 13,
     "fat": 0.3,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "pieceName": "ks",
+    "pieceWeight": 80
   },
   {
     "id": "mango",
@@ -3605,7 +3613,9 @@
     "carbs": 12,
     "fat": 0.1,
     "unit": "100g",
-    "source": "orientační databáze fitness 100g"
+    "source": "orientační databáze fitness 100g",
+    "pieceName": "ks",
+    "pieceWeight": 160
   },
   {
     "id": "rozinky",
@@ -4298,7 +4308,9 @@
     "carbs": 65,
     "fat": 3,
     "unit": "100g",
-    "source": "orientační databáze fitness 100g"
+    "source": "orientační databáze fitness 100g",
+    "pieceName": "ks",
+    "pieceWeight": 12
   },
   {
     "id": "kroupy-suche",
@@ -5640,7 +5652,9 @@
     "carbs": 2,
     "fat": 2,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "pieceName": "plátek",
+    "pieceWeight": 20
   },
   {
     "id": "sunka-kureci",
@@ -5651,7 +5665,9 @@
     "carbs": 2,
     "fat": 3,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "pieceName": "plátek",
+    "pieceWeight": 20
   },
   {
     "id": "sunka-veprova-95",
@@ -5695,7 +5711,9 @@
     "carbs": 0.7,
     "fat": 9.5,
     "unit": "100g",
-    "source": "orientační hodnota 100g"
+    "source": "orientační hodnota 100g",
+    "pieceName": "ks",
+    "pieceWeight": 50
   },
   {
     "id": "avokado",
@@ -6114,5 +6132,49 @@
     "fat": 0.3,
     "unit": "100g",
     "source": "orientacni databaze"
+  },
+  {
+    "name": "Med",
+    "category": "Sacharidy",
+    "kcal": 304,
+    "protein": 0.3,
+    "carbs": 82.4,
+    "fat": 0,
+    "unit": "100g",
+    "source": "orientační databáze 100g",
+    "id": "med"
+  },
+  {
+    "name": "Zelenina mix",
+    "category": "Zelenina",
+    "kcal": 35,
+    "protein": 2.0,
+    "carbs": 6.0,
+    "fat": 0.3,
+    "unit": "100g",
+    "source": "orientační databáze 100g",
+    "id": "zelenina-mix"
+  },
+  {
+    "name": "Zelenina mix mražená",
+    "category": "Zelenina",
+    "kcal": 38,
+    "protein": 2.2,
+    "carbs": 6.5,
+    "fat": 0.4,
+    "unit": "100g",
+    "source": "orientační databáze 100g",
+    "id": "zelenina-mix-mrazena"
+  },
+  {
+    "name": "Krůtí mleté 2% Lidl",
+    "category": "Maso",
+    "kcal": 112,
+    "protein": 23.0,
+    "carbs": 0.0,
+    "fat": 2.0,
+    "unit": "100g",
+    "source": "orientační dle deklarace 100g",
+    "id": "kruti-mlete-2-lidl"
   }
 ]

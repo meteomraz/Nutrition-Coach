@@ -45,8 +45,14 @@
             <datalist id="foodSuggestions"></datalist>
             <span id="foodHint" class="muted small">Našeptávač nabízí potraviny podle začátku názvu.</span>
           </label>
-          <label>Množství v gramech
-            <input id="gramsInput" type="number" min="1" step="1" value="100" />
+          <label>Množství
+            <div class="quantity-row">
+              <input id="gramsInput" type="number" min="1" step="1" value="100" />
+              <select id="unitSelect">
+                <option value="g">g</option>
+              </select>
+            </div>
+            <span id="unitHint" class="muted small">Základ je v gramech. U vybraných potravin lze použít i kusy.</span>
           </label>
           <button id="addFoodBtn">Přidat do reportu</button>
         </div>
@@ -120,7 +126,7 @@
         <table>
           <thead>
             <tr>
-              <th>Jídlo</th><th>Potravina</th><th>g</th><th>kcal</th><th>B</th><th>S</th><th>T</th><th></th>
+              <th>Jídlo</th><th>Potravina</th><th>Množství / g</th><th>kcal</th><th>B</th><th>S</th><th>T</th><th></th>
             </tr>
           </thead>
           <tbody id="reportBody"></tbody>

@@ -25,10 +25,19 @@ async function loadFoods(){
   const res = await fetch('foods.json');
   defaultFoods = await res.json();
   const savedFoods = localStorage.getItem('nutritionFoods');
-  foods = savedFoods ? JSON.parse(savedFoods) : defaultFoods;
+  foods = savedFoods ? mergeDefaultFoods(JSON.parse(savedFoods), defaultFoods) : defaultFoods;
   refreshFoodSelect();
   updateImportStatus('Databáze potravin načtena.');
   render();
+}
+
+function mergeDefaultFoods(saved, defaults){
+  const byName = new Map((saved || []).map(f => [normalizeText(f.name), f]));
+  (defaults || []).forEach(f => {
+    const key = normalizeText(f.name);
+    if(!byName.has(key)) byName.set(key, f);
+  });
+  return Array.from(byName.values());
 }
 
 function normalizeText(value){
@@ -306,11 +315,27 @@ function findFoodBySearch(){
     || foods.find(f => normalizeText(f.name).includes(normalizedValue));
 }
 
+function updateUnitOptions(){
+  if(!$('unitSelect')) return;
+  const food = findFoodBySearch();
+  const current = $('unitSelect').value || 'g';
+  const pieceWeight = Number(food?.pieceWeight || 0);
+  const pieceName = food?.pieceName || 'ks';
+  $('unitSelect').innerHTML = `<option value="g">g</option>` + (pieceWeight > 0 ? `<option value="piece">${pieceName}</option>` : '');
+  $('unitSelect').value = pieceWeight > 0 && current === 'piece' ? 'piece' : 'g';
+  if($('unitHint')){
+    $('unitHint').textContent = pieceWeight > 0
+      ? `Lze zadat gramy nebo ${pieceName}. 1 ${pieceName} ≈ ${pieceWeight} g.`
+      : 'Tato potravina se počítá v gramech.';
+  }
+}
+
 function updateFoodHint(){
   if(!$('foodHint')) return;
   const food = findFoodBySearch();
+  updateUnitOptions();
   $('foodHint').textContent = food
-    ? `Vybráno: ${food.name} | ${food.kcal} kcal, B ${food.protein} g, S ${food.carbs} g, T ${food.fat} g / 100 g`
+    ? `Vybráno: ${food.name} | ${food.kcal} kcal, B ${food.protein} g, S ${food.carbs} g, T ${food.fat} g / 100 g${food.pieceWeight ? ` · 1 ${food.pieceName || 'ks'} ≈ ${food.pieceWeight} g` : ''}`
     : 'Začni psát název potraviny. Nabízí se položky začínající na zadaná písmena.';
 }
 
@@ -337,6 +362,8 @@ function validateFoods(data){
       carbs,
       fat,
       unit: f.unit || '100g',
+      pieceName: f.pieceName || undefined,
+      pieceWeight: f.pieceWeight ? Number(f.pieceWeight) : undefined,
       source: f.source || 'import'
     };
   });
@@ -449,10 +476,16 @@ function changeDayType(){
 
 function addFood(){
   const food = findFoodBySearch();
-  const grams = Number($('gramsInput').value);
-  if(!food || grams <= 0) return alert('Zadej platnou potravinu a gramy.');
-  getReport().push({ meal: $('mealType').value, name: food.name, grams, ...calc(food, grams) });
+  const amount = Number($('gramsInput').value);
+  const unitMode = $('unitSelect') ? $('unitSelect').value : 'g';
+  if(!food || amount <= 0) return alert('Zadej platnou potravinu a množství.');
+  const pieceWeight = Number(food.pieceWeight || 0);
+  const pieceName = food.pieceName || 'ks';
+  const grams = unitMode === 'piece' && pieceWeight > 0 ? round(amount * pieceWeight) : amount;
+  const amountLabel = unitMode === 'piece' && pieceWeight > 0 ? `${amount} ${pieceName} / ${grams} g` : `${grams} g`;
+  getReport().push({ meal: $('mealType').value, name: food.name, grams, amount, unitMode, pieceName, pieceWeight, amountLabel, ...calc(food, grams) });
   $('foodSearch').value = '';
+  if($('unitSelect')) $('unitSelect').innerHTML = '<option value="g">g</option>';
   refreshFoodSuggestions('');
   updateFoodHint();
   save(); render();
@@ -512,7 +545,7 @@ function renderEditableRow(x){
   return `<tr class="meal-item">
     <td><select class="table-select" onchange="updateItemMeal(${x.originalIndex}, this.value)">${mealOptionsHtml(x.meal)}</select></td>
     <td><input class="food-edit" type="text" list="foodSuggestions" value="${xmlEsc(x.name)}" onchange="updateItemFood(${x.originalIndex}, this.value)"></td>
-    <td><input class="grams-edit" type="number" min="1" value="${x.grams}" onchange="updateItemGrams(${x.originalIndex}, this.value)"></td>
+    <td><input class="grams-edit" type="number" min="1" value="${x.grams}" onchange="updateItemGrams(${x.originalIndex}, this.value)">${x.amountLabel && x.amountLabel !== `${x.grams} g` ? `<span class="amount-label">${xmlEsc(x.amountLabel)}</span>` : ''}</td>
     <td><input class="macro-edit" type="number" step="0.1" value="${x.kcal}" onchange="updateItemMacro(${x.originalIndex}, 'kcal', this.value)"></td>
     <td><input class="macro-edit" type="number" step="0.1" value="${x.protein}" onchange="updateItemMacro(${x.originalIndex}, 'protein', this.value)"></td>
     <td><input class="macro-edit" type="number" step="0.1" value="${x.carbs}" onchange="updateItemMacro(${x.originalIndex}, 'carbs', this.value)"></td>
@@ -567,7 +600,7 @@ function render(){
 function buildTextReport(t){
   const date = $('reportDate').value || new Date().toISOString().slice(0,10);
   const name = ($('clientName')?.value || '').trim();
-  const lines = [`Denní report ${date}`, name ? `Jméno: ${name}` : '', `Typ dne: ${dayTypeLabel()}`, '', ...sortedReport().map(x => `${x.meal}: ${x.name} ${x.grams} g | ${x.kcal} kcal | B ${x.protein} g | S ${x.carbs} g | T ${x.fat} g`), '', `CELKEM: ${round(t.kcal)} kcal | B ${round(t.protein)} g | S ${round(t.carbs)} g | T ${round(t.fat)} g`].filter(line => line !== null);
+  const lines = [`Denní report ${date}`, name ? `Jméno: ${name}` : '', `Typ dne: ${dayTypeLabel()}`, '', ...sortedReport().map(x => `${x.meal}: ${x.name} ${x.amountLabel || (x.grams + ' g')} | ${x.kcal} kcal | B ${x.protein} g | S ${x.carbs} g | T ${x.fat} g`), '', `CELKEM: ${round(t.kcal)} kcal | B ${round(t.protein)} g | S ${round(t.carbs)} g | T ${round(t.fat)} g`].filter(line => line !== null);
   return lines.join('\n');
 }
 
@@ -586,7 +619,7 @@ function dateForFile(){
 }
 
 function exportCsv(){
-  const rows = [['Jméno', ($('clientName')?.value || '').trim()], ['Typ dne', dayTypeLabel()], [], ['Jídlo','Potravina','Gramy','Kcal','Bílkoviny','Sacharidy','Tuky'], ...sortedReport().map(x=>[x.meal,x.name,x.grams,x.kcal,x.protein,x.carbs,x.fat])];
+  const rows = [['Jméno', ($('clientName')?.value || '').trim()], ['Typ dne', dayTypeLabel()], [], ['Jídlo','Potravina','Množství','Kcal','Bílkoviny','Sacharidy','Tuky'], ...sortedReport().map(x=>[x.meal,x.name,x.amountLabel || (x.grams + ' g'),x.kcal,x.protein,x.carbs,x.fat])];
   const csv = rows.map(r => r.map(v => `"${String(v).replaceAll('"','""')}"`).join(';')).join('\n');
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${safeFileName(($('clientName')?.value || 'jidelnicek'))}-${dateForFile()}.csv`; a.click();
@@ -636,7 +669,7 @@ function worksheetXml(type){
     }
     return header + items.map((x, idx) => row([
       [x.name, 'String'],
-      [x.grams, 'Number'],
+      [x.amountLabel || (x.grams + ' g'), 'String'],
       [x.kcal, 'Number'],
       [x.protein, 'Number'],
       [x.carbs, 'Number'],
@@ -647,7 +680,7 @@ function worksheetXml(type){
   const otherItems = data.filter(x => !mealOrder.includes(x.meal));
   const otherRows = otherItems.length
     ? row(['Ostatní', '', '', '', '', ''], 'MealHeader') + otherItems.map((x, idx) => row([
-      [x.name, 'String'], [x.grams, 'Number'], [x.kcal, 'Number'], [x.protein, 'Number'], [x.carbs, 'Number'], [x.fat, 'Number']
+      [x.name, 'String'], [x.amountLabel || (x.grams + ' g'), 'String'], [x.kcal, 'Number'], [x.protein, 'Number'], [x.carbs, 'Number'], [x.fat, 'Number']
     ], idx % 2 === 0 ? 'Body' : 'BodyAlt')).join('')
     : '';
 
@@ -661,7 +694,7 @@ function worksheetXml(type){
         ${row(['Typ dne', sheetName, '', '', '', ''], 'Meta')}
         ${row(['', '', '', '', '', ''])}
         ${targetRows}
-        ${row(['Potravina','Gramy','Kcal','Bílkoviny','Sacharidy','Tuky'], 'Header')}
+        ${row(['Potravina','Množství','Kcal','Bílkoviny','Sacharidy','Tuky'], 'Header')}
         ${mealRows}
         ${otherRows}
         ${row(['', '', '', '', '', ''])}
