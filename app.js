@@ -8,6 +8,7 @@ let reports = JSON.parse(localStorage.getItem('nutritionReportsByDayType') || 'n
   rest: []
 };
 let currentDayType = localStorage.getItem('nutritionDayType') || 'training';
+let clientName = localStorage.getItem('nutritionClientName') || '';
 let targetPresets = JSON.parse(localStorage.getItem('nutritionTargetPresets') || JSON.stringify({
   training: { kcal: 3000, protein: 220, carbs: 350, fat: 70 },
   rest: { kcal: 2600, protein: 220, carbs: 220, fat: 85 }
@@ -37,13 +38,98 @@ function normalizeText(value){
 
 
 async function loadTemplates(){
+  let defaults = [];
   try{
     const res = await fetch('meal-templates.json');
-    mealTemplates = await res.json();
+    defaults = await res.json();
   }catch(error){
-    mealTemplates = [];
+    defaults = [];
   }
+
+  const savedTemplates = JSON.parse(localStorage.getItem('nutritionMealTemplates') || '[]');
+  const byId = new Map(defaults.map(t => [t.id, t]));
+  savedTemplates.forEach(t => byId.set(t.id, t));
+  mealTemplates = Array.from(byId.values());
   refreshTemplateSelect();
+}
+
+function persistTemplates(){
+  localStorage.setItem('nutritionMealTemplates', JSON.stringify(mealTemplates));
+}
+
+function makeTemplateId(name){
+  const base = normalizeText(name).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'sablona';
+  let id = base;
+  let counter = 2;
+  while(mealTemplates.some(t => t.id === id)){
+    id = `${base}-${counter++}`;
+  }
+  return id;
+}
+
+function reportToTemplateItems(type = currentDayType){
+  return getReport(type).map(x => ({
+    meal: x.meal,
+    name: x.name,
+    grams: Number(x.grams) || 0,
+    kcal: round(Number(x.kcal) || 0),
+    protein: round(Number(x.protein) || 0),
+    carbs: round(Number(x.carbs) || 0),
+    fat: round(Number(x.fat) || 0)
+  }));
+}
+
+function saveCurrentTemplate(){
+  const template = getSelectedTemplate();
+  if(!template) return alert('Nejdřív vyber šablonu, kterou chceš přepsat.');
+  if(!getReport().length) return alert('Aktuální jídelníček je prázdný. Nejdřív načti nebo vytvoř jídelníček.');
+  const updated = {
+    ...template,
+    targets: getTargets(),
+    items: reportToTemplateItems(),
+    description: `Upraveno v aplikaci ${new Date().toLocaleDateString('cs-CZ')}.`
+  };
+  mealTemplates = mealTemplates.map(t => t.id === template.id ? updated : t);
+  persistTemplates();
+  refreshTemplateSelect();
+  $('templateSelect').value = updated.id;
+  updateTemplatePreview();
+  alert(`Šablona uložena: ${updated.name}`);
+}
+
+function createNewTemplate(){
+  const name = ($('newTemplateName')?.value || '').trim();
+  if(!name) return alert('Vyplň název nové šablony.');
+  if(!getReport().length) return alert('Aktuální jídelníček je prázdný. Přidej položky, které se mají uložit do šablony.');
+  const created = {
+    id: makeTemplateId(name),
+    name,
+    description: `Vlastní šablona uložená z aktuálního jídelníčku (${dayTypeLabel()}).`,
+    targets: getTargets(),
+    items: reportToTemplateItems()
+  };
+  mealTemplates.push(created);
+  persistTemplates();
+  refreshTemplateSelect();
+  $('templateSelect').value = created.id;
+  $('newTemplateName').value = '';
+  updateTemplatePreview();
+  alert(`Nová šablona vytvořena: ${created.name}`);
+}
+
+function exportTemplates(){
+  const blob = new Blob([JSON.stringify(mealTemplates, null, 2)], {type:'application/json;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'meal-templates-export.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function resetTemplates(){
+  if(!confirm('Vrátit šablony z meal-templates.json? Vlastní uložené šablony v tomto prohlížeči se smažou.')) return;
+  localStorage.removeItem('nutritionMealTemplates');
+  loadTemplates();
 }
 
 function templateTotals(template){
@@ -86,7 +172,8 @@ function updateTemplatePreview(){
     <strong>${template.name}</strong><br>
     ${template.description || ''}<br>
     <span>Jídla: ${(template.items || []).length} · Součet: ${round(t.kcal)} kcal | B ${round(t.protein)} g | S ${round(t.carbs)} g | T ${round(t.fat)} g</span><br>
-    <span>Cíl šablony: ${target.kcal || '-'} kcal | B ${target.protein || '-'} g | S ${target.carbs || '-'} g | T ${target.fat || '-'} g</span>
+    <span>Cíl šablony: ${target.kcal || '-'} kcal | B ${target.protein || '-'} g | S ${target.carbs || '-'} g | T ${target.fat || '-'} g</span><br>
+    <span>Tip: načti šablonu, uprav položky v tabulce a tlačítkem „Uložit šablonu“ ji přepiš pod stejným názvem.</span>
   `;
 }
 
@@ -142,6 +229,38 @@ function recalcItemByGrams(item, newGrams){
 function updateItemGrams(index, value){
   const report = getReport();
   report[index] = recalcItemByGrams(report[index], value);
+  save();
+  render();
+}
+
+function updateItemMeal(index, value){
+  const report = getReport();
+  if(!report[index]) return;
+  report[index].meal = value;
+  save();
+  render();
+}
+
+function updateItemFood(index, value){
+  const report = getReport();
+  if(!report[index]) return;
+  const name = String(value || '').trim();
+  if(!name) return;
+  const food = foods.find(f => normalizeText(f.name) === normalizeText(name));
+  report[index].name = food ? food.name : name;
+  if(food && Number(report[index].grams) > 0){
+    report[index] = { ...report[index], ...calc(food, Number(report[index].grams)) };
+  }
+  save();
+  render();
+}
+
+function updateItemMacro(index, field, value){
+  const allowed = ['kcal','protein','carbs','fat'];
+  if(!allowed.includes(field)) return;
+  const report = getReport();
+  if(!report[index]) return;
+  report[index][field] = round(Number(value) || 0);
   save();
   render();
 }
@@ -371,6 +490,23 @@ function mealTotals(items){
   }), {kcal:0,protein:0,carbs:0,fat:0});
 }
 
+function mealOptionsHtml(selected){
+  return mealOrder.map(meal => `<option ${meal === selected ? 'selected' : ''}>${meal}</option>`).join('') + `<option ${!mealOrder.includes(selected) ? 'selected' : ''}>Ostatní</option>`;
+}
+
+function renderEditableRow(x){
+  return `<tr class="meal-item">
+    <td><select class="table-select" onchange="updateItemMeal(${x.originalIndex}, this.value)">${mealOptionsHtml(x.meal)}</select></td>
+    <td><input class="food-edit" type="text" list="foodSuggestions" value="${xmlEsc(x.name)}" onchange="updateItemFood(${x.originalIndex}, this.value)"></td>
+    <td><input class="grams-edit" type="number" min="1" value="${x.grams}" onchange="updateItemGrams(${x.originalIndex}, this.value)"></td>
+    <td><input class="macro-edit" type="number" step="0.1" value="${x.kcal}" onchange="updateItemMacro(${x.originalIndex}, 'kcal', this.value)"></td>
+    <td><input class="macro-edit" type="number" step="0.1" value="${x.protein}" onchange="updateItemMacro(${x.originalIndex}, 'protein', this.value)"></td>
+    <td><input class="macro-edit" type="number" step="0.1" value="${x.carbs}" onchange="updateItemMacro(${x.originalIndex}, 'carbs', this.value)"></td>
+    <td><input class="macro-edit" type="number" step="0.1" value="${x.fat}" onchange="updateItemMacro(${x.originalIndex}, 'fat', this.value)"></td>
+    <td><button onclick="removeItem(${x.originalIndex})">X</button></td>
+  </tr>`;
+}
+
 function renderReportRows(){
   const data = sortedReport();
   if(!data.length){
@@ -384,7 +520,7 @@ function renderReportRows(){
     const header = `<tr class="meal-divider"><td colspan="8">
       <div class="meal-title"><strong>${meal}</strong><span>${round(mt.kcal)} kcal · B ${round(mt.protein)} g · S ${round(mt.carbs)} g · T ${round(mt.fat)} g</span></div>
     </td></tr>`;
-    const rows = items.map((x)=>`<tr class="meal-item"><td>${x.meal}</td><td>${x.name}</td><td><input class="grams-edit" type="number" min="1" value="${x.grams}" onchange="updateItemGrams(${x.originalIndex}, this.value)"></td><td>${x.kcal}</td><td>${x.protein}</td><td>${x.carbs}</td><td>${x.fat}</td><td><button onclick="removeItem(${x.originalIndex})">X</button></td></tr>`).join('');
+    const rows = items.map((x)=>renderEditableRow(x)).join('');
     return header + rows;
   }).join('');
 
@@ -392,7 +528,7 @@ function renderReportRows(){
   const otherRows = otherItems.length ? (() => {
     const mt = mealTotals(otherItems);
     const header = `<tr class="meal-divider"><td colspan="8"><div class="meal-title"><strong>Ostatní</strong><span>${round(mt.kcal)} kcal · B ${round(mt.protein)} g · S ${round(mt.carbs)} g · T ${round(mt.fat)} g</span></div></td></tr>`;
-    const rows = otherItems.map((x)=>`<tr class="meal-item"><td>${x.meal}</td><td>${x.name}</td><td><input class="grams-edit" type="number" min="1" value="${x.grams}" onchange="updateItemGrams(${x.originalIndex}, this.value)"></td><td>${x.kcal}</td><td>${x.protein}</td><td>${x.carbs}</td><td>${x.fat}</td><td><button onclick="removeItem(${x.originalIndex})">X</button></td></tr>`).join('');
+    const rows = otherItems.map((x)=>renderEditableRow(x)).join('');
     return header + rows;
   })() : '';
 
@@ -416,17 +552,30 @@ function render(){
 
 function buildTextReport(t){
   const date = $('reportDate').value || new Date().toISOString().slice(0,10);
-  const lines = [`Denní report ${date}`, `Typ dne: ${dayTypeLabel()}`, '', ...sortedReport().map(x => `${x.meal}: ${x.name} ${x.grams} g | ${x.kcal} kcal | B ${x.protein} g | S ${x.carbs} g | T ${x.fat} g`), '', `CELKEM: ${round(t.kcal)} kcal | B ${round(t.protein)} g | S ${round(t.carbs)} g | T ${round(t.fat)} g`];
+  const name = ($('clientName')?.value || '').trim();
+  const lines = [`Denní report ${date}`, name ? `Jméno: ${name}` : '', `Typ dne: ${dayTypeLabel()}`, '', ...sortedReport().map(x => `${x.meal}: ${x.name} ${x.grams} g | ${x.kcal} kcal | B ${x.protein} g | S ${x.carbs} g | T ${x.fat} g`), '', `CELKEM: ${round(t.kcal)} kcal | B ${round(t.protein)} g | S ${round(t.carbs)} g | T ${round(t.fat)} g`].filter(line => line !== null);
   return lines.join('\n');
 }
 
 function copyReport(){ navigator.clipboard.writeText($('textReport').value); alert('Report zkopírován.'); }
 
+function safeFileName(value){
+  return String(value || 'jidelnicek')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9_-]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .toLowerCase() || 'jidelnicek';
+}
+
+function dateForFile(){
+  return $('reportDate').value || new Date().toISOString().slice(0,10);
+}
+
 function exportCsv(){
-  const rows = [['Typ dne', dayTypeLabel()], [], ['Jídlo','Potravina','Gramy','Kcal','Bílkoviny','Sacharidy','Tuky'], ...sortedReport().map(x=>[x.meal,x.name,x.grams,x.kcal,x.protein,x.carbs,x.fat])];
+  const rows = [['Jméno', ($('clientName')?.value || '').trim()], ['Typ dne', dayTypeLabel()], [], ['Jídlo','Potravina','Gramy','Kcal','Bílkoviny','Sacharidy','Tuky'], ...sortedReport().map(x=>[x.meal,x.name,x.grams,x.kcal,x.protein,x.carbs,x.fat])];
   const csv = rows.map(r => r.map(v => `"${String(v).replaceAll('"','""')}"`).join(';')).join('\n');
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `nutrition-report-${currentDayType}.csv`; a.click();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${safeFileName(($('clientName')?.value || 'jidelnicek'))}-${dateForFile()}.csv`; a.click();
 }
 
 function xmlEsc(v){
@@ -454,6 +603,7 @@ function worksheetXml(type){
   const t = totals(type);
   const targets = getTargets(type);
   const sheetName = type === 'training' ? 'Tréninkový den' : 'Netréninkový den';
+  const name = ($('clientName')?.value || '').trim();
   const targetRows = [
     row(['Přehled cílů', '', '', '', '', '', ''], 'TargetHeader'),
     row(['Makro', 'Cíl', 'Snědeno', 'Zbývá / přesah', '', '', ''], 'Header'),
@@ -494,6 +644,7 @@ function worksheetXml(type){
         <Column ss:Width="120"/><Column ss:Width="240"/><Column ss:Width="70"/><Column ss:Width="85"/><Column ss:Width="85"/><Column ss:Width="85"/><Column ss:Width="85"/>
         ${row([`NUTRITION COACH - ${sheetName}`, '', '', '', '', '', ''], 'Title')}
         ${row(['Datum', date, '', '', '', '', ''], 'Meta')}
+        ${row(['Jméno', name, '', '', '', '', ''], 'Meta')}
         ${row(['Typ dne', sheetName, '', '', '', '', ''], 'Meta')}
         ${row(['', '', '', '', '', '', ''])}
         ${targetRows}
@@ -538,7 +689,7 @@ function exportExcel(){
   const blob = new Blob(['\ufeff', workbook], {type:'application/vnd.ms-excel;charset=utf-8'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `jidelnicek-treninkovy-netreninkovy-${date}.xls`;
+  a.download = `${safeFileName(($('clientName')?.value || 'jidelnicek'))}-${date}.xls`;
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -551,10 +702,12 @@ function clearDay(){
 }
 
 $('reportDate').value = new Date().toISOString().slice(0,10);
+if($('clientName')) $('clientName').value = clientName;
 $('dayType').value = currentDayType;
 applyTargetsForDayType();
 $('addFoodBtn').onclick = addFood;
 $('dayType').onchange = changeDayType;
+$('reportDate').addEventListener('change', render);
 $('saveTargetsBtn').onclick = saveTargetsForDayType;
 $('foodSearch').addEventListener('input', (event) => {
   refreshFoodSuggestions(event.target.value);
@@ -576,6 +729,11 @@ $('resetFoodsBtn').onclick = resetFoods;
 $('templateSelect').addEventListener('change', updateTemplatePreview);
 $('loadTemplateBtn').onclick = () => applyTemplate(false);
 $('appendTemplateBtn').onclick = () => applyTemplate(true);
+$('saveTemplateBtn').onclick = saveCurrentTemplate;
+$('createTemplateBtn').onclick = createNewTemplate;
+$('exportTemplatesBtn').onclick = exportTemplates;
+$('resetTemplatesBtn').onclick = resetTemplates;
+if($('clientName')) $('clientName').addEventListener('input', (event) => { clientName = event.target.value; localStorage.setItem('nutritionClientName', clientName); render(); });
 ['targetKcal','targetProtein','targetCarbs','targetFat'].forEach(id => $(id).addEventListener('input', () => { render(); updateDayTypeHint('Neuložená změna.'); }));
 loadFoods();
 loadTemplates();

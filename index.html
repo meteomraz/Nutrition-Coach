@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nutrition Coach</title>
-  <link rel="stylesheet" href="style.css?v=20260602-templates" />
+  <link rel="stylesheet" href="style.css?v=20260602-template-editor" />
 </head>
 <body>
   <main class="app">
@@ -14,9 +14,15 @@
         <h1>Nutrition Coach</h1>
         <p>Profesionální jídelníček pro tréninkový i netréninkový den s exportem do Excelu.</p>
       </div>
-      <div class="date-box">
-        <label for="reportDate">Datum</label>
-        <input id="reportDate" type="date" />
+      <div class="hero-fields">
+        <div class="date-box">
+          <label for="reportDate">Datum</label>
+          <input id="reportDate" type="date" />
+        </div>
+        <div class="date-box">
+          <label for="clientName">Jméno</label>
+          <input id="clientName" type="text" placeholder="např. Martin Mráz" />
+        </div>
       </div>
     </section>
 
@@ -76,6 +82,7 @@
         <div class="actions">
           <button id="loadTemplateBtn" class="secondary" type="button">Načíst šablonu</button>
           <button id="appendTemplateBtn" class="secondary" type="button">Přidat k aktuálnímu</button>
+          <button id="saveTemplateBtn" class="secondary" type="button">Uložit šablonu</button>
         </div>
       </div>
       <div class="template-panel">
@@ -84,6 +91,17 @@
         </label>
         <div id="templatePreview" class="template-preview muted">Šablony se načítají…</div>
       </div>
+      <div class="template-create">
+        <label>Název nové šablony
+          <input id="newTemplateName" type="text" placeholder="např. Martin dieta 2600 kcal" />
+        </label>
+        <div class="actions">
+          <button id="createTemplateBtn" type="button">Vytvořit novou šablonu z aktuálního jídelníčku</button>
+          <button id="exportTemplatesBtn" class="secondary" type="button">Export šablon</button>
+          <button id="resetTemplatesBtn" class="danger" type="button">Vrátit původní šablony</button>
+        </div>
+      </div>
+      <p class="muted small">Upravení šablony: načti šablonu, změň jídla/gramy/kcal/B/S/T v tabulce a klikni na <strong>Uložit šablonu</strong>. Ukládá se do prohlížeče; pro přenos na jiný telefon použij Export šablon.</p>
     </section>
 
     <section class="card">
@@ -127,6 +145,6 @@
       <p class="muted small">Formát souboru musí být pole objektů. Každá potravina má minimálně <strong>name, kcal, protein, carbs, fat</strong> hodnoty na 100 g.</p>
     </section>
   </main>
-  <script src="app.js?v=20260602-templates"></script>
+  <script src="app.js?v=20260602-template-editor"></script>
 </body>
 </html>

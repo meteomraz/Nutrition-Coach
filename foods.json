@@ -26475,5 +26475,159 @@
     "fat": 0.3,
     "unit": "100g",
     "source": "orientacni databaze"
+  },
+  {
+    "name": "Whey protein",
+    "category": "Supplementy",
+    "kcal": 400,
+    "protein": 80,
+    "carbs": 10,
+    "fat": 6,
+    "unit": "100g",
+    "source": "manual",
+    "id": "whey-protein"
+  },
+  {
+    "name": "Whey isolate",
+    "category": "Supplementy",
+    "kcal": 365,
+    "protein": 86,
+    "carbs": 5,
+    "fat": 1.5,
+    "unit": "100g",
+    "source": "manual",
+    "id": "whey-isolate"
+  },
+  {
+    "name": "Protein whey 80",
+    "category": "Supplementy",
+    "kcal": 400,
+    "protein": 80,
+    "carbs": 10,
+    "fat": 6,
+    "unit": "100g",
+    "source": "manual",
+    "id": "protein-whey-80"
+  },
+  {
+    "name": "Cyklický dextrin",
+    "category": "Supplementy",
+    "kcal": 380,
+    "protein": 0,
+    "carbs": 95,
+    "fat": 0,
+    "unit": "100g",
+    "source": "manual",
+    "id": "cyklicky-dextrin"
+  },
+  {
+    "name": "One Stop Xtreme",
+    "category": "Supplementy",
+    "kcal": 380,
+    "protein": 40,
+    "carbs": 45,
+    "fat": 5,
+    "unit": "100g",
+    "source": "manual",
+    "id": "one-stop-xtreme"
+  },
+  {
+    "name": "Aminokyseliny EAA/BCAA",
+    "category": "Supplementy",
+    "kcal": 360,
+    "protein": 90,
+    "carbs": 0,
+    "fat": 0,
+    "unit": "100g",
+    "source": "manual",
+    "id": "aminokyseliny-eaa-bcaa"
+  },
+  {
+    "name": "Bílky vaječné",
+    "category": "Mléčné a vejce",
+    "kcal": 52,
+    "protein": 11,
+    "carbs": 0.7,
+    "fat": 0.2,
+    "unit": "100g/ml",
+    "source": "manual",
+    "id": "bilky-vajecne"
+  },
+  {
+    "name": "Tilápie",
+    "category": "Ryby",
+    "kcal": 96,
+    "protein": 20.1,
+    "carbs": 0,
+    "fat": 1.7,
+    "unit": "100g",
+    "source": "manual",
+    "id": "tilapie"
+  },
+  {
+    "name": "Losos pečený",
+    "category": "Ryby",
+    "kcal": 208,
+    "protein": 22,
+    "carbs": 0,
+    "fat": 13,
+    "unit": "100g",
+    "source": "manual",
+    "id": "losos-peceny"
+  },
+  {
+    "name": "Losos",
+    "category": "Ryby",
+    "kcal": 208,
+    "protein": 20,
+    "carbs": 0,
+    "fat": 13,
+    "unit": "100g",
+    "source": "manual",
+    "id": "losos"
+  },
+  {
+    "name": "Rýže vařená",
+    "category": "Přílohy",
+    "kcal": 130,
+    "protein": 2.7,
+    "carbs": 28,
+    "fat": 0.3,
+    "unit": "100g",
+    "source": "manual",
+    "id": "ryze-varena"
+  },
+  {
+    "name": "Mandlové mléko neslazené",
+    "category": "Mléčné a alternativy",
+    "kcal": 13,
+    "protein": 0.4,
+    "carbs": 0.2,
+    "fat": 1.1,
+    "unit": "100ml",
+    "source": "manual",
+    "id": "mandlove-mleko-neslazene"
+  },
+  {
+    "name": "Omega 3 kapsle",
+    "category": "Doplňky",
+    "kcal": 900,
+    "protein": 0,
+    "carbs": 0,
+    "fat": 100,
+    "unit": "100g",
+    "source": "manual",
+    "id": "omega-3-kapsle"
+  },
+  {
+    "name": "Skořice",
+    "category": "Koření",
+    "kcal": 247,
+    "protein": 4,
+    "carbs": 81,
+    "fat": 1.2,
+    "unit": "100g",
+    "source": "manual",
+    "id": "skorice"
   }
 ]
