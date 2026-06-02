@@ -1,0 +1,800 @@
+[
+  {
+    "id": "cut-2000-clean",
+    "name": "Hubnutí clean 2000 kcal",
+    "description": "Vyšší bílkoviny, jednodušší fitness jídla, nižší sacharidy.",
+    "targets": {
+      "kcal": 2000,
+      "protein": 190,
+      "carbs": 180,
+      "fat": 55
+    },
+    "items": [
+      {
+        "meal": "Snídaně",
+        "name": "Ovesné vločky",
+        "grams": 50,
+        "kcal": 185,
+        "protein": 6.5,
+        "carbs": 30,
+        "fat": 3.5
+      },
+      {
+        "meal": "Snídaně",
+        "name": "Whey protein",
+        "grams": 30,
+        "kcal": 120,
+        "protein": 24,
+        "carbs": 3,
+        "fat": 2
+      },
+      {
+        "meal": "Snídaně",
+        "name": "Borůvky",
+        "grams": 100,
+        "kcal": 57,
+        "protein": 0.7,
+        "carbs": 14,
+        "fat": 0.3
+      },
+      {
+        "meal": "Svačina",
+        "name": "Skyr bílý",
+        "grams": 200,
+        "kcal": 126,
+        "protein": 22,
+        "carbs": 8,
+        "fat": 0.4
+      },
+      {
+        "meal": "Svačina",
+        "name": "Mandle",
+        "grams": 15,
+        "kcal": 87,
+        "protein": 3.2,
+        "carbs": 3.2,
+        "fat": 7.5
+      },
+      {
+        "meal": "Oběd",
+        "name": "Kuřecí prsa syrová",
+        "grams": 220,
+        "kcal": 242,
+        "protein": 50.6,
+        "carbs": 0,
+        "fat": 3.3
+      },
+      {
+        "meal": "Oběd",
+        "name": "Brambory vařené",
+        "grams": 300,
+        "kcal": 231,
+        "protein": 6,
+        "carbs": 51,
+        "fat": 0.3
+      },
+      {
+        "meal": "Oběd",
+        "name": "Chřest",
+        "grams": 200,
+        "kcal": 40,
+        "protein": 4.4,
+        "carbs": 7.8,
+        "fat": 0.2
+      },
+      {
+        "meal": "Oběd",
+        "name": "Olivový olej",
+        "grams": 10,
+        "kcal": 88,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 10
+      },
+      {
+        "meal": "Před tréninkem",
+        "name": "Banán",
+        "grams": 120,
+        "kcal": 107,
+        "protein": 1.3,
+        "carbs": 27.6,
+        "fat": 0.4
+      },
+      {
+        "meal": "Po tréninku",
+        "name": "Whey protein",
+        "grams": 30,
+        "kcal": 120,
+        "protein": 24,
+        "carbs": 3,
+        "fat": 2
+      },
+      {
+        "meal": "Večeře",
+        "name": "Treska",
+        "grams": 250,
+        "kcal": 205,
+        "protein": 45,
+        "carbs": 0,
+        "fat": 2
+      },
+      {
+        "meal": "Večeře",
+        "name": "Rýže basmati vařená",
+        "grams": 180,
+        "kcal": 234,
+        "protein": 4.9,
+        "carbs": 50.4,
+        "fat": 0.5
+      },
+      {
+        "meal": "Večeře",
+        "name": "Brokolice",
+        "grams": 250,
+        "kcal": 85,
+        "protein": 7,
+        "carbs": 16.5,
+        "fat": 1
+      }
+    ]
+  },
+  {
+    "id": "cut-2600-fitness",
+    "name": "Hubnutí fitness 2600 kcal",
+    "description": "Vyvážený redukční jídelníček s kuřecím, rýží, brambory a tvarohem.",
+    "targets": {
+      "kcal": 2600,
+      "protein": 220,
+      "carbs": 270,
+      "fat": 70
+    },
+    "items": [
+      {
+        "meal": "Snídaně",
+        "name": "Rýžová kaše instantní natural",
+        "grams": 80,
+        "kcal": 296,
+        "protein": 5.6,
+        "carbs": 66,
+        "fat": 0.8
+      },
+      {
+        "meal": "Snídaně",
+        "name": "Whey protein",
+        "grams": 35,
+        "kcal": 140,
+        "protein": 28,
+        "carbs": 3.5,
+        "fat": 2.3
+      },
+      {
+        "meal": "Snídaně",
+        "name": "Arašídové máslo",
+        "grams": 15,
+        "kcal": 88,
+        "protein": 3.8,
+        "carbs": 3,
+        "fat": 7.5
+      },
+      {
+        "meal": "Svačina",
+        "name": "Tvaroh odtučněný",
+        "grams": 250,
+        "kcal": 168,
+        "protein": 30,
+        "carbs": 10,
+        "fat": 1.3
+      },
+      {
+        "meal": "Svačina",
+        "name": "Jablko",
+        "grams": 180,
+        "kcal": 94,
+        "protein": 0.5,
+        "carbs": 25,
+        "fat": 0.3
+      },
+      {
+        "meal": "Oběd",
+        "name": "Kuřecí prsa syrová",
+        "grams": 250,
+        "kcal": 275,
+        "protein": 57.5,
+        "carbs": 0,
+        "fat": 3.8
+      },
+      {
+        "meal": "Oběd",
+        "name": "Rýže basmati vařená",
+        "grams": 300,
+        "kcal": 390,
+        "protein": 8.1,
+        "carbs": 84,
+        "fat": 0.9
+      },
+      {
+        "meal": "Oběd",
+        "name": "Chřest",
+        "grams": 200,
+        "kcal": 40,
+        "protein": 4.4,
+        "carbs": 7.8,
+        "fat": 0.2
+      },
+      {
+        "meal": "Před tréninkem",
+        "name": "Banán",
+        "grams": 140,
+        "kcal": 125,
+        "protein": 1.5,
+        "carbs": 32,
+        "fat": 0.4
+      },
+      {
+        "meal": "Po tréninku",
+        "name": "Whey protein",
+        "grams": 35,
+        "kcal": 140,
+        "protein": 28,
+        "carbs": 3.5,
+        "fat": 2.3
+      },
+      {
+        "meal": "Po tréninku",
+        "name": "Rýžové chlebíčky",
+        "grams": 50,
+        "kcal": 190,
+        "protein": 4,
+        "carbs": 40,
+        "fat": 1.5
+      },
+      {
+        "meal": "Večeře",
+        "name": "Losos",
+        "grams": 180,
+        "kcal": 374,
+        "protein": 36,
+        "carbs": 0,
+        "fat": 23.4
+      },
+      {
+        "meal": "Večeře",
+        "name": "Brambory vařené",
+        "grams": 250,
+        "kcal": 193,
+        "protein": 5,
+        "carbs": 42.5,
+        "fat": 0.3
+      },
+      {
+        "meal": "Večeře",
+        "name": "Zelenina mix",
+        "grams": 250,
+        "kcal": 75,
+        "protein": 3,
+        "carbs": 14,
+        "fat": 0.8
+      }
+    ]
+  },
+  {
+    "id": "maint-3000",
+    "name": "Udržovací 3000 kcal",
+    "description": "Stabilní režim, vhodné mimo tvrdou dietu.",
+    "targets": {
+      "kcal": 3000,
+      "protein": 220,
+      "carbs": 350,
+      "fat": 80
+    },
+    "items": [
+      {
+        "meal": "Snídaně",
+        "name": "Ovesné vločky",
+        "grams": 90,
+        "kcal": 333,
+        "protein": 11.7,
+        "carbs": 54,
+        "fat": 6.3
+      },
+      {
+        "meal": "Snídaně",
+        "name": "Whey protein",
+        "grams": 30,
+        "kcal": 120,
+        "protein": 24,
+        "carbs": 3,
+        "fat": 2
+      },
+      {
+        "meal": "Snídaně",
+        "name": "Banán",
+        "grams": 120,
+        "kcal": 107,
+        "protein": 1.3,
+        "carbs": 27.6,
+        "fat": 0.4
+      },
+      {
+        "meal": "Svačina",
+        "name": "Řecký jogurt 0 %",
+        "grams": 250,
+        "kcal": 148,
+        "protein": 25,
+        "carbs": 9,
+        "fat": 0.8
+      },
+      {
+        "meal": "Svačina",
+        "name": "Granola fitness",
+        "grams": 50,
+        "kcal": 220,
+        "protein": 6,
+        "carbs": 32,
+        "fat": 7
+      },
+      {
+        "meal": "Oběd",
+        "name": "Krůtí prsa",
+        "grams": 250,
+        "kcal": 275,
+        "protein": 57.5,
+        "carbs": 0,
+        "fat": 3.8
+      },
+      {
+        "meal": "Oběd",
+        "name": "Rýže jasmínová vařená",
+        "grams": 350,
+        "kcal": 455,
+        "protein": 9.5,
+        "carbs": 98,
+        "fat": 1.1
+      },
+      {
+        "meal": "Oběd",
+        "name": "Olivový olej",
+        "grams": 15,
+        "kcal": 133,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 15
+      },
+      {
+        "meal": "Před tréninkem",
+        "name": "Rýžová kaše instantní natural",
+        "grams": 60,
+        "kcal": 222,
+        "protein": 4.2,
+        "carbs": 49.5,
+        "fat": 0.6
+      },
+      {
+        "meal": "Po tréninku",
+        "name": "Whey protein",
+        "grams": 40,
+        "kcal": 160,
+        "protein": 32,
+        "carbs": 4,
+        "fat": 2.7
+      },
+      {
+        "meal": "Večeře",
+        "name": "Hovězí zadní libové",
+        "grams": 220,
+        "kcal": 330,
+        "protein": 48,
+        "carbs": 0,
+        "fat": 13
+      },
+      {
+        "meal": "Večeře",
+        "name": "Brambory vařené",
+        "grams": 350,
+        "kcal": 270,
+        "protein": 7,
+        "carbs": 59.5,
+        "fat": 0.4
+      },
+      {
+        "meal": "Večeře",
+        "name": "Zelenina mix",
+        "grams": 300,
+        "kcal": 90,
+        "protein": 3.6,
+        "carbs": 17,
+        "fat": 1
+      }
+    ]
+  },
+  {
+    "id": "bulk-4000-clean",
+    "name": "Objemový clean 4000 kcal",
+    "description": "Čistý objem s vysokými sacharidy, rýží, vločkami a masem.",
+    "targets": {
+      "kcal": 4000,
+      "protein": 240,
+      "carbs": 550,
+      "fat": 95
+    },
+    "items": [
+      {
+        "meal": "Snídaně",
+        "name": "Ovesné vločky",
+        "grams": 120,
+        "kcal": 444,
+        "protein": 15.6,
+        "carbs": 72,
+        "fat": 8.4
+      },
+      {
+        "meal": "Snídaně",
+        "name": "Whey protein",
+        "grams": 40,
+        "kcal": 160,
+        "protein": 32,
+        "carbs": 4,
+        "fat": 2.7
+      },
+      {
+        "meal": "Snídaně",
+        "name": "Banán",
+        "grams": 150,
+        "kcal": 134,
+        "protein": 1.7,
+        "carbs": 34.5,
+        "fat": 0.5
+      },
+      {
+        "meal": "Snídaně",
+        "name": "Med",
+        "grams": 25,
+        "kcal": 76,
+        "protein": 0,
+        "carbs": 20.5,
+        "fat": 0
+      },
+      {
+        "meal": "Svačina",
+        "name": "Bageta světlá",
+        "grams": 120,
+        "kcal": 324,
+        "protein": 10,
+        "carbs": 66,
+        "fat": 2.4
+      },
+      {
+        "meal": "Svačina",
+        "name": "Šunka kuřecí",
+        "grams": 120,
+        "kcal": 132,
+        "protein": 24,
+        "carbs": 2.4,
+        "fat": 3
+      },
+      {
+        "meal": "Oběd",
+        "name": "Kuřecí prsa syrová",
+        "grams": 300,
+        "kcal": 330,
+        "protein": 69,
+        "carbs": 0,
+        "fat": 4.5
+      },
+      {
+        "meal": "Oběd",
+        "name": "Rýže basmati vařená",
+        "grams": 500,
+        "kcal": 650,
+        "protein": 13.5,
+        "carbs": 140,
+        "fat": 1.5
+      },
+      {
+        "meal": "Oběd",
+        "name": "Olivový olej",
+        "grams": 20,
+        "kcal": 177,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 20
+      },
+      {
+        "meal": "Před tréninkem",
+        "name": "Rýžová kaše instantní natural",
+        "grams": 100,
+        "kcal": 370,
+        "protein": 7,
+        "carbs": 82.5,
+        "fat": 1
+      },
+      {
+        "meal": "Po tréninku",
+        "name": "Whey protein",
+        "grams": 50,
+        "kcal": 200,
+        "protein": 40,
+        "carbs": 5,
+        "fat": 3.3
+      },
+      {
+        "meal": "Po tréninku",
+        "name": "Rýžové chlebíčky",
+        "grams": 80,
+        "kcal": 304,
+        "protein": 6.4,
+        "carbs": 64,
+        "fat": 2.4
+      },
+      {
+        "meal": "Večeře",
+        "name": "Losos",
+        "grams": 220,
+        "kcal": 458,
+        "protein": 44,
+        "carbs": 0,
+        "fat": 28.6
+      },
+      {
+        "meal": "Večeře",
+        "name": "Těstoviny vařené",
+        "grams": 350,
+        "kcal": 553,
+        "protein": 20,
+        "carbs": 108,
+        "fat": 4.2
+      },
+      {
+        "meal": "Večeře",
+        "name": "Zelenina mix",
+        "grams": 250,
+        "kcal": 75,
+        "protein": 3,
+        "carbs": 14,
+        "fat": 0.8
+      }
+    ]
+  },
+  {
+    "id": "lowcarb-2300",
+    "name": "Nízkosacharidový 2300 kcal",
+    "description": "Více tuků, méně sacharidů, vhodné na netréninkový den.",
+    "targets": {
+      "kcal": 2300,
+      "protein": 220,
+      "carbs": 120,
+      "fat": 105
+    },
+    "items": [
+      {
+        "meal": "Snídaně",
+        "name": "Vejce celé",
+        "grams": 250,
+        "kcal": 358,
+        "protein": 31.5,
+        "carbs": 1.8,
+        "fat": 25
+      },
+      {
+        "meal": "Snídaně",
+        "name": "Avokádo",
+        "grams": 100,
+        "kcal": 160,
+        "protein": 2,
+        "carbs": 9,
+        "fat": 15
+      },
+      {
+        "meal": "Svačina",
+        "name": "Skyr bílý",
+        "grams": 250,
+        "kcal": 158,
+        "protein": 27.5,
+        "carbs": 10,
+        "fat": 0.5
+      },
+      {
+        "meal": "Svačina",
+        "name": "Vlašské ořechy",
+        "grams": 25,
+        "kcal": 164,
+        "protein": 3.8,
+        "carbs": 3.5,
+        "fat": 16.3
+      },
+      {
+        "meal": "Oběd",
+        "name": "Kuřecí prsa syrová",
+        "grams": 280,
+        "kcal": 308,
+        "protein": 64.4,
+        "carbs": 0,
+        "fat": 4.2
+      },
+      {
+        "meal": "Oběd",
+        "name": "Brokolice",
+        "grams": 300,
+        "kcal": 102,
+        "protein": 8.4,
+        "carbs": 19.8,
+        "fat": 1.2
+      },
+      {
+        "meal": "Oběd",
+        "name": "Olivový olej",
+        "grams": 25,
+        "kcal": 221,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 25
+      },
+      {
+        "meal": "Svačina",
+        "name": "Whey protein",
+        "grams": 40,
+        "kcal": 160,
+        "protein": 32,
+        "carbs": 4,
+        "fat": 2.7
+      },
+      {
+        "meal": "Večeře",
+        "name": "Losos",
+        "grams": 250,
+        "kcal": 520,
+        "protein": 50,
+        "carbs": 0,
+        "fat": 32.5
+      },
+      {
+        "meal": "Večeře",
+        "name": "Brambory vařené",
+        "grams": 180,
+        "kcal": 139,
+        "protein": 3.6,
+        "carbs": 30.6,
+        "fat": 0.2
+      },
+      {
+        "meal": "Večeře",
+        "name": "Chřest",
+        "grams": 250,
+        "kcal": 50,
+        "protein": 5.5,
+        "carbs": 9.8,
+        "fat": 0.3
+      }
+    ]
+  },
+  {
+    "id": "contest-clean-2600",
+    "name": "Závodní clean 2600 kcal",
+    "description": "Jednoduché potraviny: kuře, rýže, brambory, chřest, treska.",
+    "targets": {
+      "kcal": 2600,
+      "protein": 230,
+      "carbs": 320,
+      "fat": 45
+    },
+    "items": [
+      {
+        "meal": "Snídaně",
+        "name": "Rýžová kaše instantní natural",
+        "grams": 90,
+        "kcal": 333,
+        "protein": 6.3,
+        "carbs": 74.3,
+        "fat": 0.9
+      },
+      {
+        "meal": "Snídaně",
+        "name": "Whey isolate",
+        "grams": 35,
+        "kcal": 128,
+        "protein": 30,
+        "carbs": 1.8,
+        "fat": 0.5
+      },
+      {
+        "meal": "Svačina",
+        "name": "Kuřecí prsa syrová",
+        "grams": 180,
+        "kcal": 198,
+        "protein": 41.4,
+        "carbs": 0,
+        "fat": 2.7
+      },
+      {
+        "meal": "Svačina",
+        "name": "Rýže basmati vařená",
+        "grams": 220,
+        "kcal": 286,
+        "protein": 5.9,
+        "carbs": 61.6,
+        "fat": 0.7
+      },
+      {
+        "meal": "Oběd",
+        "name": "Kuřecí prsa syrová",
+        "grams": 250,
+        "kcal": 275,
+        "protein": 57.5,
+        "carbs": 0,
+        "fat": 3.8
+      },
+      {
+        "meal": "Oběd",
+        "name": "Brambory vařené",
+        "grams": 350,
+        "kcal": 270,
+        "protein": 7,
+        "carbs": 59.5,
+        "fat": 0.4
+      },
+      {
+        "meal": "Oběd",
+        "name": "Chřest",
+        "grams": 200,
+        "kcal": 40,
+        "protein": 4.4,
+        "carbs": 7.8,
+        "fat": 0.2
+      },
+      {
+        "meal": "Před tréninkem",
+        "name": "Banán",
+        "grams": 120,
+        "kcal": 107,
+        "protein": 1.3,
+        "carbs": 27.6,
+        "fat": 0.4
+      },
+      {
+        "meal": "Po tréninku",
+        "name": "Whey isolate",
+        "grams": 40,
+        "kcal": 146,
+        "protein": 34,
+        "carbs": 2,
+        "fat": 0.6
+      },
+      {
+        "meal": "Po tréninku",
+        "name": "Rýžové chlebíčky",
+        "grams": 60,
+        "kcal": 228,
+        "protein": 4.8,
+        "carbs": 48,
+        "fat": 1.8
+      },
+      {
+        "meal": "Večeře",
+        "name": "Treska",
+        "grams": 300,
+        "kcal": 246,
+        "protein": 54,
+        "carbs": 0,
+        "fat": 2.4
+      },
+      {
+        "meal": "Večeře",
+        "name": "Rýže basmati vařená",
+        "grams": 250,
+        "kcal": 325,
+        "protein": 6.8,
+        "carbs": 70,
+        "fat": 0.8
+      },
+      {
+        "meal": "Večeře",
+        "name": "Cuketa",
+        "grams": 250,
+        "kcal": 43,
+        "protein": 3,
+        "carbs": 7.8,
+        "fat": 0.8
+      }
+    ]
+  }
+]

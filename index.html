@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nutrition Coach</title>
-  <link rel="stylesheet" href="style.css?v=20260601-redmacros" />
+  <link rel="stylesheet" href="style.css?v=20260602-templates" />
 </head>
 <body>
   <main class="app">
@@ -69,6 +69,25 @@
 
     <section class="card">
       <div class="section-head">
+        <div>
+          <h2>Šablony jídelníčků</h2>
+          <p class="muted">Vyber předdefinovaný jídelníček podle cíle. Načte se do aktuálního typu dne a můžeš ho dál upravovat.</p>
+        </div>
+        <div class="actions">
+          <button id="loadTemplateBtn" class="secondary" type="button">Načíst šablonu</button>
+          <button id="appendTemplateBtn" class="secondary" type="button">Přidat k aktuálnímu</button>
+        </div>
+      </div>
+      <div class="template-panel">
+        <label>Vybrat šablonu
+          <select id="templateSelect"></select>
+        </label>
+        <div id="templatePreview" class="template-preview muted">Šablony se načítají…</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
         <h2>Jídelníček aktuálního typu dne</h2>
         <div class="actions">
           <button id="copyBtn" class="secondary">Kopírovat text</button>
@@ -108,6 +127,6 @@
       <p class="muted small">Formát souboru musí být pole objektů. Každá potravina má minimálně <strong>name, kcal, protein, carbs, fat</strong> hodnoty na 100 g.</p>
     </section>
   </main>
-  <script src="app.js?v=20260601-redmacros"></script>
+  <script src="app.js?v=20260602-templates"></script>
 </body>
 </html>

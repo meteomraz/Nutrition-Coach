@@ -1,5 +1,6 @@
 let foods = [];
 let defaultFoods = [];
+let mealTemplates = [];
 
 const legacyReport = localStorage.getItem('nutritionReport');
 let reports = JSON.parse(localStorage.getItem('nutritionReportsByDayType') || 'null') || {
@@ -32,6 +33,117 @@ function normalizeText(value){
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .trim();
+}
+
+
+async function loadTemplates(){
+  try{
+    const res = await fetch('meal-templates.json');
+    mealTemplates = await res.json();
+  }catch(error){
+    mealTemplates = [];
+  }
+  refreshTemplateSelect();
+}
+
+function templateTotals(template){
+  return (template.items || []).reduce((a,x)=>({
+    kcal:a.kcal + Number(x.kcal || 0),
+    protein:a.protein + Number(x.protein || 0),
+    carbs:a.carbs + Number(x.carbs || 0),
+    fat:a.fat + Number(x.fat || 0)
+  }), {kcal:0,protein:0,carbs:0,fat:0});
+}
+
+function refreshTemplateSelect(){
+  if(!$('templateSelect')) return;
+  if(!mealTemplates.length){
+    $('templateSelect').innerHTML = '<option value="">Šablony nenalezeny</option>';
+    updateTemplatePreview();
+    return;
+  }
+  $('templateSelect').innerHTML = mealTemplates
+    .map(t => `<option value="${t.id}">${t.name}</option>`)
+    .join('');
+  updateTemplatePreview();
+}
+
+function getSelectedTemplate(){
+  const id = $('templateSelect') ? $('templateSelect').value : '';
+  return mealTemplates.find(t => t.id === id) || mealTemplates[0];
+}
+
+function updateTemplatePreview(){
+  if(!$('templatePreview')) return;
+  const template = getSelectedTemplate();
+  if(!template){
+    $('templatePreview').textContent = 'Žádná šablona není načtená.';
+    return;
+  }
+  const t = templateTotals(template);
+  const target = template.targets || {};
+  $('templatePreview').innerHTML = `
+    <strong>${template.name}</strong><br>
+    ${template.description || ''}<br>
+    <span>Jídla: ${(template.items || []).length} · Součet: ${round(t.kcal)} kcal | B ${round(t.protein)} g | S ${round(t.carbs)} g | T ${round(t.fat)} g</span><br>
+    <span>Cíl šablony: ${target.kcal || '-'} kcal | B ${target.protein || '-'} g | S ${target.carbs || '-'} g | T ${target.fat || '-'} g</span>
+  `;
+}
+
+function normalizeTemplateItem(item){
+  const food = foods.find(f => normalizeText(f.name) === normalizeText(item.name));
+  const grams = Number(item.grams || 0);
+  if(food && grams > 0){
+    return { meal: item.meal || 'Ostatní', name: food.name, grams, ...calc(food, grams) };
+  }
+  return {
+    meal: item.meal || 'Ostatní',
+    name: item.name,
+    grams,
+    kcal: round(Number(item.kcal || 0)),
+    protein: round(Number(item.protein || 0)),
+    carbs: round(Number(item.carbs || 0)),
+    fat: round(Number(item.fat || 0))
+  };
+}
+
+function applyTemplate(append = false){
+  const template = getSelectedTemplate();
+  if(!template) return alert('Nejdřív vyber šablonu.');
+  const items = (template.items || []).map(normalizeTemplateItem);
+  if(!append && getReport().length && !confirm(`Nahradit aktuální jídelníček pro ${dayTypeLabel()} šablonou ${template.name}?`)) return;
+  reports[currentDayType] = append ? [...getReport(), ...items] : items;
+  if(template.targets){
+    targetPresets[currentDayType] = template.targets;
+    localStorage.setItem('nutritionTargetPresets', JSON.stringify(targetPresets));
+    applyTargetsForDayType();
+  }
+  save();
+  render();
+  alert(`${append ? 'Přidáno ze šablony' : 'Načtena šablona'}: ${template.name}`);
+}
+
+function recalcItemByGrams(item, newGrams){
+  const grams = Number(newGrams);
+  if(!item || grams <= 0) return item;
+  const food = foods.find(f => normalizeText(f.name) === normalizeText(item.name));
+  if(food) return { ...item, grams, ...calc(food, grams) };
+  const ratio = item.grams ? grams / item.grams : 1;
+  return {
+    ...item,
+    grams,
+    kcal: round(item.kcal * ratio),
+    protein: round(item.protein * ratio),
+    carbs: round(item.carbs * ratio),
+    fat: round(item.fat * ratio)
+  };
+}
+
+function updateItemGrams(index, value){
+  const report = getReport();
+  report[index] = recalcItemByGrams(report[index], value);
+  save();
+  render();
 }
 
 function refreshFoodSelect(){
@@ -272,7 +384,7 @@ function renderReportRows(){
     const header = `<tr class="meal-divider"><td colspan="8">
       <div class="meal-title"><strong>${meal}</strong><span>${round(mt.kcal)} kcal · B ${round(mt.protein)} g · S ${round(mt.carbs)} g · T ${round(mt.fat)} g</span></div>
     </td></tr>`;
-    const rows = items.map((x)=>`<tr class="meal-item"><td>${x.meal}</td><td>${x.name}</td><td>${x.grams}</td><td>${x.kcal}</td><td>${x.protein}</td><td>${x.carbs}</td><td>${x.fat}</td><td><button onclick="removeItem(${x.originalIndex})">X</button></td></tr>`).join('');
+    const rows = items.map((x)=>`<tr class="meal-item"><td>${x.meal}</td><td>${x.name}</td><td><input class="grams-edit" type="number" min="1" value="${x.grams}" onchange="updateItemGrams(${x.originalIndex}, this.value)"></td><td>${x.kcal}</td><td>${x.protein}</td><td>${x.carbs}</td><td>${x.fat}</td><td><button onclick="removeItem(${x.originalIndex})">X</button></td></tr>`).join('');
     return header + rows;
   }).join('');
 
@@ -280,7 +392,7 @@ function renderReportRows(){
   const otherRows = otherItems.length ? (() => {
     const mt = mealTotals(otherItems);
     const header = `<tr class="meal-divider"><td colspan="8"><div class="meal-title"><strong>Ostatní</strong><span>${round(mt.kcal)} kcal · B ${round(mt.protein)} g · S ${round(mt.carbs)} g · T ${round(mt.fat)} g</span></div></td></tr>`;
-    const rows = otherItems.map((x)=>`<tr class="meal-item"><td>${x.meal}</td><td>${x.name}</td><td>${x.grams}</td><td>${x.kcal}</td><td>${x.protein}</td><td>${x.carbs}</td><td>${x.fat}</td><td><button onclick="removeItem(${x.originalIndex})">X</button></td></tr>`).join('');
+    const rows = otherItems.map((x)=>`<tr class="meal-item"><td>${x.meal}</td><td>${x.name}</td><td><input class="grams-edit" type="number" min="1" value="${x.grams}" onchange="updateItemGrams(${x.originalIndex}, this.value)"></td><td>${x.kcal}</td><td>${x.protein}</td><td>${x.carbs}</td><td>${x.fat}</td><td><button onclick="removeItem(${x.originalIndex})">X</button></td></tr>`).join('');
     return header + rows;
   })() : '';
 
@@ -461,5 +573,9 @@ $('clearBtn').onclick = clearDay;
 $('foodImport').addEventListener('change', importFoods);
 $('exportFoodsBtn').onclick = exportFoods;
 $('resetFoodsBtn').onclick = resetFoods;
+$('templateSelect').addEventListener('change', updateTemplatePreview);
+$('loadTemplateBtn').onclick = () => applyTemplate(false);
+$('appendTemplateBtn').onclick = () => applyTemplate(true);
 ['targetKcal','targetProtein','targetCarbs','targetFat'].forEach(id => $(id).addEventListener('input', () => { render(); updateDayTypeHint('Neuložená změna.'); }));
 loadFoods();
+loadTemplates();
