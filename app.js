@@ -16,7 +16,10 @@ let targetPresets = JSON.parse(localStorage.getItem('nutritionTargetPresets') ||
 
 const $ = (id) => document.getElementById(id);
 const round = (n) => Math.round(n * 10) / 10;
-const mealOrder = ['Snídaně','Svačina','Oběd','Před tréninkem','Po tréninku','Večeře'];
+const mealOrder = ['Snídaně','Svačina','Oběd','Odpolední svačina','Večeře','Druhá večeře'];
+const mealNameMap = { 'Před tréninkem': 'Odpolední svačina', 'Po tréninku': 'Večeře', 'Večeře': 'Druhá večeře' };
+function normalizeMealName(meal){ return mealNameMap[meal] || meal; }
+Object.keys(reports).forEach(type => { reports[type] = (reports[type] || []).map(item => ({...item, meal: normalizeMealName(item.meal)})); });
 
 async function loadFoods(){
   const res = await fetch('foods.json');
@@ -69,7 +72,7 @@ function makeTemplateId(name){
 
 function reportToTemplateItems(type = currentDayType){
   return getReport(type).map(x => ({
-    meal: x.meal,
+    meal: normalizeMealName(x.meal),
     name: x.name,
     grams: Number(x.grams) || 0,
     kcal: round(Number(x.kcal) || 0),
@@ -115,6 +118,17 @@ function createNewTemplate(){
   $('newTemplateName').value = '';
   updateTemplatePreview();
   alert(`Nová šablona vytvořena: ${created.name}`);
+}
+
+function deleteCurrentTemplate(){
+  const template = getSelectedTemplate();
+  if(!template) return alert('Nejdřív vyber šablonu, kterou chceš smazat.');
+  if(!confirm(`Opravdu smazat šablonu „${template.name}“ z tohoto prohlížeče?`)) return;
+  mealTemplates = mealTemplates.filter(t => t.id !== template.id);
+  persistTemplates();
+  refreshTemplateSelect();
+  updateTemplatePreview();
+  alert(`Šablona smazána: ${template.name}`);
 }
 
 function exportTemplates(){
@@ -605,23 +619,22 @@ function worksheetXml(type){
   const sheetName = type === 'training' ? 'Tréninkový den' : 'Netréninkový den';
   const name = ($('clientName')?.value || '').trim();
   const targetRows = [
-    row(['Přehled cílů', '', '', '', '', '', ''], 'TargetHeader'),
-    row(['Makro', 'Cíl', 'Snědeno', 'Zbývá / přesah', '', '', ''], 'Header'),
-    row(['Kalorie', [targets.kcal, 'Number'], [round(t.kcal), 'Number'], [round(targets.kcal - t.kcal), 'Number'], '', '', ''], 'Goal'),
-    row(['Bílkoviny', [targets.protein, 'Number'], [round(t.protein), 'Number'], [round(targets.protein - t.protein), 'Number'], '', '', ''], 'Goal'),
-    row(['Sacharidy', [targets.carbs, 'Number'], [round(t.carbs), 'Number'], [round(targets.carbs - t.carbs), 'Number'], '', '', ''], 'Goal'),
-    row(['Tuky', [targets.fat, 'Number'], [round(t.fat), 'Number'], [round(targets.fat - t.fat), 'Number'], '', '', ''], 'Goal'),
-    row(['', '', '', '', '', '', ''])
+    row(['Přehled cílů', '', '', '', '', ''], 'TargetHeader'),
+    row(['Makro', 'Cíl', 'Snědeno', 'Zbývá / přesah', '', ''], 'Header'),
+    row(['Kalorie', [targets.kcal, 'Number'], [round(t.kcal), 'Number'], [round(targets.kcal - t.kcal), 'Number'], '', ''], 'Goal'),
+    row(['Bílkoviny', [targets.protein, 'Number'], [round(t.protein), 'Number'], [round(targets.protein - t.protein), 'Number'], '', ''], 'Goal'),
+    row(['Sacharidy', [targets.carbs, 'Number'], [round(t.carbs), 'Number'], [round(targets.carbs - t.carbs), 'Number'], '', ''], 'Goal'),
+    row(['Tuky', [targets.fat, 'Number'], [round(t.fat), 'Number'], [round(targets.fat - t.fat), 'Number'], '', ''], 'Goal'),
+    row(['', '', '', '', '', ''])
   ].join('');
 
   const mealRows = mealOrder.map(meal => {
     const items = data.filter(x => x.meal === meal);
-    const header = row([meal, '', '', '', '', '', ''], 'MealHeader');
+    const header = row([meal, '', '', '', '', ''], 'MealHeader');
     if(!items.length){
-      return header + row(['', 'Bez položek', '', '', '', '', ''], 'Empty');
+      return header + row(['Bez položek', '', '', '', '', ''], 'Empty');
     }
     return header + items.map((x, idx) => row([
-      [x.meal, 'String'],
       [x.name, 'String'],
       [x.grams, 'Number'],
       [x.kcal, 'Number'],
@@ -633,28 +646,28 @@ function worksheetXml(type){
 
   const otherItems = data.filter(x => !mealOrder.includes(x.meal));
   const otherRows = otherItems.length
-    ? row(['Ostatní', '', '', '', '', '', ''], 'MealHeader') + otherItems.map((x, idx) => row([
-      [x.meal, 'String'], [x.name, 'String'], [x.grams, 'Number'], [x.kcal, 'Number'], [x.protein, 'Number'], [x.carbs, 'Number'], [x.fat, 'Number']
+    ? row(['Ostatní', '', '', '', '', ''], 'MealHeader') + otherItems.map((x, idx) => row([
+      [x.name, 'String'], [x.grams, 'Number'], [x.kcal, 'Number'], [x.protein, 'Number'], [x.carbs, 'Number'], [x.fat, 'Number']
     ], idx % 2 === 0 ? 'Body' : 'BodyAlt')).join('')
     : '';
 
   return `
     <Worksheet ss:Name="${xmlEsc(sheetName)}">
       <Table>
-        <Column ss:Width="120"/><Column ss:Width="240"/><Column ss:Width="70"/><Column ss:Width="85"/><Column ss:Width="85"/><Column ss:Width="85"/><Column ss:Width="85"/>
-        ${row([`NUTRITION COACH - ${sheetName}`, '', '', '', '', '', ''], 'Title')}
-        ${row(['Datum', date, '', '', '', '', ''], 'Meta')}
-        ${row(['Jméno', name, '', '', '', '', ''], 'Meta')}
-        ${row(['Typ dne', sheetName, '', '', '', '', ''], 'Meta')}
-        ${row(['', '', '', '', '', '', ''])}
+        <Column ss:Width="260"/><Column ss:Width="70"/><Column ss:Width="85"/><Column ss:Width="85"/><Column ss:Width="85"/><Column ss:Width="85"/>
+        ${row([`NUTRITION COACH - ${sheetName}`, '', '', '', '', ''], 'Title')}
+        ${row(['Datum', date, '', '', '', ''], 'Meta')}
+        ${row(['Jméno', name, '', '', '', ''], 'Meta')}
+        ${row(['Typ dne', sheetName, '', '', '', ''], 'Meta')}
+        ${row(['', '', '', '', '', ''])}
         ${targetRows}
-        ${row(['Jídlo','Potravina','Gramy','Kcal','Bílkoviny','Sacharidy','Tuky'], 'Header')}
+        ${row(['Potravina','Gramy','Kcal','Bílkoviny','Sacharidy','Tuky'], 'Header')}
         ${mealRows}
         ${otherRows}
-        ${row(['', '', '', '', '', '', ''])}
-        ${row(['CELKEM','', '', [round(t.kcal),'Number'], [round(t.protein),'Number'], [round(t.carbs),'Number'], [round(t.fat),'Number']], 'Total')}
-        ${row(['CÍL','', '', [targets.kcal,'Number'], [targets.protein,'Number'], [targets.carbs,'Number'], [targets.fat,'Number']], 'GoalStrong')}
-        ${row(['ZBÝVÁ / PŘESAH','', '', [round(targets.kcal - t.kcal),'Number'], [round(targets.protein - t.protein),'Number'], [round(targets.carbs - t.carbs),'Number'], [round(targets.fat - t.fat),'Number']], 'Delta')}
+        ${row(['', '', '', '', '', ''])}
+        ${row(['CELKEM', '', [round(t.kcal),'Number'], [round(t.protein),'Number'], [round(t.carbs),'Number'], [round(t.fat),'Number']], 'Total')}
+        ${row(['CÍL', '', [targets.kcal,'Number'], [targets.protein,'Number'], [targets.carbs,'Number'], [targets.fat,'Number']], 'GoalStrong')}
+        ${row(['ZBÝVÁ / PŘESAH', '', [round(targets.kcal - t.kcal),'Number'], [round(targets.protein - t.protein),'Number'], [round(targets.carbs - t.carbs),'Number'], [round(targets.fat - t.fat),'Number']], 'Delta')}
       </Table>
     </Worksheet>`;
 }
@@ -731,6 +744,7 @@ $('loadTemplateBtn').onclick = () => applyTemplate(false);
 $('appendTemplateBtn').onclick = () => applyTemplate(true);
 $('saveTemplateBtn').onclick = saveCurrentTemplate;
 $('createTemplateBtn').onclick = createNewTemplate;
+if($('deleteTemplateBtn')) $('deleteTemplateBtn').onclick = deleteCurrentTemplate;
 $('exportTemplatesBtn').onclick = exportTemplates;
 $('resetTemplatesBtn').onclick = resetTemplates;
 if($('clientName')) $('clientName').addEventListener('input', (event) => { clientName = event.target.value; localStorage.setItem('nutritionClientName', clientName); render(); });

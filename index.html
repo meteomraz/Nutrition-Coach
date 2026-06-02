@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nutrition Coach</title>
-  <link rel="stylesheet" href="style.css?v=20260602-template-editor" />
+  <link rel="stylesheet" href="style.css?v=20260602-template-delete" />
 </head>
 <body>
   <main class="app">
@@ -35,9 +35,9 @@
               <option>Snídaně</option>
               <option>Svačina</option>
               <option>Oběd</option>
-              <option>Před tréninkem</option>
-              <option>Po tréninku</option>
+              <option>Odpolední svačina</option>
               <option>Večeře</option>
+              <option>Druhá večeře</option>
             </select>
           </label>
           <label>Potravina
@@ -83,6 +83,7 @@
           <button id="loadTemplateBtn" class="secondary" type="button">Načíst šablonu</button>
           <button id="appendTemplateBtn" class="secondary" type="button">Přidat k aktuálnímu</button>
           <button id="saveTemplateBtn" class="secondary" type="button">Uložit šablonu</button>
+          <button id="deleteTemplateBtn" class="danger" type="button">Smazat šablonu</button>
         </div>
       </div>
       <div class="template-panel">
@@ -145,6 +146,6 @@
       <p class="muted small">Formát souboru musí být pole objektů. Každá potravina má minimálně <strong>name, kcal, protein, carbs, fat</strong> hodnoty na 100 g.</p>
     </section>
   </main>
-  <script src="app.js?v=20260602-template-editor"></script>
+  <script src="app.js?v=20260602-template-delete"></script>
 </body>
 </html>
