@@ -16,7 +16,10 @@ let targetPresets = JSON.parse(localStorage.getItem('nutritionTargetPresets') ||
 
 const $ = (id) => document.getElementById(id);
 const round = (n) => Math.round(n * 10) / 10;
-const mealOrder = ['Snídaně','Svačina','Oběd','Před tréninkem','Po tréninku','Večeře'];
+const mealOrder = ['Snídaně','Svačina','Oběd','Odpolední svačina','Večeře','Druhá večeře'];
+const mealNameMap = { 'Před tréninkem': 'Odpolední svačina', 'Po tréninku': 'Večeře', 'Večeře': 'Druhá večeře' };
+function normalizeMealName(meal){ return mealNameMap[meal] || meal; }
+Object.keys(reports).forEach(type => { reports[type] = (reports[type] || []).map(item => ({...item, meal: normalizeMealName(item.meal)})); });
 
 async function loadFoods(){
   const res = await fetch('foods.json');
@@ -69,7 +72,7 @@ function makeTemplateId(name){
 
 function reportToTemplateItems(type = currentDayType){
   return getReport(type).map(x => ({
-    meal: x.meal,
+    meal: normalizeMealName(x.meal),
     name: x.name,
     grams: Number(x.grams) || 0,
     kcal: round(Number(x.kcal) || 0),

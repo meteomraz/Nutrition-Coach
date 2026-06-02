@@ -92,7 +92,7 @@
         "fat": 10
       },
       {
-        "meal": "Před tréninkem",
+        "meal": "Odpolední svačina",
         "name": "Banán",
         "grams": 120,
         "kcal": 107,
@@ -101,7 +101,7 @@
         "fat": 0.4
       },
       {
-        "meal": "Po tréninku",
+        "meal": "Večeře",
         "name": "Whey protein",
         "grams": 30,
         "kcal": 120,
@@ -110,7 +110,7 @@
         "fat": 2
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Treska",
         "grams": 250,
         "kcal": 205,
@@ -119,7 +119,7 @@
         "fat": 2
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Rýže basmati vařená",
         "grams": 180,
         "kcal": 234,
@@ -128,7 +128,7 @@
         "fat": 0.5
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Brokolice",
         "grams": 250,
         "kcal": 85,
@@ -222,7 +222,7 @@
         "fat": 0.2
       },
       {
-        "meal": "Před tréninkem",
+        "meal": "Odpolední svačina",
         "name": "Banán",
         "grams": 140,
         "kcal": 125,
@@ -231,7 +231,7 @@
         "fat": 0.4
       },
       {
-        "meal": "Po tréninku",
+        "meal": "Večeře",
         "name": "Whey protein",
         "grams": 35,
         "kcal": 140,
@@ -240,7 +240,7 @@
         "fat": 2.3
       },
       {
-        "meal": "Po tréninku",
+        "meal": "Večeře",
         "name": "Rýžové chlebíčky",
         "grams": 50,
         "kcal": 190,
@@ -249,7 +249,7 @@
         "fat": 1.5
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Losos",
         "grams": 180,
         "kcal": 374,
@@ -258,7 +258,7 @@
         "fat": 23.4
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Brambory vařené",
         "grams": 250,
         "kcal": 193,
@@ -267,7 +267,7 @@
         "fat": 0.3
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Zelenina mix",
         "grams": 250,
         "kcal": 75,
@@ -361,7 +361,7 @@
         "fat": 15
       },
       {
-        "meal": "Před tréninkem",
+        "meal": "Odpolední svačina",
         "name": "Rýžová kaše instantní natural",
         "grams": 60,
         "kcal": 222,
@@ -370,7 +370,7 @@
         "fat": 0.6
       },
       {
-        "meal": "Po tréninku",
+        "meal": "Večeře",
         "name": "Whey protein",
         "grams": 40,
         "kcal": 160,
@@ -379,7 +379,7 @@
         "fat": 2.7
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Hovězí zadní libové",
         "grams": 220,
         "kcal": 330,
@@ -388,7 +388,7 @@
         "fat": 13
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Brambory vařené",
         "grams": 350,
         "kcal": 270,
@@ -397,7 +397,7 @@
         "fat": 0.4
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Zelenina mix",
         "grams": 300,
         "kcal": 90,
@@ -500,7 +500,7 @@
         "fat": 20
       },
       {
-        "meal": "Před tréninkem",
+        "meal": "Odpolední svačina",
         "name": "Rýžová kaše instantní natural",
         "grams": 100,
         "kcal": 370,
@@ -509,7 +509,7 @@
         "fat": 1
       },
       {
-        "meal": "Po tréninku",
+        "meal": "Večeře",
         "name": "Whey protein",
         "grams": 50,
         "kcal": 200,
@@ -518,7 +518,7 @@
         "fat": 3.3
       },
       {
-        "meal": "Po tréninku",
+        "meal": "Večeře",
         "name": "Rýžové chlebíčky",
         "grams": 80,
         "kcal": 304,
@@ -527,7 +527,7 @@
         "fat": 2.4
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Losos",
         "grams": 220,
         "kcal": 458,
@@ -536,7 +536,7 @@
         "fat": 28.6
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Těstoviny vařené",
         "grams": 350,
         "kcal": 553,
@@ -545,7 +545,7 @@
         "fat": 4.2
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Zelenina mix",
         "grams": 250,
         "kcal": 75,
@@ -639,7 +639,7 @@
         "fat": 2.7
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Losos",
         "grams": 250,
         "kcal": 520,
@@ -648,7 +648,7 @@
         "fat": 32.5
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Brambory vařené",
         "grams": 180,
         "kcal": 139,
@@ -657,7 +657,7 @@
         "fat": 0.2
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Chřest",
         "grams": 250,
         "kcal": 50,
@@ -742,7 +742,7 @@
         "fat": 0.2
       },
       {
-        "meal": "Před tréninkem",
+        "meal": "Odpolední svačina",
         "name": "Banán",
         "grams": 120,
         "kcal": 107,
@@ -751,7 +751,7 @@
         "fat": 0.4
       },
       {
-        "meal": "Po tréninku",
+        "meal": "Večeře",
         "name": "Whey isolate",
         "grams": 40,
         "kcal": 146,
@@ -760,7 +760,7 @@
         "fat": 0.6
       },
       {
-        "meal": "Po tréninku",
+        "meal": "Večeře",
         "name": "Rýžové chlebíčky",
         "grams": 60,
         "kcal": 228,
@@ -769,7 +769,7 @@
         "fat": 1.8
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Treska",
         "grams": 300,
         "kcal": 246,
@@ -778,7 +778,7 @@
         "fat": 2.4
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Rýže basmati vařená",
         "grams": 250,
         "kcal": 325,
@@ -787,7 +787,7 @@
         "fat": 0.8
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Cuketa",
         "grams": 250,
         "kcal": 43,
@@ -854,7 +854,7 @@
         "fat": 0.0
       },
       {
-        "meal": "Před tréninkem",
+        "meal": "Odpolední svačina",
         "name": "Cyklický dextrin",
         "grams": 30,
         "kcal": 114.0,
@@ -863,7 +863,7 @@
         "fat": 0.0
       },
       {
-        "meal": "Před tréninkem",
+        "meal": "Odpolední svačina",
         "name": "Aminokyseliny EAA/BCAA",
         "grams": 10,
         "kcal": 36.0,
@@ -872,7 +872,7 @@
         "fat": 0.0
       },
       {
-        "meal": "Po tréninku",
+        "meal": "Večeře",
         "name": "One Stop Xtreme",
         "grams": 50,
         "kcal": 190.0,
@@ -953,7 +953,7 @@
         "fat": 0.3
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Losos pečený",
         "grams": 100,
         "kcal": 208.0,
@@ -962,7 +962,7 @@
         "fat": 13.0
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Hovězí zadní libové",
         "grams": 150,
         "kcal": 210.0,
@@ -971,7 +971,7 @@
         "fat": 9.0
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Brambory vařené",
         "grams": 150,
         "kcal": 114.0,
@@ -980,7 +980,7 @@
         "fat": 0.2
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Pohanka vařená",
         "grams": 40,
         "kcal": 36.8,
@@ -989,7 +989,7 @@
         "fat": 0.2
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Rýže basmati vařená",
         "grams": 40,
         "kcal": 50.0,
@@ -998,7 +998,7 @@
         "fat": 0.1
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Mandlové mléko neslazené",
         "grams": 30,
         "kcal": 3.9,
@@ -1007,7 +1007,7 @@
         "fat": 0.3
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Bílky vaječné",
         "grams": 160,
         "kcal": 83.2,
@@ -1016,7 +1016,7 @@
         "fat": 0.3
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Vejce celé",
         "grams": 50,
         "kcal": 71.5,
@@ -1025,7 +1025,7 @@
         "fat": 5.0
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Ovesné vločky",
         "grams": 20,
         "kcal": 74.0,
@@ -1034,7 +1034,7 @@
         "fat": 1.4
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Med",
         "grams": 10,
         "kcal": 30.4,
@@ -1043,7 +1043,7 @@
         "fat": 0.0
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Borůvky",
         "grams": 30,
         "kcal": 17.1,
@@ -1052,7 +1052,7 @@
         "fat": 0.1
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Whey protein",
         "grams": 35,
         "kcal": 140.0,
@@ -1061,7 +1061,7 @@
         "fat": 2.1
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Omega 3 kapsle",
         "grams": 3,
         "kcal": 27.0,
@@ -1182,7 +1182,7 @@
         "fat": 0.1
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Losos pečený",
         "grams": 100,
         "kcal": 208.0,
@@ -1191,7 +1191,7 @@
         "fat": 13.0
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Mandlové mléko neslazené",
         "grams": 30,
         "kcal": 3.9,
@@ -1200,7 +1200,7 @@
         "fat": 0.3
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Vejce celé",
         "grams": 50,
         "kcal": 71.5,
@@ -1209,7 +1209,7 @@
         "fat": 5.0
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Ovesné vločky",
         "grams": 15,
         "kcal": 55.5,
@@ -1218,7 +1218,7 @@
         "fat": 1.1
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Med",
         "grams": 10,
         "kcal": 30.4,
@@ -1227,7 +1227,7 @@
         "fat": 0.0
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Borůvky",
         "grams": 30,
         "kcal": 17.1,
@@ -1236,7 +1236,7 @@
         "fat": 0.1
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Whey protein",
         "grams": 40,
         "kcal": 160.0,
@@ -1245,7 +1245,7 @@
         "fat": 2.4
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Omega 3 kapsle",
         "grams": 3,
         "kcal": 27.0,
@@ -1402,7 +1402,7 @@
         "fat": 0.4
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Losos pečený",
         "grams": 100,
         "kcal": 208.0,
@@ -1411,7 +1411,7 @@
         "fat": 13.0
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Chřest",
         "grams": 150,
         "kcal": 30.0,
@@ -1420,7 +1420,7 @@
         "fat": 0.2
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Rýže basmati vařená",
         "grams": 60,
         "kcal": 75.0,
@@ -1429,7 +1429,7 @@
         "fat": 0.2
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Vejce celé",
         "grams": 50,
         "kcal": 71.5,
@@ -1438,7 +1438,7 @@
         "fat": 5.0
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Kuřecí prsa syrová",
         "grams": 100,
         "kcal": 110.0,
@@ -1447,7 +1447,7 @@
         "fat": 1.5
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Rýže basmati vařená",
         "grams": 60,
         "kcal": 75.0,
@@ -1456,7 +1456,7 @@
         "fat": 0.2
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Omega 3 kapsle",
         "grams": 3,
         "kcal": 27.0,
@@ -1465,7 +1465,7 @@
         "fat": 3.0
       },
       {
-        "meal": "Večeře",
+        "meal": "Druhá večeře",
         "name": "Med",
         "grams": 12,
         "kcal": 36.5,
