@@ -1,6 +1,8 @@
 let foods = [];
 let defaultFoods = [];
 let mealTemplates = [];
+let customFoods = JSON.parse(localStorage.getItem('nutritionCustomFoods') || '[]');
+let favoriteFoodKeys = JSON.parse(localStorage.getItem('nutritionFavoriteFoods') || '[]');
 
 const legacyReport = localStorage.getItem('nutritionReport');
 let reports = JSON.parse(localStorage.getItem('nutritionReportsByDayType') || 'null') || {
@@ -25,7 +27,8 @@ async function loadFoods(){
   const res = await fetch('foods.json');
   defaultFoods = await res.json();
   const savedFoods = localStorage.getItem('nutritionFoods');
-  foods = savedFoods ? mergeDefaultFoods(JSON.parse(savedFoods), defaultFoods) : defaultFoods;
+  const baseFoods = savedFoods ? mergeDefaultFoods(JSON.parse(savedFoods), defaultFoods) : defaultFoods;
+  foods = mergeDefaultFoods(customFoods, baseFoods);
   refreshFoodSelect();
   updateImportStatus('Databáze potravin načtena.');
   render();
@@ -46,6 +49,27 @@ function normalizeText(value){
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .trim();
+}
+
+function foodKey(foodOrName){
+  return normalizeText(typeof foodOrName === 'string' ? foodOrName : foodOrName?.name);
+}
+
+function isFavoriteFood(foodOrName){
+  const key = foodKey(foodOrName);
+  return key && favoriteFoodKeys.includes(key);
+}
+
+function saveFavorites(){
+  localStorage.setItem('nutritionFavoriteFoods', JSON.stringify(favoriteFoodKeys));
+}
+
+function refreshFoodDatabase(){
+  const savedFoods = localStorage.getItem('nutritionFoods');
+  const baseFoods = savedFoods ? mergeDefaultFoods(JSON.parse(savedFoods), defaultFoods) : defaultFoods;
+  foods = mergeDefaultFoods(customFoods, baseFoods);
+  refreshFoodSelect();
+  updateImportStatus('Databáze potravin aktualizována.');
 }
 
 
@@ -298,10 +322,11 @@ function refreshFoodSuggestions(query){
   const normalizedQuery = normalizeText(query);
   const filtered = foods
     .filter(f => !normalizedQuery || normalizeText(f.name).startsWith(normalizedQuery))
-    .slice(0, 50);
+    .sort((a,b) => Number(isFavoriteFood(b)) - Number(isFavoriteFood(a)) || a.name.localeCompare(b.name, 'cs'))
+    .slice(0, 70);
 
   $('foodSuggestions').innerHTML = filtered
-    .map(f => `<option value="${f.name}">${f.kcal} kcal | B ${f.protein} | S ${f.carbs} | T ${f.fat}</option>`)
+    .map(f => `<option value="${xmlEsc(f.name)}">${isFavoriteFood(f) ? '⭐ ' : ''}${f.kcal} kcal | B ${f.protein} | S ${f.carbs} | T ${f.fat}${f.source === 'custom' ? ' | vlastní' : ''}</option>`)
     .join('');
 }
 
@@ -334,9 +359,11 @@ function updateFoodHint(){
   if(!$('foodHint')) return;
   const food = findFoodBySearch();
   updateUnitOptions();
+  updateFavoriteButton();
+  if(food) fillCustomFoodForm(food, false);
   $('foodHint').textContent = food
-    ? `Vybráno: ${food.name} | ${food.kcal} kcal, B ${food.protein} g, S ${food.carbs} g, T ${food.fat} g / 100 g${food.pieceWeight ? ` · 1 ${food.pieceName || 'ks'} ≈ ${food.pieceWeight} g` : ''}`
-    : 'Začni psát název potraviny. Nabízí se položky začínající na zadaná písmena.';
+    ? `${isFavoriteFood(food) ? '⭐ ' : ''}Vybráno: ${food.name} | ${food.kcal} kcal, B ${food.protein} g, S ${food.carbs} g, T ${food.fat} g / 100 g${food.pieceWeight ? ` · 1 ${food.pieceName || 'ks'} ≈ ${food.pieceWeight} g` : ''}`
+    : 'Začni psát název potraviny. Oblíbené položky se řadí nahoře.';
 }
 
 function validateFoods(data){
@@ -376,8 +403,8 @@ async function importFoods(event){
   try{
     const text = await file.text();
     const imported = validateFoods(JSON.parse(text));
-    foods = imported;
-    localStorage.setItem('nutritionFoods', JSON.stringify(foods));
+    localStorage.setItem('nutritionFoods', JSON.stringify(imported));
+    foods = mergeDefaultFoods(customFoods, imported);
     refreshFoodSelect();
     updateImportStatus(`Import hotový: ${foods.length} potravin ze souboru ${file.name}.`);
     alert(`Import hotový: ${foods.length} potravin.`);
@@ -398,10 +425,108 @@ function exportFoods(){
   URL.revokeObjectURL(a.href);
 }
 
+function updateFavoriteButton(){
+  const btn = $('favoriteFoodBtn');
+  if(!btn) return;
+  const food = findFoodBySearch();
+  btn.textContent = food && isFavoriteFood(food) ? '★ Odebrat z oblíbených' : '☆ Přidat do oblíbených';
+  btn.disabled = !food;
+}
+
+function toggleFavoriteFood(){
+  const food = findFoodBySearch();
+  if(!food) return alert('Nejdřív vyber potravinu.');
+  const key = foodKey(food);
+  if(isFavoriteFood(food)){
+    favoriteFoodKeys = favoriteFoodKeys.filter(k => k !== key);
+  }else{
+    favoriteFoodKeys.push(key);
+  }
+  saveFavorites();
+  refreshFoodSuggestions($('foodSearch')?.value || '');
+  updateFoodHint();
+}
+
+function getCustomFoodFromForm(){
+  const name = ($('customFoodName')?.value || '').trim();
+  const kcal = Number($('customFoodKcal')?.value);
+  const protein = Number($('customFoodProtein')?.value);
+  const carbs = Number($('customFoodCarbs')?.value);
+  const fat = Number($('customFoodFat')?.value);
+  const pieceName = ($('customFoodPieceName')?.value || '').trim();
+  const pieceWeight = Number($('customFoodPieceWeight')?.value || 0);
+  if(!name) throw new Error('Vyplň název potraviny.');
+  if([kcal, protein, carbs, fat].some(Number.isNaN)) throw new Error('Vyplň kcal, bílkoviny, sacharidy a tuky.');
+  return {
+    id: `custom-${foodKey(name).replace(/[^a-z0-9]+/g, '-')}`,
+    name,
+    category: ($('customFoodCategory')?.value || 'Vlastní').trim() || 'Vlastní',
+    kcal: round(kcal),
+    protein: round(protein),
+    carbs: round(carbs),
+    fat: round(fat),
+    unit: '100g',
+    pieceName: pieceName || undefined,
+    pieceWeight: pieceWeight > 0 ? round(pieceWeight) : undefined,
+    source: 'custom'
+  };
+}
+
+function fillCustomFoodForm(food, force = true){
+  if(!food || !$('customFoodName')) return;
+  if(!force && document.activeElement && String(document.activeElement.id || '').startsWith('customFood')) return;
+  $('customFoodName').value = food.name || '';
+  $('customFoodCategory').value = food.category || '';
+  $('customFoodKcal').value = food.kcal ?? '';
+  $('customFoodProtein').value = food.protein ?? '';
+  $('customFoodCarbs').value = food.carbs ?? '';
+  $('customFoodFat').value = food.fat ?? '';
+  $('customFoodPieceName').value = food.pieceName || '';
+  $('customFoodPieceWeight').value = food.pieceWeight || '';
+  if($('customFoodStatus')) $('customFoodStatus').textContent = food.source === 'custom' ? 'Načtena vlastní potravina k úpravě.' : 'Načtena potravina z databáze. Uložením vznikne/aktualizuje se vlastní položka.';
+}
+
+function clearCustomFoodForm(){
+  ['customFoodName','customFoodCategory','customFoodKcal','customFoodProtein','customFoodCarbs','customFoodFat','customFoodPieceName','customFoodPieceWeight'].forEach(id => { if($(id)) $(id).value = ''; });
+  if($('customFoodStatus')) $('customFoodStatus').textContent = 'Formulář je prázdný. Vyplň hodnoty na 100 g.';
+}
+
+function saveCustomFood(){
+  try{
+    const food = getCustomFoodFromForm();
+    const key = foodKey(food);
+    customFoods = customFoods.filter(f => foodKey(f) !== key);
+    customFoods.push(food);
+    localStorage.setItem('nutritionCustomFoods', JSON.stringify(customFoods));
+    refreshFoodDatabase();
+    $('foodSearch').value = food.name;
+    updateFoodHint();
+    if($('customFoodStatus')) $('customFoodStatus').textContent = `Vlastní potravina uložena: ${food.name}.`;
+    alert(`Potravina uložena: ${food.name}`);
+  }catch(error){
+    alert(error.message);
+  }
+}
+
+function deleteCustomFood(){
+  const name = ($('customFoodName')?.value || $('foodSearch')?.value || '').trim();
+  if(!name) return alert('Vyber nebo napiš vlastní potravinu ke smazání.');
+  const key = foodKey(name);
+  const exists = customFoods.some(f => foodKey(f) === key);
+  if(!exists) return alert('Tato položka není uložená jako vlastní potravina.');
+  if(!confirm(`Smazat vlastní potravinu „${name}“?`)) return;
+  customFoods = customFoods.filter(f => foodKey(f) !== key);
+  localStorage.setItem('nutritionCustomFoods', JSON.stringify(customFoods));
+  favoriteFoodKeys = favoriteFoodKeys.filter(k => k !== key);
+  saveFavorites();
+  refreshFoodDatabase();
+  clearCustomFoodForm();
+}
+
 function resetFoods(){
   if(!confirm('Vrátit původní databázi z foods.json? Importovaná databáze v tomto prohlížeči se smaže.')) return;
   localStorage.removeItem('nutritionFoods');
-  foods = defaultFoods;
+  foods = mergeDefaultFoods(customFoods, defaultFoods);
   refreshFoodSelect();
   updateImportStatus('Načtena původní databáze z foods.json.');
   render();
@@ -644,6 +769,60 @@ function row(values, style = ''){
   return `<Row>${values.map(v => Array.isArray(v) ? cell(v[0], v[1], v[2] || style) : cell(v, 'String', style)).join('')}</Row>`;
 }
 
+function groupedMealsForPdf(type = currentDayType){
+  const data = sortedReport(type);
+  return mealOrder.map(meal => ({ meal, items: data.filter(x => x.meal === meal), totals: mealTotals(data.filter(x => x.meal === meal)) }))
+    .filter(group => group.items.length);
+}
+
+function macroCardsHtml(type = currentDayType){
+  const t = totals(type);
+  const targets = getTargets(type);
+  const items = [
+    ['Kalorie', t.kcal, targets.kcal, 'kcal'],
+    ['Bílkoviny', t.protein, targets.protein, 'g'],
+    ['Sacharidy', t.carbs, targets.carbs, 'g'],
+    ['Tuky', t.fat, targets.fat, 'g']
+  ];
+  return items.map(([label, value, target, unit]) => {
+    const over = Number(value) > Number(target);
+    const delta = round(Number(target) - Number(value));
+    return `<div class="pdf-macro ${over ? 'over' : ''}"><span>${label}</span><strong>${round(value)} ${unit}</strong><small>Cíl ${target} ${unit} · ${over ? 'Přesah ' + Math.abs(delta) : 'Zbývá ' + delta} ${unit}</small></div>`;
+  }).join('');
+}
+
+function exportPdf(){
+  const date = $('reportDate').value || new Date().toISOString().slice(0,10);
+  const name = ($('clientName')?.value || 'Klient').trim();
+  const type = currentDayType;
+  const groups = groupedMealsForPdf(type);
+  const fileTitle = `${safeFileName(name)}-${date}`;
+  const rowsHtml = groups.length ? groups.map(group => `
+    <section class="pdf-meal">
+      <h2>${xmlEsc(group.meal)} <span>${round(group.totals.kcal)} kcal · B ${round(group.totals.protein)} g · S ${round(group.totals.carbs)} g · T ${round(group.totals.fat)} g</span></h2>
+      <table>
+        <thead><tr><th>Potravina</th><th>Množství</th><th>kcal</th><th>B</th><th>S</th><th>T</th></tr></thead>
+        <tbody>${group.items.map(x => `<tr><td>${xmlEsc(x.name)}</td><td>${xmlEsc(x.amountLabel || (x.grams + ' g'))}</td><td>${round(x.kcal)}</td><td>${round(x.protein)}</td><td>${round(x.carbs)}</td><td>${round(x.fat)}</td></tr>`).join('')}</tbody>
+      </table>
+    </section>`).join('') : '<p>Jídelníček je prázdný.</p>';
+
+  const html = `<!doctype html><html lang="cs"><head><meta charset="utf-8"><title>${xmlEsc(fileTitle)}</title>
+  <style>
+    @page{size:A4;margin:14mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#101828;margin:0;background:#fff} .pdf-header{background:linear-gradient(135deg,#101828,#155eef);color:white;border-radius:18px;padding:22px;margin-bottom:18px}.pdf-header h1{margin:0 0 8px;font-size:28px}.pdf-header p{margin:4px 0;color:#eaf0ff}.pdf-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}.pdf-macro{border:1px solid #d9e2ef;border-radius:14px;padding:12px;background:#f8fbff}.pdf-macro span{display:block;color:#667085;font-size:12px;font-weight:bold}.pdf-macro strong{display:block;font-size:20px;margin:5px 0}.pdf-macro small{font-weight:bold;color:#12b76a}.pdf-macro.over{background:#fff5f5;border-color:#fca5a5}.pdf-macro.over strong,.pdf-macro.over small{color:#dc2626}.pdf-meal{break-inside:avoid;margin-top:16px}.pdf-meal h2{background:#101828;color:white;padding:10px 12px;border-radius:12px;font-size:17px;margin:0 0 8px}.pdf-meal h2 span{float:right;font-size:12px;color:#d0d5dd;margin-top:3px}table{width:100%;border-collapse:collapse;margin-bottom:12px}th,td{border:1px solid #e7eef8;padding:8px;text-align:left;font-size:12px}th{background:#eef4ff;color:#344054;text-transform:uppercase;font-size:11px}tr:nth-child(even) td{background:#fbfdff}.footer{margin-top:18px;color:#667085;font-size:11px;text-align:center}@media print{button{display:none}}
+  </style></head><body>
+    <div class="pdf-header"><h1>Nutrition Coach</h1><p><strong>${xmlEsc(name)}</strong></p><p>${xmlEsc(date)} · ${xmlEsc(dayTypeLabel(type))}</p></div>
+    <div class="pdf-macros">${macroCardsHtml(type)}</div>
+    ${rowsHtml}
+    <div class="footer">Vygenerováno z aplikace Nutrition Coach · ${xmlEsc(fileTitle)}</div>
+    <script>window.onload = () => setTimeout(() => window.print(), 250);</script>
+  </body></html>`;
+  const printWindow = window.open('', '_blank');
+  if(!printWindow) return alert('Prohlížeč zablokoval otevření PDF okna. Povol vyskakovací okna pro tuto stránku.');
+  printWindow.document.open();
+  printWindow.document.write(html);
+  printWindow.document.close();
+}
+
 function worksheetXml(type){
   const date = $('reportDate').value || new Date().toISOString().slice(0,10);
   const data = sortedReport(type);
@@ -752,6 +931,7 @@ if($('clientName')) $('clientName').value = clientName;
 $('dayType').value = currentDayType;
 applyTargetsForDayType();
 $('addFoodBtn').onclick = addFood;
+if($('favoriteFoodBtn')) $('favoriteFoodBtn').onclick = toggleFavoriteFood;
 $('dayType').onchange = changeDayType;
 $('reportDate').addEventListener('change', render);
 $('saveTargetsBtn').onclick = saveTargetsForDayType;
@@ -768,10 +948,14 @@ $('foodSearch').addEventListener('keydown', (event) => {
 $('copyBtn').onclick = copyReport;
 $('csvBtn').onclick = exportCsv;
 $('excelBtn').onclick = exportExcel;
+if($('pdfBtn')) $('pdfBtn').onclick = exportPdf;
 $('clearBtn').onclick = clearDay;
 $('foodImport').addEventListener('change', importFoods);
 $('exportFoodsBtn').onclick = exportFoods;
 $('resetFoodsBtn').onclick = resetFoods;
+if($('saveCustomFoodBtn')) $('saveCustomFoodBtn').onclick = saveCustomFood;
+if($('clearCustomFoodBtn')) $('clearCustomFoodBtn').onclick = clearCustomFoodForm;
+if($('deleteCustomFoodBtn')) $('deleteCustomFoodBtn').onclick = deleteCustomFood;
 $('templateSelect').addEventListener('change', updateTemplatePreview);
 $('loadTemplateBtn').onclick = () => applyTemplate(false);
 $('appendTemplateBtn').onclick = () => applyTemplate(true);

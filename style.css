@@ -223,3 +223,20 @@ button:hover,.file-button:hover{box-shadow:0 14px 28px rgba(21,94,239,.30)}
 .quantity-row input{flex:1}
 .quantity-row select{width:86px}
 .amount-label{display:block;font-size:11px;color:#667085;margin-top:4px}
+
+/* Vlastní potraviny + oblíbené */
+.food-actions{margin-top:4px}
+#favoriteFoodBtn:disabled{opacity:.55;cursor:not-allowed;box-shadow:none}
+.custom-food-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin-top:14px;
+  padding:16px;
+  border:1px dashed var(--border);
+  border-radius:22px;
+  background:#f8fbff;
+}
+#customFoodStatus{display:block;margin-top:10px;font-weight:800}
+@media(max-width:1000px){.custom-food-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.custom-food-grid{grid-template-columns:1fr}}
