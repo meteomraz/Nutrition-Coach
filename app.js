@@ -1013,44 +1013,287 @@ function pdfDayBlock(type){
     </section>`;
 }
 
-function exportPdf(){
+
+function loadImageDataUrl(src){
+  return fetch(src)
+    .then(res => {
+      if(!res.ok) throw new Error('Obrázek pro PDF se nepodařilo načíst.');
+      return res.blob();
+    })
+    .then(blob => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    }));
+}
+
+function fitImageSize(imgWidth, imgHeight, boxWidth, boxHeight){
+  const ratio = Math.min(boxWidth / imgWidth, boxHeight / imgHeight);
+  return { width: imgWidth * ratio, height: imgHeight * ratio };
+}
+
+function addWrappedText(doc, text, x, y, maxWidth, lineHeight, options = {}){
+  const lines = doc.splitTextToSize(String(text || ''), maxWidth);
+  doc.text(lines, x, y, options);
+  return y + (lines.length * lineHeight);
+}
+
+function pdfMacroRowData(type){
+  const t = totals(type);
+  const targets = getTargets(type);
+  return [
+    ['Kalorie', round(t.kcal), targets.kcal, 'kcal'],
+    ['Bílkoviny', round(t.protein), targets.protein, 'g'],
+    ['Sacharidy', round(t.carbs), targets.carbs, 'g'],
+    ['Tuky', round(t.fat), targets.fat, 'g']
+  ];
+}
+
+function drawMacroCards(doc, type, x, y, w){
+  const cards = pdfMacroRowData(type);
+  const gap = 4;
+  const cardW = (w - gap * 3) / 4;
+  cards.forEach(([label, value, target, unit], i) => {
+    const cx = x + i * (cardW + gap);
+    const over = Number(value) > Number(target);
+    doc.setDrawColor(over ? 248 : 209, over ? 113 : 221, over ? 113 : 238);
+    doc.setFillColor(over ? 255 : 248, over ? 245 : 251, over ? 245 : 255);
+    doc.roundedRect(cx, y, cardW, 23, 4, 4, 'FD');
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(102, 112, 133);
+    doc.setFontSize(7.5);
+    doc.text(label.toUpperCase(), cx + 4, y + 6);
+    doc.setFontSize(13);
+    doc.setTextColor(over ? 220 : 16, over ? 38 : 24, over ? 38 : 40);
+    doc.text(`${value} ${unit}`, cx + 4, y + 14);
+    doc.setFontSize(7.5);
+    const delta = round(Number(target) - Number(value));
+    doc.setTextColor(over ? 220 : 18, over ? 38 : 183, over ? 38 : 106);
+    doc.text(`${over ? 'Přesah' : 'Zbývá'} ${Math.abs(delta)} ${unit}`, cx + 4, y + 20);
+  });
+}
+
+function drawMealTable(doc, type, startY){
+  const left = 14;
+  const pageW = 210;
+  const right = 14;
+  const maxY = 282;
+  let y = startY;
+  const groups = groupedMealsForPdf(type);
+
+  if(!groups.length){
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(203, 213, 225);
+    doc.roundedRect(left, y, pageW - left - right, 16, 4, 4, 'FD');
+    doc.setTextColor(102, 112, 133);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(10);
+    doc.text('Jídelníček pro tento den je zatím prázdný.', pageW / 2, y + 10, {align:'center'});
+    return y + 22;
+  }
+
+  groups.forEach(group => {
+    const needed = 18 + group.items.length * 8 + 8;
+    if(y + needed > maxY){ doc.addPage(); y = 16; }
+
+    doc.setFillColor(16, 24, 40);
+    doc.setDrawColor(16, 24, 40);
+    doc.roundedRect(left, y, pageW - left - right, 12, 3, 3, 'FD');
+    doc.setTextColor(255,255,255);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(11);
+    doc.text(group.meal, left + 4, y + 8);
+    doc.setFontSize(7.5);
+    doc.setTextColor(208, 213, 221);
+    doc.text(`${round(group.totals.kcal)} kcal · B ${round(group.totals.protein)} g · S ${round(group.totals.carbs)} g · T ${round(group.totals.fat)} g`, pageW - right - 4, y + 8, {align:'right'});
+    y += 12;
+
+    const cols = [left, left + 83, left + 112, left + 130, left + 148, left + 166];
+    doc.setFillColor(242, 246, 255);
+    doc.rect(left, y, pageW - left - right, 8, 'F');
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica','bold');
+    doc.setTextColor(52, 64, 84);
+    ['Potravina','Množství','kcal','B','S','T'].forEach((h,i)=> doc.text(h, cols[i]+2, y+5.3));
+    y += 8;
+
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(8.6);
+    group.items.forEach((item, idx) => {
+      if(y + 8 > maxY){ doc.addPage(); y = 16; }
+      if(idx % 2 === 1){ doc.setFillColor(251,253,255); doc.rect(left, y, pageW - left - right, 8, 'F'); }
+      doc.setDrawColor(237,242,247);
+      doc.line(left, y + 8, pageW - right, y + 8);
+      doc.setTextColor(16,24,40);
+      const nameLines = doc.splitTextToSize(String(item.name), 78);
+      doc.text(nameLines[0], cols[0]+2, y+5.4);
+      doc.text(String(item.amountLabel || (item.grams + ' g')), cols[1]+2, y+5.4);
+      doc.text(String(round(item.kcal)), cols[2]+10, y+5.4, {align:'right'});
+      doc.text(String(round(item.protein)), cols[3]+10, y+5.4, {align:'right'});
+      doc.text(String(round(item.carbs)), cols[4]+10, y+5.4, {align:'right'});
+      doc.text(String(round(item.fat)), cols[5]+10, y+5.4, {align:'right'});
+      y += 8;
+    });
+    y += 6;
+  });
+  return y;
+}
+
+function drawDayPage(doc, type){
+  doc.addPage();
+  const name = ($('clientName')?.value || 'Klient').trim();
+  doc.setTextColor(102,112,133);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(8);
+  doc.text('NUTRITION COACH', 14, 13);
+  doc.text(name, 196, 13, {align:'right'});
+
+  doc.setTextColor(16,24,40);
+  doc.setFontSize(22);
+  doc.text(dayTypeLabel(type), 14, 27);
+  const t = totals(type);
+  const targets = getTargets(type);
+  doc.setFontSize(10);
+  doc.setTextColor(21,94,239);
+  doc.text(`${round(t.kcal)} / ${targets.kcal} kcal`, 196, 27, {align:'right'});
+  doc.setDrawColor(21,94,239);
+  doc.setLineWidth(0.8);
+  doc.line(14, 32, 196, 32);
+  drawMacroCards(doc, type, 14, 38, 182);
+  drawMealTable(doc, type, 70);
+}
+
+function drawSummaryPage(doc){
+  doc.addPage();
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(22);
+  doc.setTextColor(16,24,40);
+  doc.text('Souhrn jídelníčků', 14, 24);
+  doc.setDrawColor(21,94,239);
+  doc.setLineWidth(0.8);
+  doc.line(14, 30, 196, 30);
+  let y = 42;
+  ['training','rest'].forEach(type => {
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(15);
+    doc.setTextColor(16,24,40);
+    doc.text(dayTypeLabel(type), 14, y);
+    y += 7;
+    drawMacroCards(doc, type, 14, y, 182);
+    y += 34;
+  });
+}
+
+function getReplacementPdfRows(){
+  const names = Array.from(new Set([...getReport('training'), ...getReport('rest')].map(i => i.name))).slice(0, 18);
+  return names.map(name => {
+    const item = findFoodSmart(name) || { name };
+    const candidates = getReplacementCandidates(item).slice(0, 4).map(f => f.name);
+    return { name, candidates };
+  }).filter(r => r.candidates.length);
+}
+
+function drawReplacementsPage(doc){
+  const rows = getReplacementPdfRows();
+  if(!rows.length) return;
+  doc.addPage();
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(22);
+  doc.setTextColor(16,24,40);
+  doc.text('Náhrady potravin', 14, 24);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9);
+  doc.setTextColor(102,112,133);
+  doc.text('Orientační alternativy s podobným charakterem nebo makry. Dávkování vždy dolaď podle cílových maker.', 14, 32);
+  let y = 44;
+  rows.forEach(row => {
+    if(y > 270){ doc.addPage(); y = 18; }
+    doc.setFillColor(248,251,255);
+    doc.setDrawColor(228,234,243);
+    doc.roundedRect(14, y, 182, 18, 4, 4, 'FD');
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(10);
+    doc.setTextColor(16,24,40);
+    doc.text(row.name, 18, y + 7);
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(8.3);
+    doc.setTextColor(71,84,103);
+    doc.text(doc.splitTextToSize(row.candidates.join(' · '), 166), 18, y + 13);
+    y += 23;
+  });
+}
+
+async function exportPdf(){
+  const jspdfLib = window.jspdf;
+  if(!jspdfLib || !jspdfLib.jsPDF){
+    return alert('PDF knihovna se nenačetla. Zkontroluj internetové připojení a obnov stránku.');
+  }
+  const { jsPDF } = jspdfLib;
   const date = $('reportDate').value || new Date().toISOString().slice(0,10);
   const name = ($('clientName')?.value || 'Klient').trim();
-  const description = ($('clientDescription')?.value || 'Individuální jídelníček sestavený v aplikaci Nutrition Coach.').trim();
-  const fileTitle = `${safeFileName(name)}-${date}-jidelnicek`;
-  const foodSvg = `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520"><defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#e0f2fe"/><stop offset="1" stop-color="#dcfce7"/></linearGradient><filter id="s"><feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="#0f172a" flood-opacity=".22"/></filter></defs><rect width="900" height="520" rx="38" fill="url(#bg)"/><circle cx="455" cy="270" r="190" fill="#fff" filter="url(#s)"/><circle cx="455" cy="270" r="150" fill="#f8fafc" stroke="#dbeafe" stroke-width="8"/><path d="M330 278c45-70 142-91 218-50 30 16 48 42 36 68-14 30-66 41-127 35-61-6-115-24-127-53z" fill="#fb7185"/><path d="M360 300c42 18 129 28 181 10" stroke="#fecaca" stroke-width="18" stroke-linecap="round" opacity=".8"/><ellipse cx="560" cy="217" rx="62" ry="38" fill="#fbbf24"/><path d="M568 206c-20 8-44 10-62 6" stroke="#92400e" stroke-width="8" stroke-linecap="round" opacity=".35"/><g fill="#22c55e"><circle cx="590" cy="324" r="18"/><circle cx="620" cy="340" r="16"/><circle cx="584" cy="356" r="15"/><circle cx="632" cy="309" r="13"/></g><g fill="#fff7ed" stroke="#fed7aa" stroke-width="4"><ellipse cx="394" cy="206" rx="42" ry="26"/><ellipse cx="424" cy="238" rx="48" ry="28"/><ellipse cx="374" cy="252" rx="38" ry="24"/></g><path d="M210 105c60-32 102-34 163-10" stroke="#12b76a" stroke-width="18" stroke-linecap="round" opacity=".65"/><path d="M600 95c48 2 91 20 124 51" stroke="#155eef" stroke-width="18" stroke-linecap="round" opacity=".5"/></svg>`)}`;
-  const html = `<!doctype html><html lang="cs"><head><meta charset="utf-8"><title>${xmlEsc(fileTitle)}</title>
-  <style>
-    @page{size:A4;margin:12mm}
-    *{box-sizing:border-box}
-    body{font-family:Arial,Helvetica,sans-serif;color:#101828;margin:0;background:#fff;line-height:1.35}
-    .cover-page{min-height:265mm;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(135deg,#0b1220 0%,#155eef 58%,#12b76a 130%);color:white;border-radius:28px;padding:34px;overflow:hidden;position:relative;page-break-after:always}
-    .cover-page:before{content:"";position:absolute;right:-80px;top:-80px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.12)}
-    .cover-page:after{content:"";position:absolute;left:-90px;bottom:-120px;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.08)}
-    .cover-content{position:relative;z-index:1}.pdf-logo{font-size:13px;text-transform:uppercase;letter-spacing:.18em;font-weight:900;color:#d7e7ff}.cover-page h1{font-size:52px;line-height:1.02;margin:20px 0 14px;letter-spacing:-.04em}.cover-desc{font-size:18px;max-width:640px;color:#eef6ff;margin:0 0 28px}.food-hero{width:100%;max-width:620px;border-radius:28px;box-shadow:0 28px 70px rgba(0,0,0,.32);margin:26px 0 20px;border:8px solid rgba(255,255,255,.22)}
-    .cover-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}.cover-meta div{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.26);border-radius:18px;padding:14px}.cover-meta span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.10em;color:#cfe1ff;font-weight:900}.cover-meta strong{display:block;margin-top:6px;font-size:18px}.cover-footer{position:relative;z-index:1;color:#dbeafe;font-size:12px;font-weight:800;text-align:right}
-    .pdf-day{margin-top:16px}.page-break{break-before:page;page-break-before:always}.pdf-day-head{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #155eef;padding-bottom:10px;margin-bottom:12px}.pdf-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:#667085;font-weight:900}.pdf-day h2{margin:2px 0 0;font-size:25px;color:#101828}.pdf-total-pill{background:#eef4ff;color:#155eef;border:1px solid #c7d7fe;border-radius:999px;padding:9px 14px;font-weight:900}.pdf-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:14px 0 16px}.pdf-macro{border:1px solid #d9e2ef;border-radius:15px;padding:11px 12px;background:#f8fbff}.pdf-macro span{display:block;color:#667085;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.pdf-macro strong{display:block;font-size:19px;margin:5px 0;color:#101828}.pdf-macro small{font-weight:800;color:#12b76a;font-size:11px}.pdf-macro.over{background:#fff5f5;border-color:#fca5a5}.pdf-macro.over strong,.pdf-macro.over small{color:#dc2626}.pdf-meal{break-inside:avoid;margin:13px 0 16px;border:1px solid #e4eaf3;border-radius:16px;overflow:hidden;background:#fff}.pdf-meal-title{display:flex;justify-content:space-between;align-items:center;background:#101828;color:white;padding:10px 13px}.pdf-meal-title h3{margin:0;font-size:16px}.pdf-meal-title span{font-size:11px;color:#d0d5dd;font-weight:800;text-align:right}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #edf2f7;padding:8px 9px;text-align:left;font-size:12px}th{background:#f2f6ff;color:#344054;text-transform:uppercase;font-size:10px;letter-spacing:.06em}td:nth-child(n+3),th:nth-child(n+3){text-align:right}tr:nth-child(even) td{background:#fbfdff}tr:last-child td{border-bottom:0}.pdf-empty{border:1px dashed #cbd5e1;background:#f8fafc;color:#667085;border-radius:14px;padding:18px;text-align:center;font-weight:700}.footer{margin-top:18px;color:#667085;font-size:10px;text-align:center;border-top:1px solid #e4eaf3;padding-top:10px}@media print{button{display:none}.cover-page{border-radius:0}}
-  </style></head><body>
-    <section class="cover-page">
-      <div class="cover-content">
-        <div class="pdf-logo">Nutrition Coach</div>
-        <h1>Jídelníček<br>pro klienta</h1>
-        <p class="cover-desc">${xmlEsc(description)}</p>
-        <img class="food-hero" src="${foodSvg}" alt="Jídlo">
-        <div class="cover-meta"><div><span>Klient</span><strong>${xmlEsc(name)}</strong></div><div><span>Datum</span><strong>${xmlEsc(date)}</strong></div><div><span>Obsah</span><strong>Tréninkový + netréninkový den</strong></div></div>
-      </div>
-      <div class="cover-footer">Vygenerováno v aplikaci Nutrition Coach</div>
-    </section>
-    ${pdfDayBlock('training')}
-    ${pdfDayBlock('rest')}
-    <div class="footer">Vygenerováno z aplikace Nutrition Coach · ${xmlEsc(fileTitle)}</div>
-    <script>window.onload = () => setTimeout(() => window.print(), 250);</script>
-  </body></html>`;
-  const printWindow = window.open('', '_blank');
-  if(!printWindow) return alert('Prohlížeč zablokoval otevření PDF okna. Povol vyskakovací okna pro tuto stránku.');
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
+  const description = ($('clientDescription')?.value || 'Tréninkový a netréninkový jídelníček připravený v aplikaci Nutrition Coach.').trim();
+  const fileTitle = `${safeFileName(name)}-${date}-jidelnicek.pdf`;
+  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+
+  doc.setFillColor(11,18,32);
+  doc.rect(0,0,210,297,'F');
+  doc.setFillColor(21,94,239);
+  doc.circle(184, 22, 42, 'F');
+  doc.setFillColor(18,183,106);
+  doc.circle(18, 282, 58, 'F');
+  doc.setTextColor(215,231,255);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10);
+  doc.text('NUTRITION COACH', 18, 28);
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(34);
+  doc.text('Jídelníček', 18, 49);
+  doc.text('pro klienta', 18, 64);
+  doc.setFontSize(12);
+  doc.setFont('helvetica','normal');
+  doc.setTextColor(238,246,255);
+  addWrappedText(doc, description, 18, 78, 174, 5.5);
+
+  try{
+    const imgData = await loadImageDataUrl('cover-food.jpg');
+    doc.addImage(imgData, 'JPEG', 30, 96, 150, 112);
+  }catch(e){
+    doc.setFillColor(255,255,255);
+    doc.roundedRect(30, 96, 150, 112, 8, 8, 'F');
+    doc.setTextColor(16,24,40);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(18);
+    doc.text('Nutrition Coach', 105, 152, {align:'center'});
+  }
+
+  const metaY = 226;
+  const boxes = [
+    ['Klient', name],
+    ['Datum', date],
+    ['Obsah', 'Tréninkový + netréninkový den']
+  ];
+  boxes.forEach((b, i) => {
+    const x = 18 + i * 59;
+    doc.setFillColor(30, 64, 120);
+    doc.roundedRect(x, metaY, 54, 25, 5, 5, 'F');
+    doc.setTextColor(207,225,255);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(7.5);
+    doc.text(b[0].toUpperCase(), x + 4, metaY + 8);
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(10);
+    doc.text(doc.splitTextToSize(b[1], 45), x + 4, metaY + 16);
+  });
+  doc.setTextColor(219,234,254);
+  doc.setFontSize(9);
+  doc.text('Vygenerováno v aplikaci Nutrition Coach', 192, 278, {align:'right'});
+
+  drawDayPage(doc, 'training');
+  drawDayPage(doc, 'rest');
+  drawSummaryPage(doc);
+  drawReplacementsPage(doc);
+  doc.save(fileTitle);
 }
 
 function worksheetXml(type){
