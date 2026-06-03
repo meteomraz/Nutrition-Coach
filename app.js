@@ -11,6 +11,7 @@ let reports = JSON.parse(localStorage.getItem('nutritionReportsByDayType') || 'n
 };
 let currentDayType = localStorage.getItem('nutritionDayType') || 'training';
 let clientName = localStorage.getItem('nutritionClientName') || '';
+let clientDescription = localStorage.getItem('nutritionClientDescription') || '';
 let targetPresets = JSON.parse(localStorage.getItem('nutritionTargetPresets') || JSON.stringify({
   training: { kcal: 3000, protein: 220, carbs: 350, fat: 70 },
   rest: { kcal: 2600, protein: 220, carbs: 220, fat: 85 }
@@ -606,25 +607,38 @@ function setGeneratorStatus(message, isError = false){
   $('generatorStatus').classList.toggle('error-text', isError);
 }
 
-function findFoodSmart(names){
+function findFoodSmart(names, dietMode = 'classic'){
   const candidates = Array.isArray(names) ? names : [names];
+  const pool = foods.slice().sort((a,b) => dietFoodScore(b, dietMode) - dietFoodScore(a, dietMode));
   for(const name of candidates){
-    const exact = foods.find(f => normalizeText(f.name) === normalizeText(name));
+    const exact = pool.find(f => normalizeText(f.name) === normalizeText(name));
     if(exact) return exact;
   }
   for(const name of candidates){
-    const starts = foods.find(f => normalizeText(f.name).startsWith(normalizeText(name)));
+    const starts = pool.find(f => normalizeText(f.name).startsWith(normalizeText(name)));
     if(starts) return starts;
   }
   for(const name of candidates){
-    const contains = foods.find(f => normalizeText(f.name).includes(normalizeText(name)));
+    const contains = pool.find(f => normalizeText(f.name).includes(normalizeText(name)));
     if(contains) return contains;
   }
   return null;
 }
 
-function generatedFoodItem(meal, names, grams, role = '', min = 0, max = 999){
-  const food = findFoodSmart(names);
+function foodTags(food){
+  return Array.isArray(food?.tags) ? food.tags.map(normalizeText) : [];
+}
+
+function dietFoodScore(food, dietMode){
+  const name = normalizeText(food?.name);
+  const tags = foodTags(food);
+  if(dietMode === 'glutenfree') return Number(tags.includes('bezlepkove') || name.includes('bezlepk')) * 10;
+  if(dietMode === 'lactosefree') return Number(tags.includes('bezlaktozove') || name.includes('bez laktozy') || name.includes('bezlakt')) * 10;
+  return 0;
+}
+
+function generatedFoodItem(meal, names, grams, role = '', min = 0, max = 999, dietMode = 'classic'){
+  const food = findFoodSmart(names, dietMode);
   if(!food) return null;
   const safeGrams = Math.max(min || 0, Math.min(max || 999, round(Number(grams) || 0)));
   return { meal, name: food.name, grams: safeGrams, role, min, max, amount: safeGrams, unitMode: 'g', amountLabel: `${safeGrams} g`, ...calc(food, safeGrams) };
@@ -635,41 +649,46 @@ function generatorBlueprint(){
   const style = $('generatorStyle')?.value || 'fitness';
   const carbSource = $('generatorCarbSource')?.value || 'rice';
   const proteinSource = $('generatorProteinSource')?.value || 'chicken';
+  const dietMode = $('generatorDietMode')?.value || 'classic';
+  const breakfastCarbNames = dietMode === 'glutenfree' ? ['Bezlepkové ovesné vločky','Rýžová kaše instantní natural','Rýžová kaše bezlepková'] : ['Ovesné vločky','Ovesné vločky jemné'];
+  const morningProteinNames = dietMode === 'lactosefree' ? ['Whey isolate bez laktózy','Protein whey isolate bez laktózy','Rýžový protein'] : ['Whey protein','Syrovátkový protein whey 80%'];
+  const dairySnackNames = dietMode === 'lactosefree' ? ['Skyr bez laktózy','Tvaroh bez laktózy','Jogurt řecký bez laktózy'] : ['Skyr','Skyr bílý','Tvaroh nízkotučný'];
+  const snackCarbNames = dietMode === 'glutenfree' ? ['Rýžová kaše bezlepková','Rýžová kaše instantní natural'] : ['Rýžová kaše instantní natural','Rýžová kaše vanilková'];
   const proteinMain = proteinSource === 'turkey' ? 'Krůtí mleté 2% Lidl' : proteinSource === 'mixed' ? ['Kuřecí prsa syrová','Krůtí mleté 2% Lidl'] : 'Kuřecí prsa syrová';
   const lunchCarb = carbSource === 'potatoes' ? 'Brambory vařené' : 'Rýže basmati suchá';
   const dinnerCarb = carbSource === 'rice' ? 'Rýže basmati suchá' : 'Batáty syrové';
   const fatOil = style === 'diet' ? 3 : style === 'bulk' ? 12 : 8;
 
   const items = [
-    generatedFoodItem('Snídaně', ['Ovesné vločky','Ovesné vločky jemné'], style === 'bulk' ? 90 : 70, 'carb', 30, 160),
-    generatedFoodItem('Snídaně', ['Whey protein','Syrovátkový protein whey 80%'], 30, 'protein', 15, 60),
-    generatedFoodItem('Snídaně', 'Vejce celé', style === 'diet' ? 50 : 100, 'fat', 0, 200),
-    generatedFoodItem('Snídaně', 'Med', style === 'bulk' ? 20 : 10, 'carb', 0, 60),
+    generatedFoodItem('Snídaně', breakfastCarbNames, style === 'bulk' ? 90 : 70, 'carb', 30, 160, dietMode),
+    generatedFoodItem('Snídaně', morningProteinNames, 30, 'protein', 15, 60, dietMode),
+    generatedFoodItem('Snídaně', 'Vejce celé', style === 'diet' ? 50 : 100, 'fat', 0, 200, dietMode),
+    generatedFoodItem('Snídaně', 'Med', style === 'bulk' ? 20 : 10, 'carb', 0, 60, dietMode),
 
-    generatedFoodItem('Svačina', ['Skyr','Skyr bílý','Tvaroh nízkotučný'], 250, 'protein', 100, 500),
-    generatedFoodItem('Svačina', ['Banán','Banán čerstvý'], style === 'diet' ? 80 : 120, 'carb', 0, 250),
+    generatedFoodItem('Svačina', dairySnackNames, 250, 'protein', 100, 500, dietMode),
+    generatedFoodItem('Svačina', ['Banán','Banán čerstvý'], style === 'diet' ? 80 : 120, 'carb', 0, 250, dietMode),
 
-    generatedFoodItem('Oběd', proteinMain, style === 'bulk' ? 230 : 200, 'protein', 100, 350),
-    generatedFoodItem('Oběd', lunchCarb, style === 'bulk' ? 110 : 80, 'carb', 30, 180),
-    generatedFoodItem('Oběd', ['Zelenina mix','Zelenina mix mražená'], 200, 'veg', 100, 400),
-    generatedFoodItem('Oběd', 'Olivový olej', fatOil, 'fat', 0, 30),
+    generatedFoodItem('Oběd', proteinMain, style === 'bulk' ? 230 : 200, 'protein', 100, 350, dietMode),
+    generatedFoodItem('Oběd', lunchCarb, style === 'bulk' ? 110 : 80, 'carb', 30, 180, dietMode),
+    generatedFoodItem('Oběd', ['Zelenina mix','Zelenina mix mražená'], 200, 'veg', 100, 400, dietMode),
+    generatedFoodItem('Oběd', 'Olivový olej', fatOil, 'fat', 0, 30, dietMode),
 
-    generatedFoodItem('Odpolední svačina', ['Rýžová kaše instantní natural','Rýžová kaše vanilková'], style === 'bulk' ? 80 : 55, 'carb', 20, 140),
-    generatedFoodItem('Odpolední svačina', ['Whey protein','Syrovátkový protein whey 80%'], 30, 'protein', 15, 60),
+    generatedFoodItem('Odpolední svačina', snackCarbNames, style === 'bulk' ? 80 : 55, 'carb', 20, 140, dietMode),
+    generatedFoodItem('Odpolední svačina', morningProteinNames, 30, 'protein', 15, 60, dietMode),
 
-    generatedFoodItem('Večeře', proteinSource === 'mixed' ? 'Losos syrový' : proteinMain, style === 'diet' ? 180 : 220, 'protein', 100, 350),
-    generatedFoodItem('Večeře', dinnerCarb, style === 'bulk' ? 300 : 220, 'carb', 80, 500),
-    generatedFoodItem('Večeře', ['Chřest','Brokolice','Zelenina mix'], 150, 'veg', 80, 350),
-    generatedFoodItem('Večeře', 'Olivový olej', style === 'diet' ? 0 : 6, 'fat', 0, 25)
+    generatedFoodItem('Večeře', proteinSource === 'mixed' ? 'Losos syrový' : proteinMain, style === 'diet' ? 180 : 220, 'protein', 100, 350, dietMode),
+    generatedFoodItem('Večeře', dinnerCarb, style === 'bulk' ? 300 : 220, 'carb', 80, 500, dietMode),
+    generatedFoodItem('Večeře', ['Chřest','Brokolice','Zelenina mix'], 150, 'veg', 80, 350, dietMode),
+    generatedFoodItem('Večeře', 'Olivový olej', style === 'diet' ? 0 : 6, 'fat', 0, 25, dietMode)
   ].filter(Boolean);
 
   if(count >= 6){
     items.push(
-      generatedFoodItem('Druhá večeře', ['Tvaroh nízkotučný','Tvaroh polotučný','Skyr'], 250, 'protein', 100, 500),
-      generatedFoodItem('Druhá večeře', style === 'bulk' ? 'Hořká čokoláda 85 %' : 'Mandle', style === 'bulk' ? 20 : 15, 'fat', 0, 50)
+      generatedFoodItem('Druhá večeře', dairySnackNames, 250, 'protein', 100, 500, dietMode),
+      generatedFoodItem('Druhá večeře', style === 'bulk' ? ['Hořká čokoláda 85 %','Čokoláda hořká 85 %'] : 'Mandle', style === 'bulk' ? 20 : 15, 'fat', 0, 50, dietMode)
     );
   }else{
-    items.push(generatedFoodItem('Svačina', ['Rýžové chlebíčky natural','Rýžové chlebíčky'], style === 'bulk' ? 40 : 20, 'carb', 0, 80));
+    items.push(generatedFoodItem('Svačina', ['Rýžové chlebíčky natural','Rýžové chlebíčky'], style === 'bulk' ? 40 : 20, 'carb', 0, 80, dietMode));
   }
 
   return items.filter(Boolean);
@@ -792,6 +811,48 @@ function mealOptionsHtml(selected){
   return mealOrder.map(meal => `<option ${meal === selected ? 'selected' : ''}>${meal}</option>`).join('') + `<option ${!mealOrder.includes(selected) ? 'selected' : ''}>Ostatní</option>`;
 }
 
+function replacementScore(currentFood, candidate){
+  const categoryBonus = normalizeText(currentFood?.category) === normalizeText(candidate?.category) ? -35 : 0;
+  const kcalDiff = Math.abs(Number(currentFood?.kcal || 0) - Number(candidate?.kcal || 0)) / 8;
+  const proteinDiff = Math.abs(Number(currentFood?.protein || 0) - Number(candidate?.protein || 0)) * 1.5;
+  const carbsDiff = Math.abs(Number(currentFood?.carbs || 0) - Number(candidate?.carbs || 0));
+  const fatDiff = Math.abs(Number(currentFood?.fat || 0) - Number(candidate?.fat || 0)) * 1.4;
+  return categoryBonus + kcalDiff + proteinDiff + carbsDiff + fatDiff;
+}
+
+function getReplacementCandidates(item){
+  const currentFood = findFoodSmart(item.name) || {name:item.name, kcal:item.kcal, protein:item.protein, carbs:item.carbs, fat:item.fat};
+  const currentKey = foodKey(item.name);
+  return foods
+    .filter(f => foodKey(f) !== currentKey)
+    .filter(f => {
+      const sameCategory = normalizeText(f.category) === normalizeText(currentFood.category);
+      const sameMacroProfile = Math.abs(Number(f.protein || 0) - Number(currentFood.protein || 0)) <= 12
+        && Math.abs(Number(f.carbs || 0) - Number(currentFood.carbs || 0)) <= 25
+        && Math.abs(Number(f.fat || 0) - Number(currentFood.fat || 0)) <= 15;
+      return sameCategory || sameMacroProfile;
+    })
+    .sort((a,b) => replacementScore(currentFood, a) - replacementScore(currentFood, b))
+    .slice(0, 9);
+}
+
+function showReplacements(index){
+  const report = getReport();
+  const item = report[index];
+  if(!item) return;
+  const candidates = getReplacementCandidates(item);
+  if(!candidates.length) return alert('Pro tuto potravinu jsem nenašel vhodné náhrady.');
+  const text = candidates.map((f, i) => `${i + 1}) ${f.name} | ${f.kcal} kcal | B ${f.protein} | S ${f.carbs} | T ${f.fat}`).join('\n');
+  const choice = prompt(`Náhrady pro: ${item.name}\nZadej číslo náhrady:\n\n${text}`);
+  if(!choice) return;
+  const selected = candidates[Number(choice) - 1];
+  if(!selected) return alert('Neplatná volba náhrady.');
+  const grams = Number(item.grams || 0);
+  report[index] = { ...item, name: selected.name, grams, amount: grams, unitMode: 'g', amountLabel: `${grams} g`, ...calc(selected, grams) };
+  save();
+  render();
+}
+
 function renderEditableRow(x){
   return `<tr class="meal-item">
     <td><select class="table-select" onchange="updateItemMeal(${x.originalIndex}, this.value)">${mealOptionsHtml(x.meal)}</select></td>
@@ -801,7 +862,7 @@ function renderEditableRow(x){
     <td><input class="macro-edit" type="number" step="0.1" value="${x.protein}" onchange="updateItemMacro(${x.originalIndex}, 'protein', this.value)"></td>
     <td><input class="macro-edit" type="number" step="0.1" value="${x.carbs}" onchange="updateItemMacro(${x.originalIndex}, 'carbs', this.value)"></td>
     <td><input class="macro-edit" type="number" step="0.1" value="${x.fat}" onchange="updateItemMacro(${x.originalIndex}, 'fat', this.value)"></td>
-    <td><button onclick="removeItem(${x.originalIndex})">X</button></td>
+    <td class="row-actions"><button class="secondary tiny-btn" onclick="showReplacements(${x.originalIndex})" type="button">Náhrady</button><button class="tiny-btn" onclick="removeItem(${x.originalIndex})" type="button">X</button></td>
   </tr>`;
 }
 
@@ -955,32 +1016,31 @@ function pdfDayBlock(type){
 function exportPdf(){
   const date = $('reportDate').value || new Date().toISOString().slice(0,10);
   const name = ($('clientName')?.value || 'Klient').trim();
+  const description = ($('clientDescription')?.value || 'Individuální jídelníček sestavený v aplikaci Nutrition Coach.').trim();
   const fileTitle = `${safeFileName(name)}-${date}-jidelnicek`;
+  const foodSvg = `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520"><defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#e0f2fe"/><stop offset="1" stop-color="#dcfce7"/></linearGradient><filter id="s"><feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="#0f172a" flood-opacity=".22"/></filter></defs><rect width="900" height="520" rx="38" fill="url(#bg)"/><circle cx="455" cy="270" r="190" fill="#fff" filter="url(#s)"/><circle cx="455" cy="270" r="150" fill="#f8fafc" stroke="#dbeafe" stroke-width="8"/><path d="M330 278c45-70 142-91 218-50 30 16 48 42 36 68-14 30-66 41-127 35-61-6-115-24-127-53z" fill="#fb7185"/><path d="M360 300c42 18 129 28 181 10" stroke="#fecaca" stroke-width="18" stroke-linecap="round" opacity=".8"/><ellipse cx="560" cy="217" rx="62" ry="38" fill="#fbbf24"/><path d="M568 206c-20 8-44 10-62 6" stroke="#92400e" stroke-width="8" stroke-linecap="round" opacity=".35"/><g fill="#22c55e"><circle cx="590" cy="324" r="18"/><circle cx="620" cy="340" r="16"/><circle cx="584" cy="356" r="15"/><circle cx="632" cy="309" r="13"/></g><g fill="#fff7ed" stroke="#fed7aa" stroke-width="4"><ellipse cx="394" cy="206" rx="42" ry="26"/><ellipse cx="424" cy="238" rx="48" ry="28"/><ellipse cx="374" cy="252" rx="38" ry="24"/></g><path d="M210 105c60-32 102-34 163-10" stroke="#12b76a" stroke-width="18" stroke-linecap="round" opacity=".65"/><path d="M600 95c48 2 91 20 124 51" stroke="#155eef" stroke-width="18" stroke-linecap="round" opacity=".5"/></svg>`)}`;
   const html = `<!doctype html><html lang="cs"><head><meta charset="utf-8"><title>${xmlEsc(fileTitle)}</title>
   <style>
     @page{size:A4;margin:12mm}
     *{box-sizing:border-box}
     body{font-family:Arial,Helvetica,sans-serif;color:#101828;margin:0;background:#fff;line-height:1.35}
-    .pdf-cover{background:linear-gradient(135deg,#0f172a 0%,#155eef 55%,#12b76a 120%);color:white;border-radius:22px;padding:24px 26px;margin-bottom:18px;box-shadow:0 10px 28px rgba(16,24,40,.16)}
-    .pdf-brand{display:flex;justify-content:space-between;align-items:flex-start;gap:18px}
-    .pdf-logo{font-size:13px;text-transform:uppercase;letter-spacing:.14em;font-weight:800;color:#d7e7ff}
-    .pdf-cover h1{margin:10px 0 8px;font-size:32px;line-height:1.05}
-    .pdf-cover p{margin:4px 0;color:#eaf0ff;font-size:14px}
-    .pdf-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
-    .pdf-meta div{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.24);border-radius:14px;padding:10px 12px}
-    .pdf-meta span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#cfe1ff;font-weight:800}.pdf-meta strong{display:block;margin-top:4px;font-size:15px}
-    .pdf-day{margin-top:16px}.page-break{break-before:page;page-break-before:always}
-    .pdf-day-head{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #155eef;padding-bottom:10px;margin-bottom:12px}
-    .pdf-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:#667085;font-weight:900}.pdf-day h2{margin:2px 0 0;font-size:25px;color:#101828}.pdf-total-pill{background:#eef4ff;color:#155eef;border:1px solid #c7d7fe;border-radius:999px;padding:9px 14px;font-weight:900}
-    .pdf-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:14px 0 16px}.pdf-macro{border:1px solid #d9e2ef;border-radius:15px;padding:11px 12px;background:#f8fbff}.pdf-macro span{display:block;color:#667085;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.pdf-macro strong{display:block;font-size:19px;margin:5px 0;color:#101828}.pdf-macro small{font-weight:800;color:#12b76a;font-size:11px}.pdf-macro.over{background:#fff5f5;border-color:#fca5a5}.pdf-macro.over strong,.pdf-macro.over small{color:#dc2626}
-    .pdf-meal{break-inside:avoid;margin:13px 0 16px;border:1px solid #e4eaf3;border-radius:16px;overflow:hidden;background:#fff}.pdf-meal-title{display:flex;justify-content:space-between;align-items:center;background:#101828;color:white;padding:10px 13px}.pdf-meal-title h3{margin:0;font-size:16px}.pdf-meal-title span{font-size:11px;color:#d0d5dd;font-weight:800;text-align:right}
-    table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #edf2f7;padding:8px 9px;text-align:left;font-size:12px}th{background:#f2f6ff;color:#344054;text-transform:uppercase;font-size:10px;letter-spacing:.06em}td:nth-child(n+3),th:nth-child(n+3){text-align:right}tr:nth-child(even) td{background:#fbfdff}tr:last-child td{border-bottom:0}.pdf-empty{border:1px dashed #cbd5e1;background:#f8fafc;color:#667085;border-radius:14px;padding:18px;text-align:center;font-weight:700}.footer{margin-top:18px;color:#667085;font-size:10px;text-align:center;border-top:1px solid #e4eaf3;padding-top:10px}
-    @media print{button{display:none}.pdf-cover{box-shadow:none}}
+    .cover-page{min-height:265mm;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(135deg,#0b1220 0%,#155eef 58%,#12b76a 130%);color:white;border-radius:28px;padding:34px;overflow:hidden;position:relative;page-break-after:always}
+    .cover-page:before{content:"";position:absolute;right:-80px;top:-80px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.12)}
+    .cover-page:after{content:"";position:absolute;left:-90px;bottom:-120px;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.08)}
+    .cover-content{position:relative;z-index:1}.pdf-logo{font-size:13px;text-transform:uppercase;letter-spacing:.18em;font-weight:900;color:#d7e7ff}.cover-page h1{font-size:52px;line-height:1.02;margin:20px 0 14px;letter-spacing:-.04em}.cover-desc{font-size:18px;max-width:640px;color:#eef6ff;margin:0 0 28px}.food-hero{width:100%;max-width:620px;border-radius:28px;box-shadow:0 28px 70px rgba(0,0,0,.32);margin:26px 0 20px;border:8px solid rgba(255,255,255,.22)}
+    .cover-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}.cover-meta div{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.26);border-radius:18px;padding:14px}.cover-meta span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.10em;color:#cfe1ff;font-weight:900}.cover-meta strong{display:block;margin-top:6px;font-size:18px}.cover-footer{position:relative;z-index:1;color:#dbeafe;font-size:12px;font-weight:800;text-align:right}
+    .pdf-day{margin-top:16px}.page-break{break-before:page;page-break-before:always}.pdf-day-head{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #155eef;padding-bottom:10px;margin-bottom:12px}.pdf-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:#667085;font-weight:900}.pdf-day h2{margin:2px 0 0;font-size:25px;color:#101828}.pdf-total-pill{background:#eef4ff;color:#155eef;border:1px solid #c7d7fe;border-radius:999px;padding:9px 14px;font-weight:900}.pdf-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:14px 0 16px}.pdf-macro{border:1px solid #d9e2ef;border-radius:15px;padding:11px 12px;background:#f8fbff}.pdf-macro span{display:block;color:#667085;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.pdf-macro strong{display:block;font-size:19px;margin:5px 0;color:#101828}.pdf-macro small{font-weight:800;color:#12b76a;font-size:11px}.pdf-macro.over{background:#fff5f5;border-color:#fca5a5}.pdf-macro.over strong,.pdf-macro.over small{color:#dc2626}.pdf-meal{break-inside:avoid;margin:13px 0 16px;border:1px solid #e4eaf3;border-radius:16px;overflow:hidden;background:#fff}.pdf-meal-title{display:flex;justify-content:space-between;align-items:center;background:#101828;color:white;padding:10px 13px}.pdf-meal-title h3{margin:0;font-size:16px}.pdf-meal-title span{font-size:11px;color:#d0d5dd;font-weight:800;text-align:right}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #edf2f7;padding:8px 9px;text-align:left;font-size:12px}th{background:#f2f6ff;color:#344054;text-transform:uppercase;font-size:10px;letter-spacing:.06em}td:nth-child(n+3),th:nth-child(n+3){text-align:right}tr:nth-child(even) td{background:#fbfdff}tr:last-child td{border-bottom:0}.pdf-empty{border:1px dashed #cbd5e1;background:#f8fafc;color:#667085;border-radius:14px;padding:18px;text-align:center;font-weight:700}.footer{margin-top:18px;color:#667085;font-size:10px;text-align:center;border-top:1px solid #e4eaf3;padding-top:10px}@media print{button{display:none}.cover-page{border-radius:0}}
   </style></head><body>
-    <header class="pdf-cover">
-      <div class="pdf-brand"><div><div class="pdf-logo">Nutrition Coach</div><h1>Jídelníček pro klienta</h1><p>Tréninkový i netréninkový den v jednom PDF.</p></div></div>
-      <div class="pdf-meta"><div><span>Klient</span><strong>${xmlEsc(name)}</strong></div><div><span>Datum</span><strong>${xmlEsc(date)}</strong></div><div><span>Export</span><strong>PDF plán</strong></div></div>
-    </header>
+    <section class="cover-page">
+      <div class="cover-content">
+        <div class="pdf-logo">Nutrition Coach</div>
+        <h1>Jídelníček<br>pro klienta</h1>
+        <p class="cover-desc">${xmlEsc(description)}</p>
+        <img class="food-hero" src="${foodSvg}" alt="Jídlo">
+        <div class="cover-meta"><div><span>Klient</span><strong>${xmlEsc(name)}</strong></div><div><span>Datum</span><strong>${xmlEsc(date)}</strong></div><div><span>Obsah</span><strong>Tréninkový + netréninkový den</strong></div></div>
+      </div>
+      <div class="cover-footer">Vygenerováno v aplikaci Nutrition Coach</div>
+    </section>
     ${pdfDayBlock('training')}
     ${pdfDayBlock('rest')}
     <div class="footer">Vygenerováno z aplikace Nutrition Coach · ${xmlEsc(fileTitle)}</div>
@@ -1098,6 +1158,7 @@ function clearDay(){
 
 $('reportDate').value = new Date().toISOString().slice(0,10);
 if($('clientName')) $('clientName').value = clientName;
+if($('clientDescription')) $('clientDescription').value = clientDescription;
 $('dayType').value = currentDayType;
 applyTargetsForDayType();
 $('addFoodBtn').onclick = addFood;
@@ -1137,6 +1198,7 @@ if($('deleteTemplateBtn')) $('deleteTemplateBtn').onclick = deleteCurrentTemplat
 $('exportTemplatesBtn').onclick = exportTemplates;
 $('resetTemplatesBtn').onclick = resetTemplates;
 if($('clientName')) $('clientName').addEventListener('input', (event) => { clientName = event.target.value; localStorage.setItem('nutritionClientName', clientName); render(); });
+if($('clientDescription')) $('clientDescription').addEventListener('input', (event) => { clientDescription = event.target.value; localStorage.setItem('nutritionClientDescription', clientDescription); });
 ['targetKcal','targetProtein','targetCarbs','targetFat'].forEach(id => $(id).addEventListener('input', () => { render(); updateDayTypeHint('Neuložená změna.'); }));
 loadFoods();
 loadTemplates();

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nutrition Coach</title>
-  <link rel="stylesheet" href="style.css?v=20260602-pdf-custom-foods" />
+  <link rel="stylesheet" href="style.css?v=20260603-pdf-replacements" />
 </head>
 <body>
   <main class="app">
@@ -22,6 +22,10 @@
         <div class="date-box">
           <label for="clientName">Jméno</label>
           <input id="clientName" type="text" placeholder="např. Martin Mráz" />
+        </div>
+        <div class="date-box description-box">
+          <label for="clientDescription">Popis / poznámka do PDF</label>
+          <textarea id="clientDescription" rows="3" placeholder="např. jídelníček na redukci tuku, kontrola za 14 dní"></textarea>
         </div>
       </div>
     </section>
@@ -107,6 +111,13 @@
             <option value="bulk">Objemový / více sacharidů</option>
           </select>
         </label>
+        <label>Režim potravin
+          <select id="generatorDietMode">
+            <option value="classic" selected>Klasické potraviny</option>
+            <option value="glutenfree">Bezlepkové potraviny</option>
+            <option value="lactosefree">Bezlaktózové potraviny</option>
+          </select>
+        </label>
         <label>Hlavní příloha
           <select id="generatorCarbSource">
             <option value="rice" selected>Rýže</option>
@@ -173,7 +184,7 @@
         <table>
           <thead>
             <tr>
-              <th>Jídlo</th><th>Potravina</th><th>Množství / g</th><th>kcal</th><th>B</th><th>S</th><th>T</th><th></th>
+              <th>Jídlo</th><th>Potravina</th><th>Množství / g</th><th>kcal</th><th>B</th><th>S</th><th>T</th><th>Akce</th>
             </tr>
           </thead>
           <tbody id="reportBody"></tbody>
@@ -242,6 +253,6 @@
       <p class="muted small">Formát souboru musí být pole objektů. Každá potravina má minimálně <strong>name, kcal, protein, carbs, fat</strong> hodnoty na 100 g.</p>
     </section>
   </main>
-  <script src="app.js?v=20260602-pdf-custom-foods"></script>
+  <script src="app.js?v=20260603-pdf-replacements"></script>
 </body>
 </html>

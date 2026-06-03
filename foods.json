@@ -4392,13 +4392,16 @@
   {
     "id": "quinoa-sucha",
     "name": "Quinoa suchá",
-    "category": "Přílohy / pečivo",
+    "category": "Bezlepkové",
     "kcal": 368,
     "protein": 14,
     "carbs": 64,
     "fat": 6,
     "unit": "100g",
-    "source": "orientační databáze fitness 100g"
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlepkove"
+    ]
   },
   {
     "id": "quinoa-varena",
@@ -5052,13 +5055,17 @@
   {
     "id": "hrachovy-protein",
     "name": "Hrachový protein",
-    "category": "Sportovní výživa",
-    "kcal": 370,
-    "protein": 80,
-    "carbs": 5,
+    "category": "Doplňky",
+    "kcal": 375,
+    "protein": 78,
+    "carbs": 8,
     "fat": 5,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlepkove",
+      "bezlaktozove"
+    ]
   },
   {
     "id": "kasein-protein",
@@ -5096,13 +5103,17 @@
   {
     "id": "ryzovy-protein",
     "name": "Rýžový protein",
-    "category": "Sportovní výživa",
+    "category": "Doplňky",
     "kcal": 380,
-    "protein": 78,
+    "protein": 80,
     "carbs": 8,
     "fat": 4,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlepkove",
+      "bezlaktozove"
+    ]
   },
   {
     "id": "syrovatkovy-protein",
@@ -6176,5 +6187,314 @@
     "unit": "100g",
     "source": "orientační dle deklarace 100g",
     "id": "kruti-mlete-2-lidl"
+  },
+  {
+    "id": "cokolada-mlecna",
+    "name": "Čokoláda mléčná",
+    "category": "Sladké suroviny",
+    "kcal": 535,
+    "protein": 7.5,
+    "carbs": 56,
+    "fat": 31,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g"
+  },
+  {
+    "id": "cokolada-bila",
+    "name": "Čokoláda bílá",
+    "category": "Sladké suroviny",
+    "kcal": 540,
+    "protein": 6,
+    "carbs": 59,
+    "fat": 32,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g"
+  },
+  {
+    "id": "cokolada-horka-70",
+    "name": "Čokoláda hořká 70 %",
+    "category": "Sladké suroviny",
+    "kcal": 575,
+    "protein": 8,
+    "carbs": 35,
+    "fat": 43,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g"
+  },
+  {
+    "id": "cokolada-horka-80",
+    "name": "Čokoláda hořká 80 %",
+    "category": "Sladké suroviny",
+    "kcal": 590,
+    "protein": 9,
+    "carbs": 25,
+    "fat": 49,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g"
+  },
+  {
+    "id": "cokolada-horka-85",
+    "name": "Čokoláda hořká 85 %",
+    "category": "Sladké suroviny",
+    "kcal": 600,
+    "protein": 11,
+    "carbs": 19,
+    "fat": 52,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g"
+  },
+  {
+    "id": "cokolada-horka-90",
+    "name": "Čokoláda hořká 90 %",
+    "category": "Sladké suroviny",
+    "kcal": 610,
+    "protein": 10,
+    "carbs": 14,
+    "fat": 56,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g"
+  },
+  {
+    "id": "cokolada-bez-cukru",
+    "name": "Čokoláda bez cukru",
+    "category": "Sladké suroviny",
+    "kcal": 470,
+    "protein": 8,
+    "carbs": 45,
+    "fat": 34,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g"
+  },
+  {
+    "id": "cokolada-proteinova",
+    "name": "Čokoláda proteinová",
+    "category": "Fitness produkty",
+    "kcal": 430,
+    "protein": 28,
+    "carbs": 32,
+    "fat": 20,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g"
+  },
+  {
+    "id": "cokoladove-pecicky-horke",
+    "name": "Čokoládové pecičky hořké",
+    "category": "Sladké suroviny",
+    "kcal": 520,
+    "protein": 6,
+    "carbs": 50,
+    "fat": 32,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g"
+  },
+  {
+    "id": "bezlepkove-ovesne-vlocky",
+    "name": "Bezlepkové ovesné vločky",
+    "category": "Bezlepkové",
+    "kcal": 370,
+    "protein": 13,
+    "carbs": 60,
+    "fat": 7,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlepkove"
+    ]
+  },
+  {
+    "id": "ryzova-kase-bezlepkova",
+    "name": "Rýžová kaše bezlepková",
+    "category": "Bezlepkové",
+    "kcal": 375,
+    "protein": 7,
+    "carbs": 82,
+    "fat": 1.2,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlepkove"
+    ]
+  },
+  {
+    "id": "bezlepkovy-chleb",
+    "name": "Bezlepkový chléb",
+    "category": "Bezlepkové",
+    "kcal": 250,
+    "protein": 4,
+    "carbs": 48,
+    "fat": 4,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlepkove"
+    ]
+  },
+  {
+    "id": "bezlepkove-testoviny-kukuricne",
+    "name": "Bezlepkové těstoviny kukuřičné",
+    "category": "Bezlepkové",
+    "kcal": 360,
+    "protein": 7,
+    "carbs": 78,
+    "fat": 1.5,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlepkove"
+    ]
+  },
+  {
+    "id": "bezlepkove-testoviny-ryzove",
+    "name": "Bezlepkové těstoviny rýžové",
+    "category": "Bezlepkové",
+    "kcal": 355,
+    "protein": 6,
+    "carbs": 79,
+    "fat": 0.8,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlepkove"
+    ]
+  },
+  {
+    "id": "bezlepkove-ryzove-chlebicky",
+    "name": "Bezlepkové rýžové chlebíčky",
+    "category": "Bezlepkové",
+    "kcal": 385,
+    "protein": 8,
+    "carbs": 80,
+    "fat": 3,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlepkove"
+    ]
+  },
+  {
+    "id": "pohanka-lamanka-sucha",
+    "name": "Pohanka lámanka suchá",
+    "category": "Bezlepkové",
+    "kcal": 343,
+    "protein": 13,
+    "carbs": 72,
+    "fat": 3.4,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlepkove"
+    ]
+  },
+  {
+    "id": "mleko-bez-laktozy-1-5",
+    "name": "Mléko bez laktózy 1,5 %",
+    "category": "Bezlaktózové",
+    "kcal": 47,
+    "protein": 3.4,
+    "carbs": 4.8,
+    "fat": 1.5,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlaktozove"
+    ]
+  },
+  {
+    "id": "jogurt-bily-bez-laktozy",
+    "name": "Jogurt bílý bez laktózy",
+    "category": "Bezlaktózové",
+    "kcal": 63,
+    "protein": 4.5,
+    "carbs": 5,
+    "fat": 2.8,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlaktozove"
+    ]
+  },
+  {
+    "id": "jogurt-recky-bez-laktozy",
+    "name": "Jogurt řecký bez laktózy",
+    "category": "Bezlaktózové",
+    "kcal": 75,
+    "protein": 8,
+    "carbs": 4,
+    "fat": 3,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlaktozove"
+    ]
+  },
+  {
+    "id": "skyr-bez-laktozy",
+    "name": "Skyr bez laktózy",
+    "category": "Bezlaktózové",
+    "kcal": 62,
+    "protein": 11,
+    "carbs": 4,
+    "fat": 0.2,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlaktozove"
+    ]
+  },
+  {
+    "id": "tvaroh-bez-laktozy",
+    "name": "Tvaroh bez laktózy",
+    "category": "Bezlaktózové",
+    "kcal": 78,
+    "protein": 12,
+    "carbs": 4,
+    "fat": 1.5,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlaktozove"
+    ]
+  },
+  {
+    "id": "cottage-bez-laktozy",
+    "name": "Cottage bez laktózy",
+    "category": "Bezlaktózové",
+    "kcal": 96,
+    "protein": 12,
+    "carbs": 3,
+    "fat": 4,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlaktozove"
+    ]
+  },
+  {
+    "id": "whey-isolate-bez-laktozy",
+    "name": "Whey isolate bez laktózy",
+    "category": "Doplňky",
+    "kcal": 370,
+    "protein": 86,
+    "carbs": 3,
+    "fat": 2,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlaktozove"
+    ]
+  },
+  {
+    "id": "protein-whey-isolate-bez-laktozy",
+    "name": "Protein whey isolate bez laktózy",
+    "category": "Doplňky",
+    "kcal": 370,
+    "protein": 86,
+    "carbs": 3,
+    "fat": 2,
+    "unit": "100g",
+    "source": "doplněno orientačně 100g",
+    "tags": [
+      "bezlaktozove"
+    ]
   }
 ]
