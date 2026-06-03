@@ -599,6 +599,132 @@ function changeDayType(){
   applyTargetsForDayType();
 }
 
+
+function setGeneratorStatus(message, isError = false){
+  if(!$('generatorStatus')) return;
+  $('generatorStatus').textContent = message;
+  $('generatorStatus').classList.toggle('error-text', isError);
+}
+
+function findFoodSmart(names){
+  const candidates = Array.isArray(names) ? names : [names];
+  for(const name of candidates){
+    const exact = foods.find(f => normalizeText(f.name) === normalizeText(name));
+    if(exact) return exact;
+  }
+  for(const name of candidates){
+    const starts = foods.find(f => normalizeText(f.name).startsWith(normalizeText(name)));
+    if(starts) return starts;
+  }
+  for(const name of candidates){
+    const contains = foods.find(f => normalizeText(f.name).includes(normalizeText(name)));
+    if(contains) return contains;
+  }
+  return null;
+}
+
+function generatedFoodItem(meal, names, grams, role = '', min = 0, max = 999){
+  const food = findFoodSmart(names);
+  if(!food) return null;
+  const safeGrams = Math.max(min || 0, Math.min(max || 999, round(Number(grams) || 0)));
+  return { meal, name: food.name, grams: safeGrams, role, min, max, amount: safeGrams, unitMode: 'g', amountLabel: `${safeGrams} g`, ...calc(food, safeGrams) };
+}
+
+function generatorBlueprint(){
+  const count = Number($('generatorMealsCount')?.value || 6);
+  const style = $('generatorStyle')?.value || 'fitness';
+  const carbSource = $('generatorCarbSource')?.value || 'rice';
+  const proteinSource = $('generatorProteinSource')?.value || 'chicken';
+  const proteinMain = proteinSource === 'turkey' ? 'Krůtí mleté 2% Lidl' : proteinSource === 'mixed' ? ['Kuřecí prsa syrová','Krůtí mleté 2% Lidl'] : 'Kuřecí prsa syrová';
+  const lunchCarb = carbSource === 'potatoes' ? 'Brambory vařené' : 'Rýže basmati suchá';
+  const dinnerCarb = carbSource === 'rice' ? 'Rýže basmati suchá' : 'Batáty syrové';
+  const fatOil = style === 'diet' ? 3 : style === 'bulk' ? 12 : 8;
+
+  const items = [
+    generatedFoodItem('Snídaně', ['Ovesné vločky','Ovesné vločky jemné'], style === 'bulk' ? 90 : 70, 'carb', 30, 160),
+    generatedFoodItem('Snídaně', ['Whey protein','Syrovátkový protein whey 80%'], 30, 'protein', 15, 60),
+    generatedFoodItem('Snídaně', 'Vejce celé', style === 'diet' ? 50 : 100, 'fat', 0, 200),
+    generatedFoodItem('Snídaně', 'Med', style === 'bulk' ? 20 : 10, 'carb', 0, 60),
+
+    generatedFoodItem('Svačina', ['Skyr','Skyr bílý','Tvaroh nízkotučný'], 250, 'protein', 100, 500),
+    generatedFoodItem('Svačina', ['Banán','Banán čerstvý'], style === 'diet' ? 80 : 120, 'carb', 0, 250),
+
+    generatedFoodItem('Oběd', proteinMain, style === 'bulk' ? 230 : 200, 'protein', 100, 350),
+    generatedFoodItem('Oběd', lunchCarb, style === 'bulk' ? 110 : 80, 'carb', 30, 180),
+    generatedFoodItem('Oběd', ['Zelenina mix','Zelenina mix mražená'], 200, 'veg', 100, 400),
+    generatedFoodItem('Oběd', 'Olivový olej', fatOil, 'fat', 0, 30),
+
+    generatedFoodItem('Odpolední svačina', ['Rýžová kaše instantní natural','Rýžová kaše vanilková'], style === 'bulk' ? 80 : 55, 'carb', 20, 140),
+    generatedFoodItem('Odpolední svačina', ['Whey protein','Syrovátkový protein whey 80%'], 30, 'protein', 15, 60),
+
+    generatedFoodItem('Večeře', proteinSource === 'mixed' ? 'Losos syrový' : proteinMain, style === 'diet' ? 180 : 220, 'protein', 100, 350),
+    generatedFoodItem('Večeře', dinnerCarb, style === 'bulk' ? 300 : 220, 'carb', 80, 500),
+    generatedFoodItem('Večeře', ['Chřest','Brokolice','Zelenina mix'], 150, 'veg', 80, 350),
+    generatedFoodItem('Večeře', 'Olivový olej', style === 'diet' ? 0 : 6, 'fat', 0, 25)
+  ].filter(Boolean);
+
+  if(count >= 6){
+    items.push(
+      generatedFoodItem('Druhá večeře', ['Tvaroh nízkotučný','Tvaroh polotučný','Skyr'], 250, 'protein', 100, 500),
+      generatedFoodItem('Druhá večeře', style === 'bulk' ? 'Hořká čokoláda 85 %' : 'Mandle', style === 'bulk' ? 20 : 15, 'fat', 0, 50)
+    );
+  }else{
+    items.push(generatedFoodItem('Svačina', ['Rýžové chlebíčky natural','Rýžové chlebíčky'], style === 'bulk' ? 40 : 20, 'carb', 0, 80));
+  }
+
+  return items.filter(Boolean);
+}
+
+function recalcGenerated(items){
+  return items.map(item => {
+    const food = findFoodSmart(item.name);
+    return food ? { ...item, amount: item.grams, amountLabel: `${round(item.grams)} g`, ...calc(food, item.grams) } : item;
+  });
+}
+
+function adjustGeneratedMacro(items, macro, desiredDelta, roles){
+  if(Math.abs(desiredDelta) < 1) return items;
+  const adjustable = items.filter(item => roles.includes(item.role)).map(item => {
+    const food = findFoodSmart(item.name);
+    const perGram = food ? Number(food[macro] || 0) / 100 : 0;
+    const room = desiredDelta > 0 ? (Number(item.max || 999) - Number(item.grams || 0)) : (Number(item.grams || 0) - Number(item.min || 0));
+    return { item, food, perGram, room };
+  }).filter(x => x.food && x.perGram > 0 && x.room > 0);
+  if(!adjustable.length) return items;
+
+  let remaining = desiredDelta;
+  for(const entry of adjustable){
+    const rawGrams = remaining / entry.perGram / Math.max(1, adjustable.length);
+    const step = rawGrams >= 0 ? Math.min(rawGrams, entry.room) : -Math.min(Math.abs(rawGrams), entry.room);
+    entry.item.grams = Math.max(Number(entry.item.min || 0), Math.min(Number(entry.item.max || 999), round((Number(entry.item.grams) || 0) + step)));
+  }
+  return recalcGenerated(items);
+}
+
+function generateMealPlan(append = false){
+  if(!foods.length) return alert('Nejdřív musí být načtená databáze potravin.');
+  const targets = getTargets();
+  let items = recalcGenerated(generatorBlueprint());
+
+  for(let i = 0; i < 7; i++){
+    const current = items.reduce((a,x)=>({kcal:a.kcal+x.kcal, protein:a.protein+x.protein, carbs:a.carbs+x.carbs, fat:a.fat+x.fat}), {kcal:0, protein:0, carbs:0, fat:0});
+    items = adjustGeneratedMacro(items, 'protein', Number(targets.protein || 0) - current.protein, ['protein']);
+    const afterProtein = items.reduce((a,x)=>({kcal:a.kcal+x.kcal, protein:a.protein+x.protein, carbs:a.carbs+x.carbs, fat:a.fat+x.fat}), {kcal:0, protein:0, carbs:0, fat:0});
+    items = adjustGeneratedMacro(items, 'carbs', Number(targets.carbs || 0) - afterProtein.carbs, ['carb']);
+    const afterCarbs = items.reduce((a,x)=>({kcal:a.kcal+x.kcal, protein:a.protein+x.protein, carbs:a.carbs+x.carbs, fat:a.fat+x.fat}), {kcal:0, protein:0, carbs:0, fat:0});
+    items = adjustGeneratedMacro(items, 'fat', Number(targets.fat || 0) - afterCarbs.fat, ['fat']);
+  }
+
+  items = recalcGenerated(items).map(item => ({...item, grams: Math.max(1, Math.round(item.grams / 5) * 5)}));
+  items = recalcGenerated(items);
+  if(!append && getReport().length && !confirm(`Nahradit aktuální jídelníček pro ${dayTypeLabel()} automaticky vygenerovaným návrhem?`)) return;
+  reports[currentDayType] = append ? [...getReport(), ...items] : items;
+  save();
+  render();
+  const t = totals();
+  setGeneratorStatus(`Vygenerováno pro ${dayTypeLabel()}: ${round(t.kcal)} kcal | B ${round(t.protein)} g | S ${round(t.carbs)} g | T ${round(t.fat)} g. Gramy můžeš dál upravovat v tabulce.`);
+}
+
 function addFood(){
   const food = findFoodBySearch();
   const amount = Number($('gramsInput').value);
@@ -993,6 +1119,8 @@ $('copyBtn').onclick = copyReport;
 $('csvBtn').onclick = exportCsv;
 $('excelBtn').onclick = exportExcel;
 if($('pdfBtn')) $('pdfBtn').onclick = exportPdf;
+if($('generateMealPlanBtn')) $('generateMealPlanBtn').onclick = () => generateMealPlan(false);
+if($('appendGeneratedMealPlanBtn')) $('appendGeneratedMealPlanBtn').onclick = () => generateMealPlan(true);
 $('clearBtn').onclick = clearDay;
 $('foodImport').addEventListener('change', importFoods);
 $('exportFoodsBtn').onclick = exportFoods;

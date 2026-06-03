@@ -82,6 +82,49 @@
       </div>
     </section>
 
+    <section class="card generator-card">
+      <div class="section-head">
+        <div>
+          <h2>Automatický generátor jídelníčku</h2>
+          <p class="muted">Vygeneruje návrh z běžných fitness surovin podle cílů aktuálního typu dne. Výsledek se načte do tabulky a můžeš ho hned ručně upravovat.</p>
+        </div>
+        <div class="actions">
+          <button id="generateMealPlanBtn" type="button">Vygenerovat jídelníček</button>
+          <button id="appendGeneratedMealPlanBtn" class="secondary" type="button">Přidat k aktuálnímu</button>
+        </div>
+      </div>
+      <div class="generator-grid">
+        <label>Počet chodů
+          <select id="generatorMealsCount">
+            <option value="5">5 jídel</option>
+            <option value="6" selected>6 jídel</option>
+          </select>
+        </label>
+        <label>Styl jídelníčku
+          <select id="generatorStyle">
+            <option value="fitness" selected>Fitness základ</option>
+            <option value="diet">Dietnější / nízkotučný</option>
+            <option value="bulk">Objemový / více sacharidů</option>
+          </select>
+        </label>
+        <label>Hlavní příloha
+          <select id="generatorCarbSource">
+            <option value="rice" selected>Rýže</option>
+            <option value="potatoes">Brambory / batáty</option>
+            <option value="mixed">Mix příloh</option>
+          </select>
+        </label>
+        <label>Hlavní protein
+          <select id="generatorProteinSource">
+            <option value="chicken" selected>Kuřecí prsa</option>
+            <option value="turkey">Krůtí mleté 2 %</option>
+            <option value="mixed">Mix proteinů</option>
+          </select>
+        </label>
+      </div>
+      <p id="generatorStatus" class="muted small">Generátor používá cíle vybraného dne a položky z databáze potravin. Pokud něco chybí, použije nejbližší dostupnou surovinu.</p>
+    </section>
+
     <section class="card">
       <div class="section-head">
         <div>

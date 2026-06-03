@@ -240,3 +240,39 @@ button:hover,.file-button:hover{box-shadow:0 14px 28px rgba(21,94,239,.30)}
 #customFoodStatus{display:block;margin-top:10px;font-weight:800}
 @media(max-width:1000px){.custom-food-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:650px){.custom-food-grid{grid-template-columns:1fr}}
+
+.generator-card{
+  border:1px solid rgba(21,94,239,.18);
+  background:linear-gradient(135deg,#ffffff 0%,#f7fbff 55%,#eef7ff 100%);
+}
+.generator-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+  margin-top:16px;
+}
+.generator-grid label{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  font-weight:700;
+  color:#344054;
+}
+.generator-grid select{
+  width:100%;
+  border:1px solid #d0d5dd;
+  border-radius:14px;
+  padding:12px 13px;
+  background:#fff;
+  color:#101828;
+  font-weight:600;
+}
+.error-text{
+  color:#dc2626 !important;
+}
+@media (max-width: 900px){
+  .generator-grid{grid-template-columns:1fr 1fr;}
+}
+@media (max-width: 560px){
+  .generator-grid{grid-template-columns:1fr;}
+}
