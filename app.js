@@ -791,28 +791,72 @@ function macroCardsHtml(type = currentDayType){
   }).join('');
 }
 
-function exportPdf(){
-  const date = $('reportDate').value || new Date().toISOString().slice(0,10);
-  const name = ($('clientName')?.value || 'Klient').trim();
-  const type = currentDayType;
+function pdfMealSectionsHtml(type){
   const groups = groupedMealsForPdf(type);
-  const fileTitle = `${safeFileName(name)}-${date}`;
-  const rowsHtml = groups.length ? groups.map(group => `
+  if(!groups.length){
+    return '<div class="pdf-empty">Jídelníček pro tento den je zatím prázdný.</div>';
+  }
+  return groups.map(group => `
     <section class="pdf-meal">
-      <h2>${xmlEsc(group.meal)} <span>${round(group.totals.kcal)} kcal · B ${round(group.totals.protein)} g · S ${round(group.totals.carbs)} g · T ${round(group.totals.fat)} g</span></h2>
+      <div class="pdf-meal-title">
+        <h3>${xmlEsc(group.meal)}</h3>
+        <span>${round(group.totals.kcal)} kcal · B ${round(group.totals.protein)} g · S ${round(group.totals.carbs)} g · T ${round(group.totals.fat)} g</span>
+      </div>
       <table>
         <thead><tr><th>Potravina</th><th>Množství</th><th>kcal</th><th>B</th><th>S</th><th>T</th></tr></thead>
         <tbody>${group.items.map(x => `<tr><td>${xmlEsc(x.name)}</td><td>${xmlEsc(x.amountLabel || (x.grams + ' g'))}</td><td>${round(x.kcal)}</td><td>${round(x.protein)}</td><td>${round(x.carbs)}</td><td>${round(x.fat)}</td></tr>`).join('')}</tbody>
       </table>
-    </section>`).join('') : '<p>Jídelníček je prázdný.</p>';
+    </section>`).join('');
+}
 
+function pdfDayBlock(type){
+  const t = totals(type);
+  const targets = getTargets(type);
+  return `
+    <section class="pdf-day ${type === 'rest' ? 'page-break' : ''}">
+      <div class="pdf-day-head">
+        <div>
+          <div class="pdf-kicker">Jídelníček</div>
+          <h2>${xmlEsc(dayTypeLabel(type))}</h2>
+        </div>
+        <div class="pdf-total-pill">${round(t.kcal)} / ${targets.kcal} kcal</div>
+      </div>
+      <div class="pdf-macros">${macroCardsHtml(type)}</div>
+      ${pdfMealSectionsHtml(type)}
+    </section>`;
+}
+
+function exportPdf(){
+  const date = $('reportDate').value || new Date().toISOString().slice(0,10);
+  const name = ($('clientName')?.value || 'Klient').trim();
+  const fileTitle = `${safeFileName(name)}-${date}-jidelnicek`;
   const html = `<!doctype html><html lang="cs"><head><meta charset="utf-8"><title>${xmlEsc(fileTitle)}</title>
   <style>
-    @page{size:A4;margin:14mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#101828;margin:0;background:#fff} .pdf-header{background:linear-gradient(135deg,#101828,#155eef);color:white;border-radius:18px;padding:22px;margin-bottom:18px}.pdf-header h1{margin:0 0 8px;font-size:28px}.pdf-header p{margin:4px 0;color:#eaf0ff}.pdf-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}.pdf-macro{border:1px solid #d9e2ef;border-radius:14px;padding:12px;background:#f8fbff}.pdf-macro span{display:block;color:#667085;font-size:12px;font-weight:bold}.pdf-macro strong{display:block;font-size:20px;margin:5px 0}.pdf-macro small{font-weight:bold;color:#12b76a}.pdf-macro.over{background:#fff5f5;border-color:#fca5a5}.pdf-macro.over strong,.pdf-macro.over small{color:#dc2626}.pdf-meal{break-inside:avoid;margin-top:16px}.pdf-meal h2{background:#101828;color:white;padding:10px 12px;border-radius:12px;font-size:17px;margin:0 0 8px}.pdf-meal h2 span{float:right;font-size:12px;color:#d0d5dd;margin-top:3px}table{width:100%;border-collapse:collapse;margin-bottom:12px}th,td{border:1px solid #e7eef8;padding:8px;text-align:left;font-size:12px}th{background:#eef4ff;color:#344054;text-transform:uppercase;font-size:11px}tr:nth-child(even) td{background:#fbfdff}.footer{margin-top:18px;color:#667085;font-size:11px;text-align:center}@media print{button{display:none}}
+    @page{size:A4;margin:12mm}
+    *{box-sizing:border-box}
+    body{font-family:Arial,Helvetica,sans-serif;color:#101828;margin:0;background:#fff;line-height:1.35}
+    .pdf-cover{background:linear-gradient(135deg,#0f172a 0%,#155eef 55%,#12b76a 120%);color:white;border-radius:22px;padding:24px 26px;margin-bottom:18px;box-shadow:0 10px 28px rgba(16,24,40,.16)}
+    .pdf-brand{display:flex;justify-content:space-between;align-items:flex-start;gap:18px}
+    .pdf-logo{font-size:13px;text-transform:uppercase;letter-spacing:.14em;font-weight:800;color:#d7e7ff}
+    .pdf-cover h1{margin:10px 0 8px;font-size:32px;line-height:1.05}
+    .pdf-cover p{margin:4px 0;color:#eaf0ff;font-size:14px}
+    .pdf-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+    .pdf-meta div{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.24);border-radius:14px;padding:10px 12px}
+    .pdf-meta span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#cfe1ff;font-weight:800}.pdf-meta strong{display:block;margin-top:4px;font-size:15px}
+    .pdf-day{margin-top:16px}.page-break{break-before:page;page-break-before:always}
+    .pdf-day-head{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #155eef;padding-bottom:10px;margin-bottom:12px}
+    .pdf-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:#667085;font-weight:900}.pdf-day h2{margin:2px 0 0;font-size:25px;color:#101828}.pdf-total-pill{background:#eef4ff;color:#155eef;border:1px solid #c7d7fe;border-radius:999px;padding:9px 14px;font-weight:900}
+    .pdf-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:14px 0 16px}.pdf-macro{border:1px solid #d9e2ef;border-radius:15px;padding:11px 12px;background:#f8fbff}.pdf-macro span{display:block;color:#667085;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.pdf-macro strong{display:block;font-size:19px;margin:5px 0;color:#101828}.pdf-macro small{font-weight:800;color:#12b76a;font-size:11px}.pdf-macro.over{background:#fff5f5;border-color:#fca5a5}.pdf-macro.over strong,.pdf-macro.over small{color:#dc2626}
+    .pdf-meal{break-inside:avoid;margin:13px 0 16px;border:1px solid #e4eaf3;border-radius:16px;overflow:hidden;background:#fff}.pdf-meal-title{display:flex;justify-content:space-between;align-items:center;background:#101828;color:white;padding:10px 13px}.pdf-meal-title h3{margin:0;font-size:16px}.pdf-meal-title span{font-size:11px;color:#d0d5dd;font-weight:800;text-align:right}
+    table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #edf2f7;padding:8px 9px;text-align:left;font-size:12px}th{background:#f2f6ff;color:#344054;text-transform:uppercase;font-size:10px;letter-spacing:.06em}td:nth-child(n+3),th:nth-child(n+3){text-align:right}tr:nth-child(even) td{background:#fbfdff}tr:last-child td{border-bottom:0}.pdf-empty{border:1px dashed #cbd5e1;background:#f8fafc;color:#667085;border-radius:14px;padding:18px;text-align:center;font-weight:700}.footer{margin-top:18px;color:#667085;font-size:10px;text-align:center;border-top:1px solid #e4eaf3;padding-top:10px}
+    @media print{button{display:none}.pdf-cover{box-shadow:none}}
   </style></head><body>
-    <div class="pdf-header"><h1>Nutrition Coach</h1><p><strong>${xmlEsc(name)}</strong></p><p>${xmlEsc(date)} · ${xmlEsc(dayTypeLabel(type))}</p></div>
-    <div class="pdf-macros">${macroCardsHtml(type)}</div>
-    ${rowsHtml}
+    <header class="pdf-cover">
+      <div class="pdf-brand"><div><div class="pdf-logo">Nutrition Coach</div><h1>Jídelníček pro klienta</h1><p>Tréninkový i netréninkový den v jednom PDF.</p></div></div>
+      <div class="pdf-meta"><div><span>Klient</span><strong>${xmlEsc(name)}</strong></div><div><span>Datum</span><strong>${xmlEsc(date)}</strong></div><div><span>Export</span><strong>PDF plán</strong></div></div>
+    </header>
+    ${pdfDayBlock('training')}
+    ${pdfDayBlock('rest')}
     <div class="footer">Vygenerováno z aplikace Nutrition Coach · ${xmlEsc(fileTitle)}</div>
     <script>window.onload = () => setTimeout(() => window.print(), 250);</script>
   </body></html>`;
