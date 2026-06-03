@@ -1224,76 +1224,192 @@ function drawReplacementsPage(doc){
   });
 }
 
+function replacementRowsHtml(){
+  const rows = getReplacementPdfRows();
+  if(!rows.length) return '';
+  return `
+    <div class="pdf-html-page">
+      <div class="html-page-inner">
+        <h1>Náhrady potravin</h1>
+        <p class="html-muted">Orientační alternativy s podobným charakterem nebo makry. Dávkování vždy dolaď podle cílových maker.</p>
+        <div class="html-replacements">
+          ${rows.map(row => `
+            <div class="html-replacement-card">
+              <strong>${xmlEsc(row.name)}</strong>
+              <span>${xmlEsc(row.candidates.join(' · '))}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function summaryPdfHtml(){
+  return `
+    <div class="pdf-html-page">
+      <div class="html-page-inner">
+        <h1>Souhrn jídelníčků</h1>
+        <div class="html-blue-line"></div>
+        ${['training','rest'].map(type => `
+          <section class="html-summary-block">
+            <h2>${xmlEsc(dayTypeLabel(type))}</h2>
+            <div class="pdf-macros">${macroCardsHtml(type)}</div>
+          </section>`).join('')}
+      </div>
+    </div>`;
+}
+
+function dayPdfHtml(type){
+  const t = totals(type);
+  const targets = getTargets(type);
+  const name = ($('clientName')?.value || 'Klient').trim();
+  return `
+    <div class="pdf-html-page">
+      <div class="html-page-inner">
+        <div class="html-topline"><strong>NUTRITION COACH</strong><span>${xmlEsc(name)}</span></div>
+        <div class="html-day-head">
+          <div><span>Jídelníček</span><h1>${xmlEsc(dayTypeLabel(type))}</h1></div>
+          <b>${round(t.kcal)} / ${targets.kcal} kcal</b>
+        </div>
+        <div class="html-blue-line"></div>
+        <div class="pdf-macros">${macroCardsHtml(type)}</div>
+        ${pdfMealSectionsHtml(type)}
+      </div>
+    </div>`;
+}
+
+function coverPdfHtml(){
+  const date = $('reportDate').value || new Date().toISOString().slice(0,10);
+  const name = ($('clientName')?.value || 'Klient').trim();
+  const description = ($('clientDescription')?.value || 'Tréninkový a netréninkový jídelníček připravený v aplikaci Nutrition Coach.').trim();
+  return `
+    <div class="pdf-html-page html-cover">
+      <div class="html-cover-bg html-cover-blue"></div>
+      <div class="html-cover-bg html-cover-green"></div>
+      <div class="html-cover-content">
+        <div class="html-cover-kicker">NUTRITION COACH</div>
+        <h1>Jídelníček<br>pro klienta</h1>
+        <p>${xmlEsc(description)}</p>
+        <img class="html-cover-img" src="cover-food.jpg" alt="Jídlo">
+        <div class="html-cover-boxes">
+          <div><small>Klient</small><strong>${xmlEsc(name)}</strong></div>
+          <div><small>Datum</small><strong>${xmlEsc(date)}</strong></div>
+          <div><small>Obsah</small><strong>Tréninkový + netréninkový den</strong></div>
+        </div>
+        <footer>Vygenerováno v aplikaci Nutrition Coach</footer>
+      </div>
+    </div>`;
+}
+
+function buildPdfHtmlDocument(){
+  return `
+    <div id="pdfRenderRoot" class="pdf-render-root">
+      <style>
+        .pdf-render-root{position:fixed;left:-10000px;top:0;width:794px;background:#fff;font-family:Inter,Arial,sans-serif;color:#101828;}
+        .pdf-html-page{width:794px;min-height:1123px;background:#fff;position:relative;overflow:hidden;box-sizing:border-box;page-break-after:always;}
+        .html-page-inner{padding:54px 54px 42px 54px;box-sizing:border-box;}
+        .html-cover{background:#0b1220;color:#fff;}
+        .html-cover-bg{position:absolute;border-radius:999px;filter:blur(0.2px);opacity:.92;}
+        .html-cover-blue{width:330px;height:330px;right:-95px;top:-90px;background:#155eef;}
+        .html-cover-green{width:430px;height:430px;left:-170px;bottom:-190px;background:#12b76a;}
+        .html-cover-content{position:relative;z-index:2;padding:72px 68px 52px 68px;box-sizing:border-box;height:1123px;}
+        .html-cover-kicker{font-weight:900;letter-spacing:.15em;color:#d7e7ff;font-size:19px;margin-bottom:18px;}
+        .html-cover h1{font-size:66px;line-height:1.05;margin:0 0 22px 0;letter-spacing:-.04em;}
+        .html-cover p{font-size:19px;line-height:1.45;color:#eef6ff;width:610px;margin:0 0 28px 0;}
+        .html-cover-img{display:block;width:560px;height:390px;object-fit:cover;border-radius:28px;margin:28px auto 42px auto;box-shadow:0 26px 70px rgba(0,0,0,.38);background:#fff;}
+        .html-cover-boxes{display:grid;grid-template-columns:1fr 1fr 1.35fr;gap:16px;margin-top:12px;}
+        .html-cover-boxes div{background:#1e4078;border-radius:18px;padding:15px 17px;min-height:72px;box-sizing:border-box;}
+        .html-cover-boxes small{display:block;text-transform:uppercase;color:#cfe1ff;font-weight:900;font-size:12px;letter-spacing:.1em;margin-bottom:9px;}
+        .html-cover-boxes strong{font-size:18px;line-height:1.2;color:#fff;}
+        .html-cover footer{position:absolute;right:68px;bottom:44px;color:#dbeafe;font-size:16px;}
+        .html-topline{display:flex;justify-content:space-between;align-items:center;color:#667085;font-size:14px;margin-bottom:28px;}
+        .html-topline strong{letter-spacing:.12em;color:#667085;}
+        .html-day-head{display:flex;justify-content:space-between;align-items:end;gap:20px;}
+        .html-day-head span{display:block;color:#155eef;font-weight:900;text-transform:uppercase;letter-spacing:.12em;font-size:13px;margin-bottom:4px;}
+        .html-day-head h1,.html-page-inner h1{font-size:42px;line-height:1.05;margin:0;color:#101828;letter-spacing:-.035em;}
+        .html-day-head b{color:#155eef;font-size:20px;white-space:nowrap;}
+        .html-blue-line{height:4px;background:#155eef;border-radius:999px;margin:18px 0 24px;}
+        .pdf-macros{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 24px 0;}
+        .pdf-macro{border:1px solid #d1ddec;background:#f8fbff;border-radius:16px;padding:13px 12px;box-sizing:border-box;min-height:84px;}
+        .pdf-macro.over{border-color:#f87171;background:#fff1f2;}
+        .pdf-macro span{display:block;text-transform:uppercase;letter-spacing:.08em;color:#667085;font-size:11px;font-weight:900;margin-bottom:9px;}
+        .pdf-macro strong{display:block;font-size:22px;color:#101828;line-height:1.1;margin-bottom:8px;}
+        .pdf-macro.over strong{color:#dc2626;}
+        .pdf-macro small{display:block;color:#12b76a;font-weight:800;font-size:11px;line-height:1.2;}
+        .pdf-macro.over small{color:#dc2626;}
+        .pdf-meal{border:1px solid #e4e9f2;border-radius:18px;overflow:hidden;margin:0 0 18px 0;background:#fff;break-inside:avoid;}
+        .pdf-meal-title{background:#101828;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:12px 15px;gap:16px;}
+        .pdf-meal-title h3{margin:0;font-size:19px;color:#fff;}
+        .pdf-meal-title span{font-size:12px;color:#d0d5dd;white-space:nowrap;font-weight:800;}
+        .pdf-meal table{width:100%;border-collapse:collapse;font-size:14px;}
+        .pdf-meal th{background:#f2f6ff;color:#344054;text-align:left;text-transform:uppercase;letter-spacing:.06em;font-size:11px;padding:9px 10px;}
+        .pdf-meal td{border-top:1px solid #edf2f7;padding:10px;color:#101828;}
+        .pdf-meal tbody tr:nth-child(even){background:#fbfdff;}
+        .pdf-empty{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:18px;padding:22px;text-align:center;color:#667085;font-weight:800;}
+        .html-summary-block{border:1px solid #e4e9f2;border-radius:20px;padding:20px;margin:0 0 28px;background:#fff;}
+        .html-summary-block h2{font-size:26px;margin:0 0 16px;color:#101828;}
+        .html-replacements{display:grid;gap:13px;margin-top:24px;}
+        .html-replacement-card{background:#f8fbff;border:1px solid #e4eaf3;border-radius:16px;padding:13px 16px;}
+        .html-replacement-card strong{display:block;font-size:16px;color:#101828;margin-bottom:7px;}
+        .html-replacement-card span{display:block;font-size:13px;color:#475467;line-height:1.35;}
+        .html-muted{color:#667085;font-size:16px;line-height:1.45;margin-top:12px;}
+      </style>
+      ${coverPdfHtml()}
+      ${dayPdfHtml('training')}
+      ${dayPdfHtml('rest')}
+      ${summaryPdfHtml()}
+      ${replacementRowsHtml()}
+    </div>`;
+}
+
+async function waitForImages(root){
+  const imgs = Array.from(root.querySelectorAll('img'));
+  await Promise.all(imgs.map(img => {
+    if(img.complete) return Promise.resolve();
+    return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
+  }));
+}
+
 async function exportPdf(){
   const jspdfLib = window.jspdf;
   if(!jspdfLib || !jspdfLib.jsPDF){
     return alert('PDF knihovna se nenačetla. Zkontroluj internetové připojení a obnov stránku.');
   }
+  if(!window.html2canvas){
+    return alert('Knihovna pro správnou diakritiku PDF se nenačetla. Zkontroluj internetové připojení a obnov stránku.');
+  }
+
   const { jsPDF } = jspdfLib;
   const date = $('reportDate').value || new Date().toISOString().slice(0,10);
   const name = ($('clientName')?.value || 'Klient').trim();
-  const description = ($('clientDescription')?.value || 'Tréninkový a netréninkový jídelníček připravený v aplikaci Nutrition Coach.').trim();
   const fileTitle = `${safeFileName(name)}-${date}-jidelnicek.pdf`;
-  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
 
-  doc.setFillColor(11,18,32);
-  doc.rect(0,0,210,297,'F');
-  doc.setFillColor(21,94,239);
-  doc.circle(184, 22, 42, 'F');
-  doc.setFillColor(18,183,106);
-  doc.circle(18, 282, 58, 'F');
-  doc.setTextColor(215,231,255);
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(10);
-  doc.text('NUTRITION COACH', 18, 28);
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(34);
-  doc.text('Jídelníček', 18, 49);
-  doc.text('pro klienta', 18, 64);
-  doc.setFontSize(12);
-  doc.setFont('helvetica','normal');
-  doc.setTextColor(238,246,255);
-  addWrappedText(doc, description, 18, 78, 174, 5.5);
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = buildPdfHtmlDocument();
+  const root = wrapper.firstElementChild;
+  document.body.appendChild(root);
 
   try{
-    const imgData = await loadImageDataUrl('cover-food.jpg');
-    doc.addImage(imgData, 'JPEG', 30, 96, 150, 112);
-  }catch(e){
-    doc.setFillColor(255,255,255);
-    doc.roundedRect(30, 96, 150, 112, 8, 8, 'F');
-    doc.setTextColor(16,24,40);
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(18);
-    doc.text('Nutrition Coach', 105, 152, {align:'center'});
+    await waitForImages(root);
+    const pages = Array.from(root.querySelectorAll('.pdf-html-page'));
+    const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+    for(let i = 0; i < pages.length; i++){
+      const canvas = await window.html2canvas(pages[i], {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false
+      });
+      const imgData = canvas.toDataURL('image/jpeg', 0.96);
+      if(i > 0) doc.addPage();
+      doc.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+    }
+    doc.save(fileTitle);
+  }catch(error){
+    console.error(error);
+    alert('PDF se nepodařilo vytvořit: ' + error.message);
+  }finally{
+    root.remove();
   }
-
-  const metaY = 226;
-  const boxes = [
-    ['Klient', name],
-    ['Datum', date],
-    ['Obsah', 'Tréninkový + netréninkový den']
-  ];
-  boxes.forEach((b, i) => {
-    const x = 18 + i * 59;
-    doc.setFillColor(30, 64, 120);
-    doc.roundedRect(x, metaY, 54, 25, 5, 5, 'F');
-    doc.setTextColor(207,225,255);
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(7.5);
-    doc.text(b[0].toUpperCase(), x + 4, metaY + 8);
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(10);
-    doc.text(doc.splitTextToSize(b[1], 45), x + 4, metaY + 16);
-  });
-  doc.setTextColor(219,234,254);
-  doc.setFontSize(9);
-  doc.text('Vygenerováno v aplikaci Nutrition Coach', 192, 278, {align:'right'});
-
-  drawDayPage(doc, 'training');
-  drawDayPage(doc, 'rest');
-  drawSummaryPage(doc);
-  drawReplacementsPage(doc);
-  doc.save(fileTitle);
 }
 
 function worksheetXml(type){
