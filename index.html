@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nutrition Coach</title>
-  <link rel="stylesheet" href="style.css?v=20260603-pdf-replacements" />
+  <link rel="stylesheet" href="style.css?v=20260608-final-ui" />
 </head>
 <body>
   <main class="app">
@@ -85,6 +85,36 @@
         </div>
       </div>
     </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Jídelníček aktuálního typu dne</h2>
+        <div class="actions">
+          <button id="copyBtn" class="secondary">Kopírovat text</button>
+          <button id="csvBtn" class="secondary">Export CSV</button>
+          <button id="excelBtn" class="secondary">Export Excel – oba dny</button>
+          <button id="pdfBtn" class="secondary">Export PDF</button>
+          <label class="checkbox-inline"><input id="includeReplacementsPdf" type="checkbox" checked> Náhrady do PDF</label>
+          <button id="clearBtn" class="danger">Vymazat aktuální jídelníček</button>
+        </div>
+      </div>
+      <div class="summary" id="summary"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Jídlo</th><th>Potravina</th><th>Množství / g</th><th>kcal</th><th>B</th><th>S</th><th>T</th><th>Akce</th>
+            </tr>
+          </thead>
+          <tbody id="reportBody"></tbody>
+        </table>
+      </div>
+      <textarea id="textReport" readonly></textarea>
+    </section>
+
+
+
+
 
     <section class="card generator-card">
       <div class="section-head">
@@ -170,33 +200,6 @@
 
     <section class="card">
       <div class="section-head">
-        <h2>Jídelníček aktuálního typu dne</h2>
-        <div class="actions">
-          <button id="copyBtn" class="secondary">Kopírovat text</button>
-          <button id="csvBtn" class="secondary">Export CSV</button>
-          <button id="excelBtn" class="secondary">Export Excel – oba dny</button>
-          <button id="pdfBtn" class="secondary">Export PDF</button>
-          <button id="clearBtn" class="danger">Vymazat aktuální jídelníček</button>
-        </div>
-      </div>
-      <div class="summary" id="summary"></div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Jídlo</th><th>Potravina</th><th>Množství / g</th><th>kcal</th><th>B</th><th>S</th><th>T</th><th>Akce</th>
-            </tr>
-          </thead>
-          <tbody id="reportBody"></tbody>
-        </table>
-      </div>
-      <textarea id="textReport" readonly></textarea>
-    </section>
-
-
-
-    <section class="card">
-      <div class="section-head">
         <div>
           <h2>Vlastní potravina</h2>
           <p class="muted">Přidej vlastní surovinu nebo konkrétní produkt. Uloží se do prohlížeče a hned se objeví ve vyhledávání.</p>
@@ -253,8 +256,9 @@
       <p class="muted small">Formát souboru musí být pole objektů. Každá potravina má minimálně <strong>name, kcal, protein, carbs, fat</strong> hodnoty na 100 g.</p>
     </section>
   </main>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="app.js?v=20260603-pdf-diacritics-fix"></script>
+  <script src="app.js?v=20260608-final-ui"></script>
 </body>
 </html>

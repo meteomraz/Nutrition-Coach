@@ -2153,7 +2153,9 @@
     "carbs": 4.8,
     "fat": 3,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "mleko-0-5",
@@ -2164,7 +2166,9 @@
     "carbs": 5,
     "fat": 0.5,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "mleko-1-5",
@@ -2175,7 +2179,9 @@
     "carbs": 5,
     "fat": 1.5,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "mleko-3-5",
@@ -2186,7 +2192,9 @@
     "carbs": 4.8,
     "fat": 3.5,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "ovocny-jogurt",
@@ -2230,7 +2238,9 @@
     "fat": 1.1,
     "unit": "100ml",
     "source": "manual",
-    "id": "mandlove-mleko-neslazene"
+    "id": "mandlove-mleko-neslazene",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "name": "Bílky vaječné",
@@ -2329,7 +2339,9 @@
     "carbs": 4.8,
     "fat": 3.5,
     "unit": "100g",
-    "source": "orientační databáze fitness 100g"
+    "source": "orientační databáze fitness 100g",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "mleko-polotucne",
@@ -2340,7 +2352,9 @@
     "carbs": 4.8,
     "fat": 1.5,
     "unit": "100g",
-    "source": "orientační databáze fitness 100g"
+    "source": "orientační databáze fitness 100g",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "mozzarella",
@@ -2639,7 +2653,9 @@
     "carbs": 4.8,
     "fat": 4.5,
     "unit": "100g",
-    "source": "orientační databáze fitness 100g"
+    "source": "orientační databáze fitness 100g",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "mleko-plnotucne-pecene",
@@ -2650,7 +2666,9 @@
     "carbs": 4.8,
     "fat": 5.0,
     "unit": "100g",
-    "source": "orientační databáze fitness 100g"
+    "source": "orientační databáze fitness 100g",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "mleko-polotucne-grilovane",
@@ -2661,7 +2679,9 @@
     "carbs": 4.8,
     "fat": 2.5,
     "unit": "100g",
-    "source": "orientační databáze fitness 100g"
+    "source": "orientační databáze fitness 100g",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "mleko-polotucne-pecene",
@@ -2672,7 +2692,9 @@
     "carbs": 4.8,
     "fat": 3.0,
     "unit": "100g",
-    "source": "orientační databáze fitness 100g"
+    "source": "orientační databáze fitness 100g",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "mozzarella-grilovane",
@@ -3024,7 +3046,9 @@
     "carbs": 10.6,
     "fat": 0,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "coca-cola-zero",
@@ -3035,7 +3059,9 @@
     "carbs": 0,
     "fat": 0,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "iontovy-napoj",
@@ -3046,7 +3072,9 @@
     "carbs": 6,
     "fat": 0,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "jablecny-dzus",
@@ -3057,7 +3085,9 @@
     "carbs": 11,
     "fat": 0.1,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "kakao-z-mleka",
@@ -3068,7 +3098,9 @@
     "carbs": 12,
     "fat": 2.5,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "kava-bez-cukru",
@@ -3079,7 +3111,9 @@
     "carbs": 0,
     "fat": 0,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "mandlovy-napoj-neslazeny",
@@ -3090,7 +3124,9 @@
     "carbs": 0.5,
     "fat": 1.2,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "monster-energy",
@@ -3101,7 +3137,9 @@
     "carbs": 11,
     "fat": 0,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "ovesny-napoj",
@@ -3112,7 +3150,9 @@
     "carbs": 7,
     "fat": 1.5,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "pivo-10",
@@ -3123,7 +3163,9 @@
     "carbs": 3,
     "fat": 0,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "pivo-12",
@@ -3134,7 +3176,9 @@
     "carbs": 3.5,
     "fat": 0,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "pomerancovy-dzus",
@@ -3145,7 +3189,9 @@
     "carbs": 10,
     "fat": 0.2,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "red-bull",
@@ -3156,7 +3202,9 @@
     "carbs": 11,
     "fat": 0,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "smoothie-ovocne",
@@ -3167,7 +3215,9 @@
     "carbs": 14,
     "fat": 0.2,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "sojovy-napoj",
@@ -3178,7 +3228,9 @@
     "carbs": 3,
     "fat": 2,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "vino-bile-suche",
@@ -3189,7 +3241,9 @@
     "carbs": 2,
     "fat": 0,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "vino-cervene-suche",
@@ -3200,7 +3254,9 @@
     "carbs": 2.6,
     "fat": 0,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "caj-bez-cukru",
@@ -3211,7 +3267,9 @@
     "carbs": 0,
     "fat": 0,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "cerealni-kase-instantni",
@@ -5039,7 +5097,9 @@
     "carbs": 67,
     "fat": 0,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "bcaa-prasek",
@@ -5322,7 +5382,9 @@
     "carbs": 3,
     "fat": 21,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "majoneza",
@@ -5355,7 +5417,9 @@
     "carbs": 0,
     "fat": 100,
     "unit": "100g",
-    "source": "orientacni databaze"
+    "source": "orientacni databaze",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "sadlo",
@@ -5443,7 +5507,9 @@
     "carbs": 0,
     "fat": 100,
     "unit": "100g",
-    "source": "orientační databáze fitness 100g"
+    "source": "orientační databáze fitness 100g",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "lnena-seminka",
@@ -5509,7 +5575,9 @@
     "carbs": 0,
     "fat": 100,
     "unit": "100g",
-    "source": "orientační databáze fitness 100g"
+    "source": "orientační databáze fitness 100g",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "pistacie",
@@ -5553,7 +5621,9 @@
     "carbs": 0,
     "fat": 100,
     "unit": "100g",
-    "source": "orientační databáze fitness 100g"
+    "source": "orientační databáze fitness 100g",
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "horka-cokolada-85",
@@ -6397,7 +6467,9 @@
     "source": "doplněno orientačně 100g",
     "tags": [
       "bezlaktozove"
-    ]
+    ],
+    "unitType": "ml",
+    "liquid": true
   },
   {
     "id": "jogurt-bily-bez-laktozy",

@@ -56,6 +56,36 @@ function foodKey(foodOrName){
   return normalizeText(typeof foodOrName === 'string' ? foodOrName : foodOrName?.name);
 }
 
+function isLiquidFood(foodOrName){
+  const food = typeof foodOrName === 'string' ? findFoodSmart(foodOrName) : foodOrName;
+  const text = normalizeText(`${food?.name || foodOrName || ''} ${food?.category || ''} ${food?.unitType || ''}`);
+  if(food?.unitType === 'ml' || food?.liquid === true) return true;
+  const liquidWords = ['voda','mleko','mléko','napoj','nápoj','dzus','džus','juice','smoothie','kefir','acidofilni','acidofilní','podmasli','podmáslí','syrovatka','olej','sirup','kokosove mleko','mandlove mleko','sojove mleko','ovesne mleko','ryzove mleko'];
+  return liquidWords.some(word => text.includes(normalizeText(word)));
+}
+
+function amountUnitForFood(food){
+  return isLiquidFood(food) ? 'ml' : 'g';
+}
+
+function formatAmount(foodOrName, grams){
+  const unit = amountUnitForFood(foodOrName);
+  return `${round(Number(grams) || 0)} ${unit}`;
+}
+
+function updateAmountLabelForItem(item){
+  if(!item) return item;
+  const food = findFoodSmart(item.name) || item;
+  const grams = Number(item.grams || 0);
+  if(item.unitMode === 'piece' && Number(item.pieceWeight || food.pieceWeight || 0) > 0){
+    const pieceName = item.pieceName || food.pieceName || 'ks';
+    const amount = Number(item.amount || (grams / Number(item.pieceWeight || food.pieceWeight || 1)) || 0);
+    return { ...item, amountLabel: `${round(amount)} ${pieceName} / ${formatAmount(food, grams)}` };
+  }
+  return { ...item, amount: grams, unitMode: amountUnitForFood(food), amountLabel: formatAmount(food, grams) };
+}
+
+
 function isFavoriteFood(foodOrName){
   const key = foodKey(foodOrName);
   return key && favoriteFoodKeys.includes(key);
@@ -262,16 +292,16 @@ function recalcItemByGrams(item, newGrams){
   const grams = Number(newGrams);
   if(!item || grams <= 0) return item;
   const food = foods.find(f => normalizeText(f.name) === normalizeText(item.name));
-  if(food) return { ...item, grams, ...calc(food, grams) };
+  if(food) return updateAmountLabelForItem({ ...item, grams, ...calc(food, grams) });
   const ratio = item.grams ? grams / item.grams : 1;
-  return {
+  return updateAmountLabelForItem({
     ...item,
     grams,
     kcal: round(item.kcal * ratio),
     protein: round(item.protein * ratio),
     carbs: round(item.carbs * ratio),
     fat: round(item.fat * ratio)
-  };
+  });
 }
 
 function updateItemGrams(index, value){
@@ -297,7 +327,7 @@ function updateItemFood(index, value){
   const food = foods.find(f => normalizeText(f.name) === normalizeText(name));
   report[index].name = food ? food.name : name;
   if(food && Number(report[index].grams) > 0){
-    report[index] = { ...report[index], ...calc(food, Number(report[index].grams)) };
+    report[index] = updateAmountLabelForItem({ ...report[index], ...calc(food, Number(report[index].grams)) });
   }
   save();
   render();
@@ -347,12 +377,13 @@ function updateUnitOptions(){
   const current = $('unitSelect').value || 'g';
   const pieceWeight = Number(food?.pieceWeight || 0);
   const pieceName = food?.pieceName || 'ks';
-  $('unitSelect').innerHTML = `<option value="g">g</option>` + (pieceWeight > 0 ? `<option value="piece">${pieceName}</option>` : '');
+  const baseUnit = amountUnitForFood(food);
+  $('unitSelect').innerHTML = `<option value="g">${baseUnit}</option>` + (pieceWeight > 0 ? `<option value="piece">${pieceName}</option>` : '');
   $('unitSelect').value = pieceWeight > 0 && current === 'piece' ? 'piece' : 'g';
   if($('unitHint')){
     $('unitHint').textContent = pieceWeight > 0
-      ? `Lze zadat gramy nebo ${pieceName}. 1 ${pieceName} ≈ ${pieceWeight} g.`
-      : 'Tato potravina se počítá v gramech.';
+      ? `Lze zadat ${baseUnit} nebo ${pieceName}. 1 ${pieceName} ≈ ${pieceWeight} g.`
+      : `Tato potravina se počítá v ${baseUnit}.`;
   }
 }
 
@@ -641,7 +672,7 @@ function generatedFoodItem(meal, names, grams, role = '', min = 0, max = 999, di
   const food = findFoodSmart(names, dietMode);
   if(!food) return null;
   const safeGrams = Math.max(min || 0, Math.min(max || 999, round(Number(grams) || 0)));
-  return { meal, name: food.name, grams: safeGrams, role, min, max, amount: safeGrams, unitMode: 'g', amountLabel: `${safeGrams} g`, ...calc(food, safeGrams) };
+  return updateAmountLabelForItem({ meal, name: food.name, grams: safeGrams, role, min, max, amount: safeGrams, unitMode: amountUnitForFood(food), ...calc(food, safeGrams) });
 }
 
 function generatorBlueprint(){
@@ -697,7 +728,7 @@ function generatorBlueprint(){
 function recalcGenerated(items){
   return items.map(item => {
     const food = findFoodSmart(item.name);
-    return food ? { ...item, amount: item.grams, amountLabel: `${round(item.grams)} g`, ...calc(food, item.grams) } : item;
+    return food ? updateAmountLabelForItem({ ...item, amount: item.grams, ...calc(food, item.grams) }) : updateAmountLabelForItem(item);
   });
 }
 
@@ -752,7 +783,7 @@ function addFood(){
   const pieceWeight = Number(food.pieceWeight || 0);
   const pieceName = food.pieceName || 'ks';
   const grams = unitMode === 'piece' && pieceWeight > 0 ? round(amount * pieceWeight) : amount;
-  const amountLabel = unitMode === 'piece' && pieceWeight > 0 ? `${amount} ${pieceName} / ${grams} g` : `${grams} g`;
+  const amountLabel = unitMode === 'piece' && pieceWeight > 0 ? `${amount} ${pieceName} / ${formatAmount(food, grams)}` : formatAmount(food, grams);
   getReport().push({ meal: $('mealType').value, name: food.name, grams, amount, unitMode, pieceName, pieceWeight, amountLabel, ...calc(food, grams) });
   $('foodSearch').value = '';
   if($('unitSelect')) $('unitSelect').innerHTML = '<option value="g">g</option>';
@@ -857,7 +888,7 @@ function renderEditableRow(x){
   return `<tr class="meal-item">
     <td><select class="table-select" onchange="updateItemMeal(${x.originalIndex}, this.value)">${mealOptionsHtml(x.meal)}</select></td>
     <td><input class="food-edit" type="text" list="foodSuggestions" value="${xmlEsc(x.name)}" onchange="updateItemFood(${x.originalIndex}, this.value)"></td>
-    <td><input class="grams-edit" type="number" min="1" value="${x.grams}" onchange="updateItemGrams(${x.originalIndex}, this.value)">${x.amountLabel && x.amountLabel !== `${x.grams} g` ? `<span class="amount-label">${xmlEsc(x.amountLabel)}</span>` : ''}</td>
+    <td><input class="grams-edit" type="number" min="1" value="${x.grams}" onchange="updateItemGrams(${x.originalIndex}, this.value)">${x.amountLabel && x.amountLabel !== formatAmount(x.name, x.grams) ? `<span class="amount-label">${xmlEsc(x.amountLabel)}</span>` : ''}</td>
     <td><input class="macro-edit" type="number" step="0.1" value="${x.kcal}" onchange="updateItemMacro(${x.originalIndex}, 'kcal', this.value)"></td>
     <td><input class="macro-edit" type="number" step="0.1" value="${x.protein}" onchange="updateItemMacro(${x.originalIndex}, 'protein', this.value)"></td>
     <td><input class="macro-edit" type="number" step="0.1" value="${x.carbs}" onchange="updateItemMacro(${x.originalIndex}, 'carbs', this.value)"></td>
@@ -1146,7 +1177,7 @@ function drawDayPage(doc, type){
   doc.setTextColor(102,112,133);
   doc.setFont('helvetica','bold');
   doc.setFontSize(8);
-  doc.text('NUTRITION COACH', 14, 13);
+  doc.text('PETRA DOBROVOLNÁ', 14, 13);
   doc.text(name, 196, 13, {align:'right'});
 
   doc.setTextColor(16,24,40);
@@ -1186,11 +1217,22 @@ function drawSummaryPage(doc){
 }
 
 function getReplacementPdfRows(){
-  const names = Array.from(new Set([...getReport('training'), ...getReport('rest')].map(i => i.name))).slice(0, 18);
-  return names.map(name => {
-    const item = findFoodSmart(name) || { name };
-    const candidates = getReplacementCandidates(item).slice(0, 4).map(f => f.name);
-    return { name, candidates };
+  const items = [...getReport('training'), ...getReport('rest')];
+  const seen = new Set();
+  const unique = [];
+  items.forEach(item => {
+    const key = foodKey(item.name);
+    if(key && !seen.has(key)){
+      seen.add(key);
+      unique.push(item);
+    }
+  });
+  return unique.slice(0, 18).map(item => {
+    const candidates = getReplacementCandidates(item).slice(0, 4).map(f => {
+      const eq = equivalentAmountForReplacement(item, f);
+      return `${f.name} (${eq.label})`;
+    });
+    return { name: `${item.name} (${item.amountLabel || formatAmount(item.name, item.grams)})`, candidates };
   }).filter(r => r.candidates.length);
 }
 
@@ -1265,7 +1307,7 @@ function dayPdfHtml(type){
   return `
     <div class="pdf-html-page">
       <div class="html-page-inner">
-        <div class="html-topline"><strong>NUTRITION COACH</strong><span>${xmlEsc(name)}</span></div>
+        <div class="html-topline"><strong>PETRA DOBROVOLNÁ</strong><span>${xmlEsc(name)}</span></div>
         <div class="html-day-head">
           <div><span>Jídelníček</span><h1>${xmlEsc(dayTypeLabel(type))}</h1></div>
           <b>${round(t.kcal)} / ${targets.kcal} kcal</b>
@@ -1280,13 +1322,13 @@ function dayPdfHtml(type){
 function coverPdfHtml(){
   const date = $('reportDate').value || new Date().toISOString().slice(0,10);
   const name = ($('clientName')?.value || 'Klient').trim();
-  const description = ($('clientDescription')?.value || 'Tréninkový a netréninkový jídelníček připravený v aplikaci Nutrition Coach.').trim();
+  const description = ($('clientDescription')?.value || 'Tréninkový a netréninkový jídelníček připravený Petrou Dobrovolnou.').trim();
   return `
     <div class="pdf-html-page html-cover">
       <div class="html-cover-bg html-cover-blue"></div>
       <div class="html-cover-bg html-cover-green"></div>
       <div class="html-cover-content">
-        <div class="html-cover-kicker">NUTRITION COACH</div>
+        <div class="html-cover-kicker">PETRA DOBROVOLNÁ</div>
         <h1>Jídelníček<br>pro klienta</h1>
         <p>${xmlEsc(description)}</p>
         <img class="html-cover-img" src="cover-food.jpg" alt="Jídlo">
@@ -1295,7 +1337,7 @@ function coverPdfHtml(){
           <div><small>Datum</small><strong>${xmlEsc(date)}</strong></div>
           <div><small>Obsah</small><strong>Tréninkový + netréninkový den</strong></div>
         </div>
-        <footer>Vygenerováno v aplikaci Nutrition Coach</footer>
+        <footer>Vytvořila Petra Dobrovolná</footer>
       </div>
     </div>`;
 }
@@ -1357,7 +1399,7 @@ function buildPdfHtmlDocument(){
       ${dayPdfHtml('training')}
       ${dayPdfHtml('rest')}
       ${summaryPdfHtml()}
-      ${replacementRowsHtml()}
+      ${$('includeReplacementsPdf')?.checked ? replacementRowsHtml() : ''}
     </div>`;
 }
 
@@ -1456,7 +1498,7 @@ function worksheetXml(type){
     <Worksheet ss:Name="${xmlEsc(sheetName)}">
       <Table>
         <Column ss:Width="260"/><Column ss:Width="70"/><Column ss:Width="85"/><Column ss:Width="85"/><Column ss:Width="85"/><Column ss:Width="85"/>
-        ${row([`NUTRITION COACH - ${sheetName}`, '', '', '', '', ''], 'Title')}
+        ${row([`PETRA DOBROVOLNÁ - ${sheetName}`, '', '', '', '', ''], 'Title')}
         ${row(['Datum', date, '', '', '', ''], 'Meta')}
         ${row(['Jméno', name, '', '', '', ''], 'Meta')}
         ${row(['Typ dne', sheetName, '', '', '', ''], 'Meta')}
@@ -1472,40 +1514,97 @@ function worksheetXml(type){
       </Table>
     </Worksheet>`;
 }
-function exportExcel(){
+function rowsForXlsx(type){
   const date = $('reportDate').value || new Date().toISOString().slice(0,10);
-  const workbook = `<?xml version="1.0"?>
-  <?mso-application progid="Excel.Sheet"?>
-  <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
-    xmlns:o="urn:schemas-microsoft-com:office:office"
-    xmlns:x="urn:schemas-microsoft-com:office:excel"
-    xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
-    xmlns:html="http://www.w3.org/TR/REC-html40">
-    <Styles>
-      <Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Center"/><Font ss:FontName="Arial" ss:Size="10"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E7EEF8"/></Borders></Style>
-      <Style ss:ID="Title"><Font ss:FontName="Arial" ss:Bold="1" ss:Size="18" ss:Color="#FFFFFF"/><Interior ss:Color="#155EEF" ss:Pattern="Solid"/><Alignment ss:Vertical="Center"/></Style>
-      <Style ss:ID="Meta"><Font ss:Bold="1" ss:Color="#344054"/><Interior ss:Color="#EEF4FF" ss:Pattern="Solid"/></Style>
-      <Style ss:ID="Header"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#101828" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
-      <Style ss:ID="TargetHeader"><Font ss:Bold="1" ss:Size="12" ss:Color="#155EEF"/><Interior ss:Color="#DBEAFE" ss:Pattern="Solid"/></Style>
-      <Style ss:ID="MealHeader"><Font ss:Bold="1" ss:Size="12" ss:Color="#FFFFFF"/><Interior ss:Color="#344054" ss:Pattern="Solid"/></Style>
-      <Style ss:ID="Body"><Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/></Style>
-      <Style ss:ID="BodyAlt"><Interior ss:Color="#F8FBFF" ss:Pattern="Solid"/></Style>
-      <Style ss:ID="Empty"><Font ss:Italic="1" ss:Color="#667085"/><Interior ss:Color="#F2F4F7" ss:Pattern="Solid"/></Style>
-      <Style ss:ID="Total"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#12B76A" ss:Pattern="Solid"/></Style>
-      <Style ss:ID="Goal"><Font ss:Bold="1"/><Interior ss:Color="#D1FADF" ss:Pattern="Solid"/></Style>
-      <Style ss:ID="GoalStrong"><Font ss:Bold="1" ss:Color="#065F46"/><Interior ss:Color="#A7F3D0" ss:Pattern="Solid"/></Style>
-      <Style ss:ID="Delta"><Font ss:Bold="1"/><Interior ss:Color="#FEF0C7" ss:Pattern="Solid"/></Style>
-    </Styles>
-    ${worksheetXml('training')}
-    ${worksheetXml('rest')}
-  </Workbook>`;
+  const data = sortedReport(type);
+  const t = totals(type);
+  const targets = getTargets(type);
+  const sheetName = type === 'training' ? 'Tréninkový den' : 'Netréninkový den';
+  const name = ($('clientName')?.value || '').trim();
+  const rows = [
+    [`Petra Dobrovolná - ${sheetName}`],
+    ['Datum', date],
+    ['Jméno', name],
+    ['Typ dne', sheetName],
+    [],
+    ['Přehled cílů'],
+    ['Makro', 'Cíl', 'Snědeno', 'Zbývá / přesah'],
+    ['Kalorie', Number(targets.kcal), round(t.kcal), round(targets.kcal - t.kcal)],
+    ['Bílkoviny', Number(targets.protein), round(t.protein), round(targets.protein - t.protein)],
+    ['Sacharidy', Number(targets.carbs), round(t.carbs), round(targets.carbs - t.carbs)],
+    ['Tuky', Number(targets.fat), round(t.fat), round(targets.fat - t.fat)],
+    [],
+    ['Potravina','Množství','Kcal','Bílkoviny','Sacharidy','Tuky']
+  ];
+  mealOrder.forEach(meal => {
+    const items = data.filter(x => x.meal === meal);
+    rows.push([meal]);
+    if(!items.length){
+      rows.push(['Bez položek']);
+    }else{
+      items.forEach(x => rows.push([x.name, x.amountLabel || formatAmount(x.name, x.grams), round(x.kcal), round(x.protein), round(x.carbs), round(x.fat)]));
+    }
+  });
+  const otherItems = data.filter(x => !mealOrder.includes(x.meal));
+  if(otherItems.length){
+    rows.push(['Ostatní']);
+    otherItems.forEach(x => rows.push([x.name, x.amountLabel || formatAmount(x.name, x.grams), round(x.kcal), round(x.protein), round(x.carbs), round(x.fat)]));
+  }
+  rows.push([], ['CELKEM','',round(t.kcal),round(t.protein),round(t.carbs),round(t.fat)], ['CÍL','',targets.kcal,targets.protein,targets.carbs,targets.fat], ['ZBÝVÁ / PŘESAH','',round(targets.kcal - t.kcal),round(targets.protein - t.protein),round(targets.carbs - t.carbs),round(targets.fat - t.fat)]);
+  return rows;
+}
 
-  const blob = new Blob(['\ufeff', workbook], {type:'application/vnd.ms-excel;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `${safeFileName(($('clientName')?.value || 'jidelnicek'))}-${date}.xls`;
-  a.click();
-  URL.revokeObjectURL(a.href);
+function styleXlsxSheet(ws, rows){
+  ws['!cols'] = [{wch:34},{wch:18},{wch:12},{wch:14},{wch:14},{wch:12}];
+  ws['!rows'] = rows.map((r,i)=>({hpt: i===0 ? 26 : 20}));
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for(let R = range.s.r; R <= range.e.r; ++R){
+    for(let C = range.s.c; C <= range.e.c; ++C){
+      const addr = XLSX.utils.encode_cell({r:R,c:C});
+      const cellObj = ws[addr];
+      if(!cellObj) continue;
+      cellObj.s = cellObj.s || {};
+      cellObj.s.font = { name: 'Arial', sz: 10, color: { rgb: '101828' } };
+      cellObj.s.alignment = { vertical: 'center' };
+      cellObj.s.border = { bottom: { style: 'thin', color: { rgb: 'E7EEF8' } } };
+      if(R === 0){
+        cellObj.s.font = { name: 'Arial', bold: true, sz: 16, color: { rgb: 'FFFFFF' } };
+        cellObj.s.fill = { fgColor: { rgb: '155EEF' } };
+      }
+      if(['Přehled cílů','Snídaně','Svačina','Oběd','Odpolední svačina','Večeře','Druhá večeře','Ostatní'].includes(rows[R]?.[0])){
+        cellObj.s.font = { name: 'Arial', bold: true, sz: 12, color: { rgb: 'FFFFFF' } };
+        cellObj.s.fill = { fgColor: { rgb: rows[R][0] === 'Přehled cílů' ? '155EEF' : '344054' } };
+      }
+      if(['Makro','Potravina'].includes(rows[R]?.[0])){
+        cellObj.s.font = { name: 'Arial', bold: true, sz: 10, color: { rgb: 'FFFFFF' } };
+        cellObj.s.fill = { fgColor: { rgb: '101828' } };
+      }
+      if(['CELKEM'].includes(rows[R]?.[0])){
+        cellObj.s.font = { name: 'Arial', bold: true, color: { rgb: 'FFFFFF' } };
+        cellObj.s.fill = { fgColor: { rgb: '12B76A' } };
+      }
+      if(['CÍL','ZBÝVÁ / PŘESAH'].includes(rows[R]?.[0])){
+        cellObj.s.font = { name: 'Arial', bold: true, color: { rgb: '101828' } };
+        cellObj.s.fill = { fgColor: { rgb: rows[R][0] === 'CÍL' ? 'D1FADF' : 'FEF0C7' } };
+      }
+    }
+  }
+}
+
+function exportExcel(){
+  if(!window.XLSX){
+    alert('XLSX knihovna se nenačetla. Zkontroluj internetové připojení a obnov stránku.');
+    return;
+  }
+  const wb = XLSX.utils.book_new();
+  ['training','rest'].forEach(type => {
+    const rows = rowsForXlsx(type);
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    styleXlsxSheet(ws, rows);
+    XLSX.utils.book_append_sheet(wb, ws, type === 'training' ? 'Tréninkový den' : 'Netréninkový den');
+  });
+  const date = $('reportDate').value || new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `${safeFileName(($('clientName')?.value || 'jidelnicek'))}-${date}.xlsx`, { bookType: 'xlsx', cellStyles: true });
 }
 
 function clearDay(){

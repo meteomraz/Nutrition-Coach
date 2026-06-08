@@ -280,3 +280,6 @@ button:hover,.file-button:hover{box-shadow:0 14px 28px rgba(21,94,239,.30)}
 .description-box{grid-column:1 / -1}.description-box textarea{min-height:92px;background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.28);color:white;margin-top:8px}.description-box textarea::placeholder{color:rgba(255,255,255,.72)}
 .row-actions{display:flex;gap:6px;align-items:center}.tiny-btn{padding:8px 10px!important;border-radius:12px!important;font-size:12px!important;width:auto!important;white-space:nowrap}.generator-grid{grid-template-columns:repeat(5,1fr)}
 @media(max-width:980px){.generator-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:620px){.generator-grid{grid-template-columns:1fr}.row-actions{min-width:150px}}
+
+.checkbox-inline{display:inline-flex;align-items:center;gap:8px;font-weight:800;color:#344054;background:#f8fbff;border:1px solid #dbe4f0;border-radius:12px;padding:10px 12px;}
+.checkbox-inline input{width:auto;accent-color:#155eef;}
