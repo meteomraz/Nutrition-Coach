@@ -1216,6 +1216,38 @@ function drawSummaryPage(doc){
   });
 }
 
+function equivalentAmountForReplacement(item, replacementFood){
+  const sourceFood = findFoodSmart(item.name) || item || {};
+  const baseGrams = Number(item.grams || 0);
+  const originalKcal = Number(item.kcal || 0);
+  const replacementKcalPer100 = Number(replacementFood?.kcal || 0);
+
+  let grams = baseGrams;
+
+  // Primárně se snažíme trefit přibližně stejné kalorie jako původní položka v jídelníčku.
+  if(originalKcal > 0 && replacementKcalPer100 > 0){
+    grams = originalKcal / replacementKcalPer100 * 100;
+  }else{
+    // Záloha: použij dominantní makro původní potraviny.
+    const macros = ['protein','carbs','fat'];
+    const dominant = macros
+      .map(key => ({key, value: Math.abs(Number(sourceFood[key] || item[key] || 0))}))
+      .sort((a,b) => b.value - a.value)[0]?.key;
+
+    const sourcePer100 = Number(sourceFood[dominant] || 0);
+    const replacementPer100 = Number(replacementFood?.[dominant] || 0);
+    if(baseGrams > 0 && sourcePer100 > 0 && replacementPer100 > 0){
+      grams = baseGrams * sourcePer100 / replacementPer100;
+    }
+  }
+
+  if(!Number.isFinite(grams) || grams <= 0) grams = baseGrams || 100;
+  grams = Math.max(1, Math.round(grams));
+  const label = formatAmount(replacementFood, grams);
+  const macros = calc(replacementFood, grams);
+  return { grams, label, macros };
+}
+
 function getReplacementPdfRows(){
   const items = [...getReport('training'), ...getReport('rest')];
   const seen = new Set();
