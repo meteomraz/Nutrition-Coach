@@ -283,3 +283,17 @@ button:hover,.file-button:hover{box-shadow:0 14px 28px rgba(21,94,239,.30)}
 
 .checkbox-inline{display:inline-flex;align-items:center;gap:8px;font-weight:800;color:#344054;background:#f8fbff;border:1px solid #dbe4f0;border-radius:12px;padding:10px 12px;}
 .checkbox-inline input{width:auto;accent-color:#155eef;}
+
+
+/* Administrace databáze zůstává v DOM kvůli kompatibilitě, ale v uživatelském rozhraní je skrytá. */
+.database-section-hidden {
+  display: none !important;
+}
+
+.food-entry-grid {
+  grid-template-columns: 1fr;
+}
+
+.targets-grid {
+  grid-template-columns: 1fr;
+}

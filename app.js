@@ -1666,8 +1666,8 @@ $('foodSearch').addEventListener('keydown', (event) => {
     addFood();
   }
 });
-$('copyBtn').onclick = copyReport;
-$('csvBtn').onclick = exportCsv;
+if($('copyBtn')) $('copyBtn').onclick = copyReport;
+if($('csvBtn')) $('csvBtn').onclick = exportCsv;
 $('excelBtn').onclick = exportExcel;
 if($('pdfBtn')) $('pdfBtn').onclick = exportPdf;
 if($('generateMealPlanBtn')) $('generateMealPlanBtn').onclick = () => generateMealPlan(false);

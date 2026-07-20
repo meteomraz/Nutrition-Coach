@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nutrition Coach</title>
-  <link rel="stylesheet" href="style.css?v=20260608-final-ui" />
+  <link rel="stylesheet" href="style.css?v=20260720-clean-ui" />
 </head>
 <body>
   <main class="app">
@@ -59,29 +59,9 @@
             <span id="unitHint" class="muted small">Základ je v gramech. U vybraných potravin lze použít i kusy.</span>
           </label>
           <div class="actions food-actions">
-            <button id="addFoodBtn">Přidat do reportu</button>
+            <button id="addFoodBtn">Přidat do jídelníčku</button>
             <button id="favoriteFoodBtn" class="secondary" type="button">⭐ Oblíbené</button>
           </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Cíle dne</h2>
-        <div class="targets">
-          <label>Typ dne
-            <select id="dayType">
-              <option value="training">Tréninkový den</option>
-              <option value="rest">Netréninkový den</option>
-            </select>
-          </label>
-          <label>Kcal <input id="targetKcal" type="number" value="3000"></label>
-          <label>Bílkoviny <input id="targetProtein" type="number" value="220"></label>
-          <label>Sacharidy <input id="targetCarbs" type="number" value="350"></label>
-          <label>Tuky <input id="targetFat" type="number" value="70"></label>
-          <div class="actions compact-actions">
-            <button id="saveTargetsBtn" class="secondary" type="button">Uložit cíle pro tento typ dne</button>
-          </div>
-          <p id="dayTypeHint" class="muted small"></p>
         </div>
       </div>
     </section>
@@ -90,8 +70,6 @@
       <div class="section-head">
         <h2>Jídelníček aktuálního typu dne</h2>
         <div class="actions">
-          <button id="copyBtn" class="secondary">Kopírovat text</button>
-          <button id="csvBtn" class="secondary">Export CSV</button>
           <button id="excelBtn" class="secondary">Export Excel – oba dny</button>
           <button id="pdfBtn" class="secondary">Export PDF</button>
           <label class="checkbox-inline"><input id="includeReplacementsPdf" type="checkbox" checked> Náhrady do PDF</label>
@@ -116,6 +94,28 @@
 
 
 
+    <section class="grid targets-grid">
+      <div class="card">
+        <h2>Cíle dne</h2>
+        <div class="targets">
+          <label>Typ dne
+            <select id="dayType">
+              <option value="training">Tréninkový den</option>
+              <option value="rest">Netréninkový den</option>
+            </select>
+          </label>
+          <label>Kcal <input id="targetKcal" type="number" value="3000"></label>
+          <label>Bílkoviny <input id="targetProtein" type="number" value="220"></label>
+          <label>Sacharidy <input id="targetCarbs" type="number" value="350"></label>
+          <label>Tuky <input id="targetFat" type="number" value="70"></label>
+          <div class="actions compact-actions">
+            <button id="saveTargetsBtn" class="secondary" type="button">Uložit cíle pro tento typ dne</button>
+          </div>
+          <p id="dayTypeHint" class="muted small"></p>
+        </div>
+      </div>
+    </section>
+
     <section class="card generator-card">
       <div class="section-head">
         <div>
@@ -124,7 +124,6 @@
         </div>
         <div class="actions">
           <button id="generateMealPlanBtn" type="button">Vygenerovat jídelníček</button>
-          <button id="appendGeneratedMealPlanBtn" class="secondary" type="button">Přidat k aktuálnímu</button>
         </div>
       </div>
       <div class="generator-grid">
@@ -239,7 +238,7 @@
       <p id="customFoodStatus" class="muted small">Tip: vyber potravinu ve vyhledávání a formulář se předvyplní, pokud ji chceš upravit.</p>
     </section>
 
-    <section class="card">
+    <section class="card database-section-hidden" aria-hidden="true">
       <div class="section-head">
         <div>
           <h2>Databáze potravin</h2>
@@ -259,6 +258,6 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="app.js?v=20260608-final-ui"></script>
+  <script src="app.js?v=20260720-clean-ui"></script>
 </body>
 </html>
