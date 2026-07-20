@@ -148,7 +148,7 @@ function reportToTemplateItems(type = currentDayType){
 
 function saveCurrentTemplate(){
   const template = getSelectedTemplate();
-  if(!template) return alert('Nejdřív vyber šablonu, kterou chceš přepsat.');
+  if(!template) return alert('Nejdřív vyber jídelníček, který chceš přepsat.');
   if(!getReport().length) return alert('Aktuální jídelníček je prázdný. Nejdřív načti nebo vytvoř jídelníček.');
   const updated = {
     ...template,
@@ -161,17 +161,17 @@ function saveCurrentTemplate(){
   refreshTemplateSelect();
   $('templateSelect').value = updated.id;
   updateTemplatePreview();
-  alert(`Šablona uložena: ${updated.name}`);
+  alert(`Jídelníček uložen: ${updated.name}`);
 }
 
 function createNewTemplate(){
   const name = ($('newTemplateName')?.value || '').trim();
-  if(!name) return alert('Vyplň název nové šablony.');
-  if(!getReport().length) return alert('Aktuální jídelníček je prázdný. Přidej položky, které se mají uložit do šablony.');
+  if(!name) return alert('Vyplň název nového jídelníčku.');
+  if(!getReport().length) return alert('Aktuální jídelníček je prázdný. Přidej položky, které se mají uložit do jídelníčku.');
   const created = {
     id: makeTemplateId(name),
     name,
-    description: `Vlastní šablona uložená z aktuálního jídelníčku (${dayTypeLabel()}).`,
+    description: `Vlastní jídelníček uložený z aktuálního jídelníčku (${dayTypeLabel()}).`,
     targets: getTargets(),
     items: reportToTemplateItems()
   };
@@ -181,31 +181,31 @@ function createNewTemplate(){
   $('templateSelect').value = created.id;
   $('newTemplateName').value = '';
   updateTemplatePreview();
-  alert(`Nová šablona vytvořena: ${created.name}`);
+  alert(`Nový jídelníček vytvořen: ${created.name}`);
 }
 
 function deleteCurrentTemplate(){
   const template = getSelectedTemplate();
-  if(!template) return alert('Nejdřív vyber šablonu, kterou chceš smazat.');
-  if(!confirm(`Opravdu smazat šablonu „${template.name}“ z tohoto prohlížeče?`)) return;
+  if(!template) return alert('Nejdřív vyber jídelníček, který chceš smazat.');
+  if(!confirm(`Opravdu smazat jídelníček „${template.name}“ z tohoto prohlížeče?`)) return;
   mealTemplates = mealTemplates.filter(t => t.id !== template.id);
   persistTemplates();
   refreshTemplateSelect();
   updateTemplatePreview();
-  alert(`Šablona smazána: ${template.name}`);
+  alert(`Jídelníček smazán: ${template.name}`);
 }
 
 function exportTemplates(){
   const blob = new Blob([JSON.stringify(mealTemplates, null, 2)], {type:'application/json;charset=utf-8'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'meal-templates-export.json';
+  a.download = 'jidelnicky-export.json';
   a.click();
   URL.revokeObjectURL(a.href);
 }
 
 function resetTemplates(){
-  if(!confirm('Vrátit šablony z meal-templates.json? Vlastní uložené šablony v tomto prohlížeči se smažou.')) return;
+  if(!confirm('Vrátit původní jídelníčky? Vlastní uložené jídelníčky v tomto prohlížeči se smažou.')) return;
   localStorage.removeItem('nutritionMealTemplates');
   loadTemplates();
 }
@@ -222,7 +222,7 @@ function templateTotals(template){
 function refreshTemplateSelect(){
   if(!$('templateSelect')) return;
   if(!mealTemplates.length){
-    $('templateSelect').innerHTML = '<option value="">Šablony nenalezeny</option>';
+    $('templateSelect').innerHTML = '<option value="">Jídelníčky nenalezeny</option>';
     updateTemplatePreview();
     return;
   }
@@ -241,7 +241,7 @@ function updateTemplatePreview(){
   if(!$('templatePreview')) return;
   const template = getSelectedTemplate();
   if(!template){
-    $('templatePreview').textContent = 'Žádná šablona není načtená.';
+    $('templatePreview').textContent = 'Žádný jídelníček není načtený.';
     return;
   }
   const t = templateTotals(template);
@@ -250,8 +250,8 @@ function updateTemplatePreview(){
     <strong>${template.name}</strong><br>
     ${template.description || ''}<br>
     <span>Jídla: ${(template.items || []).length} · Součet: ${round(t.kcal)} kcal | B ${round(t.protein)} g | S ${round(t.carbs)} g | T ${round(t.fat)} g</span><br>
-    <span>Cíl šablony: ${target.kcal || '-'} kcal | B ${target.protein || '-'} g | S ${target.carbs || '-'} g | T ${target.fat || '-'} g</span><br>
-    <span>Tip: načti šablonu, uprav položky v tabulce a tlačítkem „Uložit šablonu“ ji přepiš pod stejným názvem.</span>
+    <span>Cíl jídelníčku: ${target.kcal || '-'} kcal | B ${target.protein || '-'} g | S ${target.carbs || '-'} g | T ${target.fat || '-'} g</span><br>
+    <span>Tip: načti jídelníček, uprav položky v tabulce a tlačítkem „Uložit jídelníček“ jej přepiš pod stejným názvem.</span>
   `;
 }
 
@@ -274,9 +274,9 @@ function normalizeTemplateItem(item){
 
 function applyTemplate(append = false){
   const template = getSelectedTemplate();
-  if(!template) return alert('Nejdřív vyber šablonu.');
+  if(!template) return alert('Nejdřív vyber jídelníček.');
   const items = (template.items || []).map(normalizeTemplateItem);
-  if(!append && getReport().length && !confirm(`Nahradit aktuální jídelníček pro ${dayTypeLabel()} šablonou ${template.name}?`)) return;
+  if(!append && getReport().length && !confirm(`Nahradit aktuální jídelníček pro ${dayTypeLabel()} jídelníčkem „${template.name}“?`)) return;
   reports[currentDayType] = append ? [...getReport(), ...items] : items;
   if(template.targets){
     targetPresets[currentDayType] = template.targets;
@@ -285,7 +285,7 @@ function applyTemplate(append = false){
   }
   save();
   render();
-  alert(`${append ? 'Přidáno ze šablony' : 'Načtena šablona'}: ${template.name}`);
+  alert(`${append ? 'Jídelníček přidán' : 'Jídelníček načten'}: ${template.name}`);
 }
 
 function recalcItemByGrams(item, newGrams){

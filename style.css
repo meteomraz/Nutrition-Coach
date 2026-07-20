@@ -297,3 +297,74 @@ button:hover,.file-button:hover{box-shadow:0 14px 28px rgba(21,94,239,.30)}
 .targets-grid {
   grid-template-columns: 1fr;
 }
+
+/* Profesionální dvousloupcové rozhraní */
+.app{max-width:1440px;padding:28px 32px 56px}
+.workspace{display:grid;grid-template-columns:minmax(320px,430px) minmax(0,1fr);gap:22px;align-items:start;margin-bottom:22px}
+.workspace-controls{display:grid;gap:18px}
+.workspace-controls .card,.workspace-preview .card{margin-bottom:0}
+.workspace-preview{min-width:0}
+.workspace-preview>.card{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}
+.workspace .grid,.workspace .targets-grid{display:block}
+.workspace .card{border-radius:22px;padding:22px}
+.section-kicker{margin:0 0 8px;color:var(--primary);font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.workspace-preview .section-head{padding-bottom:14px;border-bottom:1px solid var(--border)}
+.workspace-preview .section-head h2{font-size:26px}
+.workspace-preview .actions{justify-content:flex-end}
+.save-plan-btn{background:linear-gradient(135deg,#12b76a,#087a4b);box-shadow:0 10px 22px rgba(18,183,106,.23)}
+
+/* Modernější karty a hierarchie */
+.support-card,.feature-card{border-radius:24px;box-shadow:0 14px 35px rgba(16,24,40,.08)}
+.feature-card{border-left:5px solid var(--primary)}
+.card h2{color:#101828}
+.hero{min-height:220px;padding:34px}
+.hero-fields{grid-template-columns:1fr 1fr;min-width:420px}
+.description-box{grid-column:1/-1}
+
+/* Barevné označení skupin jídel */
+.meal-divider td{background:#101828!important}
+.meal-divider:nth-of-type(6n+1) td{background:linear-gradient(135deg,#155eef,#004eeb)!important}
+.meal-divider:nth-of-type(6n+2) td{background:linear-gradient(135deg,#7f56d9,#6941c6)!important}
+.meal-divider:nth-of-type(6n+3) td{background:linear-gradient(135deg,#12b76a,#087a4b)!important}
+.meal-divider:nth-of-type(6n+4) td{background:linear-gradient(135deg,#f79009,#b54708)!important}
+.meal-divider:nth-of-type(6n+5) td{background:linear-gradient(135deg,#f04438,#b42318)!important}
+.meal-divider:nth-of-type(6n+6) td{background:linear-gradient(135deg,#06aed4,#087e8b)!important}
+
+/* Kompaktní profesionální formuláře */
+.workspace-controls input,.workspace-controls select{padding:12px 14px;border-radius:13px}
+.workspace-controls button{width:100%}
+.workspace-controls .food-actions{display:grid;grid-template-columns:1fr auto}
+.workspace-controls #favoriteFoodBtn{width:auto}
+.targets{background:linear-gradient(180deg,#f8fbff,#fff);padding:14px}
+.targets label{display:grid;grid-template-columns:1fr 125px;gap:12px;align-items:center}
+.targets label:first-child{grid-template-columns:1fr}
+.targets label input,.targets label select{margin-top:0}
+
+/* Přehled a tabulka jako živý náhled */
+.workspace-preview .summary{grid-template-columns:repeat(4,minmax(125px,1fr));gap:10px}
+.workspace-preview .metric{padding:14px;border-radius:16px}
+.workspace-preview .metric strong{font-size:23px}
+.workspace-preview textarea#textReport{display:none}
+.workspace-preview .table-wrap{max-height:55vh}
+.checkbox-inline{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--border);border-radius:13px;background:#fff;font-size:13px}
+.checkbox-inline input{width:auto;margin:0}
+
+/* Uložené jídelníčky */
+.template-panel,.template-create{background:linear-gradient(180deg,#f8fbff,#fff)}
+.template-preview{min-height:112px}
+
+@media(max-width:1100px){
+  .workspace{grid-template-columns:360px minmax(0,1fr)}
+  .workspace-preview .summary{grid-template-columns:1fr 1fr}
+  .hero-fields{min-width:340px}
+}
+@media(max-width:900px){
+  .app{padding:14px}
+  .workspace{grid-template-columns:1fr}
+  .workspace-preview>.card{position:static;max-height:none;overflow:visible}
+  .workspace-preview .table-wrap{max-height:none}
+  .hero-fields{min-width:0;grid-template-columns:1fr}
+  .targets label{grid-template-columns:1fr}
+  .workspace-controls .food-actions{grid-template-columns:1fr}
+  .workspace-controls #favoriteFoodBtn{width:100%}
+}

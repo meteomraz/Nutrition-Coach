@@ -1,263 +1,253 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="cs">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Nutrition Coach</title>
-  <link rel="stylesheet" href="style.css?v=20260720-clean-ui" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Nutrition Coach – profesionální jídelníčky</title>
+<link href="style.css?v=20260720-pro-ui" rel="stylesheet"/>
 </head>
 <body>
-  <main class="app">
-    <section class="card hero">
-      <div>
-        <p class="eyebrow">Nutrition Report</p>
-        <h1>Nutrition Coach</h1>
-        <p>Profesionální jídelníček pro tréninkový i netréninkový den s exportem do Excelu.</p>
-      </div>
-      <div class="hero-fields">
-        <div class="date-box">
-          <label for="reportDate">Datum</label>
-          <input id="reportDate" type="date" />
-        </div>
-        <div class="date-box">
-          <label for="clientName">Jméno</label>
-          <input id="clientName" type="text" placeholder="např. Martin Mráz" />
-        </div>
-        <div class="date-box description-box">
-          <label for="clientDescription">Popis / poznámka do PDF</label>
-          <textarea id="clientDescription" rows="3" placeholder="např. jídelníček na redukci tuku, kontrola za 14 dní"></textarea>
-        </div>
-      </div>
-    </section>
-
-    <section class="grid">
-      <div class="card">
-        <h2>Přidat jídlo</h2>
-        <div class="form">
-          <label>Jídlo / část dne
-            <select id="mealType">
-              <option>Snídaně</option>
-              <option>Svačina</option>
-              <option>Oběd</option>
-              <option>Odpolední svačina</option>
-              <option>Večeře</option>
-              <option>Druhá večeře</option>
-            </select>
-          </label>
-          <label>Potravina
-            <input id="foodSearch" type="text" list="foodSuggestions" placeholder="Začni psát např. kuř..." autocomplete="off" />
-            <datalist id="foodSuggestions"></datalist>
-            <span id="foodHint" class="muted small">Našeptávač nabízí potraviny podle začátku názvu.</span>
-          </label>
-          <label>Množství
-            <div class="quantity-row">
-              <input id="gramsInput" type="number" min="1" step="1" value="100" />
-              <select id="unitSelect">
-                <option value="g">g</option>
-              </select>
-            </div>
-            <span id="unitHint" class="muted small">Základ je v gramech. U vybraných potravin lze použít i kusy.</span>
-          </label>
-          <div class="actions food-actions">
-            <button id="addFoodBtn">Přidat do jídelníčku</button>
-            <button id="favoriteFoodBtn" class="secondary" type="button">⭐ Oblíbené</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="section-head">
-        <h2>Jídelníček aktuálního typu dne</h2>
-        <div class="actions">
-          <button id="excelBtn" class="secondary">Export Excel – oba dny</button>
-          <button id="pdfBtn" class="secondary">Export PDF</button>
-          <label class="checkbox-inline"><input id="includeReplacementsPdf" type="checkbox" checked> Náhrady do PDF</label>
-          <button id="clearBtn" class="danger">Vymazat aktuální jídelníček</button>
-        </div>
-      </div>
-      <div class="summary" id="summary"></div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Jídlo</th><th>Potravina</th><th>Množství / g</th><th>kcal</th><th>B</th><th>S</th><th>T</th><th>Akce</th>
-            </tr>
-          </thead>
-          <tbody id="reportBody"></tbody>
-        </table>
-      </div>
-      <textarea id="textReport" readonly></textarea>
-    </section>
-
-
-
-
-
-    <section class="grid targets-grid">
-      <div class="card">
-        <h2>Cíle dne</h2>
-        <div class="targets">
-          <label>Typ dne
+<main class="app">
+<section class="card hero">
+<div>
+<p class="eyebrow">Nutrition Report</p>
+<h1>Nutrition Coach</h1>
+<p>Profesionální tvorba jídelníčků, živý přehled maker a export pro klienta.</p>
+</div>
+<div class="hero-fields">
+<div class="date-box">
+<label for="reportDate">Datum</label>
+<input id="reportDate" type="date"/>
+</div>
+<div class="date-box">
+<label for="clientName">Jméno</label>
+<input id="clientName" placeholder="např. Martin Mráz" type="text"/>
+</div>
+<div class="date-box description-box">
+<label for="clientDescription">Popis / poznámka do PDF</label>
+<textarea id="clientDescription" placeholder="např. jídelníček na redukci tuku, kontrola za 14 dní" rows="3"></textarea>
+</div>
+</div>
+</section><section class="workspace"><div class="workspace-controls"><section class="grid targets-grid">
+<div class="card">
+<p class="section-kicker">1. Nastavení dne</p><h2>Cíle dne</h2>
+<div class="targets">
+<label>Typ dne
             <select id="dayType">
-              <option value="training">Tréninkový den</option>
-              <option value="rest">Netréninkový den</option>
-            </select>
-          </label>
-          <label>Kcal <input id="targetKcal" type="number" value="3000"></label>
-          <label>Bílkoviny <input id="targetProtein" type="number" value="220"></label>
-          <label>Sacharidy <input id="targetCarbs" type="number" value="350"></label>
-          <label>Tuky <input id="targetFat" type="number" value="70"></label>
-          <div class="actions compact-actions">
-            <button id="saveTargetsBtn" class="secondary" type="button">Uložit cíle pro tento typ dne</button>
-          </div>
-          <p id="dayTypeHint" class="muted small"></p>
-        </div>
-      </div>
-    </section>
+<option value="training">Tréninkový den</option>
+<option value="rest">Netréninkový den</option>
+</select>
+</label>
+<label>Kcal <input id="targetKcal" type="number" value="3000"/></label>
+<label>Bílkoviny <input id="targetProtein" type="number" value="220"/></label>
+<label>Sacharidy <input id="targetCarbs" type="number" value="350"/></label>
+<label>Tuky <input id="targetFat" type="number" value="70"/></label>
+<div class="actions compact-actions">
+<button class="secondary" id="saveTargetsBtn" type="button">Uložit cíle pro tento typ dne</button>
+</div>
+<p class="muted small" id="dayTypeHint"></p>
+</div>
+</div>
+</section><section class="grid">
+<div class="card">
+<p class="section-kicker">2. Sestavení jídelníčku</p><h2>Přidat jídlo</h2>
+<div class="form">
+<label>Jídlo / část dne
+            <select id="mealType">
+<option>Snídaně</option>
+<option>Svačina</option>
+<option>Oběd</option>
+<option>Odpolední svačina</option>
+<option>Večeře</option>
+<option>Druhá večeře</option>
+</select>
+</label>
+<label>Potravina
+            <input autocomplete="off" id="foodSearch" list="foodSuggestions" placeholder="Začni psát např. kuř..." type="text"/>
+<datalist id="foodSuggestions"></datalist>
+<span class="muted small" id="foodHint">Našeptávač nabízí potraviny podle začátku názvu.</span>
+</label>
+<label>Množství
+            <div class="quantity-row">
+<input id="gramsInput" min="1" step="1" type="number" value="100"/>
+<select id="unitSelect">
+<option value="g">g</option>
+</select>
+</div>
+<span class="muted small" id="unitHint">Základ je v gramech. U vybraných potravin lze použít i kusy.</span>
+</label>
+<div class="actions food-actions">
+<button id="addFoodBtn">Přidat do jídelníčku</button>
+<button class="secondary" id="favoriteFoodBtn" type="button">⭐ Oblíbené</button>
+</div>
+</div>
+</div>
+</section></div><div class="workspace-preview"><section class="card">
+<p class="section-kicker">Živý náhled</p><div class="section-head">
+<h2>Jídelníček aktuálního typu dne</h2>
+<div class="actions">
+<button class="secondary" id="excelBtn">Export Excel – oba dny</button>
+<button class="secondary" id="pdfBtn">Export PDF</button><button class="secondary save-plan-btn" id="saveTemplateBtn" type="button">Uložit jídelníček</button>
+<label class="checkbox-inline"><input checked="" id="includeReplacementsPdf" type="checkbox"/> Náhrady do PDF</label>
+<button class="danger" id="clearBtn">Vymazat aktuální jídelníček</button>
+</div>
+</div>
+<div class="summary" id="summary"></div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Jídlo</th><th>Potravina</th><th>Množství / g</th><th>kcal</th><th>B</th><th>S</th><th>T</th><th>Akce</th>
+</tr>
+</thead>
+<tbody id="reportBody"></tbody>
+</table>
+</div>
+<textarea id="textReport" readonly=""></textarea>
+</section></div></section>
 
-    <section class="card generator-card">
-      <div class="section-head">
-        <div>
-          <h2>Automatický generátor jídelníčku</h2>
-          <p class="muted">Vygeneruje návrh z běžných fitness surovin podle cílů aktuálního typu dne. Výsledek se načte do tabulky a můžeš ho hned ručně upravovat.</p>
-        </div>
-        <div class="actions">
-          <button id="generateMealPlanBtn" type="button">Vygenerovat jídelníček</button>
-        </div>
-      </div>
-      <div class="generator-grid">
-        <label>Počet chodů
+
+
+<section class="card generator-card feature-card">
+<div class="section-head">
+<div>
+<h2>Automatický generátor jídelníčku</h2>
+<p class="muted">Vygeneruje návrh z běžných fitness surovin podle cílů aktuálního typu dne. Výsledek se načte do tabulky a můžeš ho hned ručně upravovat.</p>
+</div>
+<div class="actions">
+<button id="generateMealPlanBtn" type="button">Vygenerovat jídelníček</button>
+</div>
+</div>
+<div class="generator-grid">
+<label>Počet chodů
           <select id="generatorMealsCount">
-            <option value="5">5 jídel</option>
-            <option value="6" selected>6 jídel</option>
-          </select>
-        </label>
-        <label>Styl jídelníčku
+<option value="5">5 jídel</option>
+<option selected="" value="6">6 jídel</option>
+</select>
+</label>
+<label>Styl jídelníčku
           <select id="generatorStyle">
-            <option value="fitness" selected>Fitness základ</option>
-            <option value="diet">Dietnější / nízkotučný</option>
-            <option value="bulk">Objemový / více sacharidů</option>
-          </select>
-        </label>
-        <label>Režim potravin
+<option selected="" value="fitness">Fitness základ</option>
+<option value="diet">Dietnější / nízkotučný</option>
+<option value="bulk">Objemový / více sacharidů</option>
+</select>
+</label>
+<label>Režim potravin
           <select id="generatorDietMode">
-            <option value="classic" selected>Klasické potraviny</option>
-            <option value="glutenfree">Bezlepkové potraviny</option>
-            <option value="lactosefree">Bezlaktózové potraviny</option>
-          </select>
-        </label>
-        <label>Hlavní příloha
+<option selected="" value="classic">Klasické potraviny</option>
+<option value="glutenfree">Bezlepkové potraviny</option>
+<option value="lactosefree">Bezlaktózové potraviny</option>
+</select>
+</label>
+<label>Hlavní příloha
           <select id="generatorCarbSource">
-            <option value="rice" selected>Rýže</option>
-            <option value="potatoes">Brambory / batáty</option>
-            <option value="mixed">Mix příloh</option>
-          </select>
-        </label>
-        <label>Hlavní protein
+<option selected="" value="rice">Rýže</option>
+<option value="potatoes">Brambory / batáty</option>
+<option value="mixed">Mix příloh</option>
+</select>
+</label>
+<label>Hlavní protein
           <select id="generatorProteinSource">
-            <option value="chicken" selected>Kuřecí prsa</option>
-            <option value="turkey">Krůtí mleté 2 %</option>
-            <option value="mixed">Mix proteinů</option>
-          </select>
-        </label>
-      </div>
-      <p id="generatorStatus" class="muted small">Generátor používá cíle vybraného dne a položky z databáze potravin. Pokud něco chybí, použije nejbližší dostupnou surovinu.</p>
-    </section>
+<option selected="" value="chicken">Kuřecí prsa</option>
+<option value="turkey">Krůtí mleté 2 %</option>
+<option value="mixed">Mix proteinů</option>
+</select>
+</label>
+</div>
+<p class="muted small" id="generatorStatus">Generátor používá cíle vybraného dne a položky z databáze potravin. Pokud něco chybí, použije nejbližší dostupnou surovinu.</p>
+</section>
+<section class="card support-card">
+<div class="section-head">
+<div>
+<h2>Uložené jídelníčky</h2>
+<p class="muted">Vyber uložený jídelníček podle cíle. Načte se do aktuálního typu dne a můžeš ho dál upravovat.</p>
+</div>
+<div class="actions">
+<button class="secondary" id="loadTemplateBtn" type="button">Načíst jídelníček</button>
+<button class="secondary" id="appendTemplateBtn" type="button">Přidat jídelníček k aktuálnímu</button>
 
-    <section class="card">
-      <div class="section-head">
-        <div>
-          <h2>Šablony jídelníčků</h2>
-          <p class="muted">Vyber předdefinovaný jídelníček podle cíle. Načte se do aktuálního typu dne a můžeš ho dál upravovat.</p>
-        </div>
-        <div class="actions">
-          <button id="loadTemplateBtn" class="secondary" type="button">Načíst šablonu</button>
-          <button id="appendTemplateBtn" class="secondary" type="button">Přidat k aktuálnímu</button>
-          <button id="saveTemplateBtn" class="secondary" type="button">Uložit šablonu</button>
-          <button id="deleteTemplateBtn" class="danger" type="button">Smazat šablonu</button>
-        </div>
-      </div>
-      <div class="template-panel">
-        <label>Vybrat šablonu
+<button class="danger" id="deleteTemplateBtn" type="button">Smazat jídelníček</button>
+</div>
+</div>
+<div class="template-panel">
+<label>Vybrat jídelníček
           <select id="templateSelect"></select>
-        </label>
-        <div id="templatePreview" class="template-preview muted">Šablony se načítají…</div>
-      </div>
-      <div class="template-create">
-        <label>Název nové šablony
-          <input id="newTemplateName" type="text" placeholder="např. Martin dieta 2600 kcal" />
-        </label>
-        <div class="actions">
-          <button id="createTemplateBtn" type="button">Vytvořit novou šablonu z aktuálního jídelníčku</button>
-          <button id="exportTemplatesBtn" class="secondary" type="button">Export šablon</button>
-          <button id="resetTemplatesBtn" class="danger" type="button">Vrátit původní šablony</button>
-        </div>
-      </div>
-      <p class="muted small">Upravení šablony: načti šablonu, změň jídla/gramy/kcal/B/S/T v tabulce a klikni na <strong>Uložit šablonu</strong>. Ukládá se do prohlížeče; pro přenos na jiný telefon použij Export šablon.</p>
-    </section>
-
-    <section class="card">
-      <div class="section-head">
-        <div>
-          <h2>Vlastní potravina</h2>
-          <p class="muted">Přidej vlastní surovinu nebo konkrétní produkt. Uloží se do prohlížeče a hned se objeví ve vyhledávání.</p>
-        </div>
-        <div class="actions">
-          <button id="saveCustomFoodBtn" type="button">Uložit potravinu</button>
-          <button id="clearCustomFoodBtn" class="secondary" type="button">Vyčistit formulář</button>
-          <button id="deleteCustomFoodBtn" class="danger" type="button">Smazat vlastní</button>
-        </div>
-      </div>
-      <div class="custom-food-grid">
-        <label>Název
-          <input id="customFoodName" type="text" placeholder="např. Protein Whey CFM" />
-        </label>
-        <label>Kategorie
-          <input id="customFoodCategory" type="text" placeholder="např. Suplementy" />
-        </label>
-        <label>Kcal / 100 g
-          <input id="customFoodKcal" type="number" step="0.1" min="0" />
-        </label>
-        <label>Bílkoviny / 100 g
-          <input id="customFoodProtein" type="number" step="0.1" min="0" />
-        </label>
-        <label>Sacharidy / 100 g
-          <input id="customFoodCarbs" type="number" step="0.1" min="0" />
-        </label>
-        <label>Tuky / 100 g
-          <input id="customFoodFat" type="number" step="0.1" min="0" />
-        </label>
-        <label>Název kusu
-          <input id="customFoodPieceName" type="text" placeholder="ks, plátek, odměrka…" />
-        </label>
-        <label>Váha 1 kusu v g
-          <input id="customFoodPieceWeight" type="number" step="0.1" min="0" placeholder="např. 50" />
-        </label>
-      </div>
-      <p id="customFoodStatus" class="muted small">Tip: vyber potravinu ve vyhledávání a formulář se předvyplní, pokud ji chceš upravit.</p>
-    </section>
-
-    <section class="card database-section-hidden" aria-hidden="true">
-      <div class="section-head">
-        <div>
-          <h2>Databáze potravin</h2>
-          <p class="muted">Potraviny se načítají z <strong>foods.json</strong>. Na Androidu můžeš importovat i stejný obsah uložený jako <strong>.txt</strong>.</p>
-        </div>
-        <div class="actions">
-          <label class="file-button" for="foodImport">Import JSON/TXT</label>
-          <input id="foodImport" class="hidden-file" type="file" accept=".json,.txt,application/json,text/plain" />
-          <button id="exportFoodsBtn" class="secondary">Export potravin</button>
-          <button id="resetFoodsBtn" class="danger">Vrátit původní</button>
-        </div>
-      </div>
-      <div id="importStatus" class="status muted">Aktuálně načteno: 0 potravin.</div>
-      <p class="muted small">Formát souboru musí být pole objektů. Každá potravina má minimálně <strong>name, kcal, protein, carbs, fat</strong> hodnoty na 100 g.</p>
-    </section>
-  </main>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="app.js?v=20260720-clean-ui"></script>
+</label>
+<div class="template-preview muted" id="templatePreview">Jídelníčky se načítají…</div>
+</div>
+<div class="template-create">
+<label>Název nového jídelníčku
+          <input id="newTemplateName" placeholder="např. Martin dieta 2600 kcal" type="text">
+</input></label>
+<div class="actions">
+<button id="createTemplateBtn" type="button">Vytvořit nový jídelníček z aktuálního</button>
+<button class="secondary" id="exportTemplatesBtn" type="button">Export jídelníčků</button>
+<button class="danger" id="resetTemplatesBtn" type="button">Vrátit původní jídelníčky</button>
+</div>
+</div>
+<p class="muted small">Úprava jídelníčku: načti jídelníček, změň jídla, množství a makra v tabulce a klikni na <strong>Uložit jídelníček</strong>. Ukládá se do prohlížeče; pro přenos na jiný telefon použij Export jídelníčků.</p>
+</section>
+<section class="card support-card">
+<div class="section-head">
+<div>
+<h2>Vlastní potravina</h2>
+<p class="muted">Přidej vlastní surovinu nebo konkrétní produkt. Uloží se do prohlížeče a hned se objeví ve vyhledávání.</p>
+</div>
+<div class="actions">
+<button id="saveCustomFoodBtn" type="button">Uložit potravinu</button>
+<button class="secondary" id="clearCustomFoodBtn" type="button">Vyčistit formulář</button>
+<button class="danger" id="deleteCustomFoodBtn" type="button">Smazat vlastní</button>
+</div>
+</div>
+<div class="custom-food-grid">
+<label>Název
+          <input id="customFoodName" placeholder="např. Protein Whey CFM" type="text">
+</input></label>
+<label>Kategorie
+          <input id="customFoodCategory" placeholder="např. Suplementy" type="text">
+</input></label>
+<label>Kcal / 100 g
+          <input id="customFoodKcal" min="0" step="0.1" type="number">
+</input></label>
+<label>Bílkoviny / 100 g
+          <input id="customFoodProtein" min="0" step="0.1" type="number">
+</input></label>
+<label>Sacharidy / 100 g
+          <input id="customFoodCarbs" min="0" step="0.1" type="number"/>
+</label>
+<label>Tuky / 100 g
+          <input id="customFoodFat" min="0" step="0.1" type="number"/>
+</label>
+<label>Název kusu
+          <input id="customFoodPieceName" placeholder="ks, plátek, odměrka…" type="text"/>
+</label>
+<label>Váha 1 kusu v g
+          <input id="customFoodPieceWeight" min="0" placeholder="např. 50" step="0.1" type="number"/>
+</label>
+</div>
+<p class="muted small" id="customFoodStatus">Tip: vyber potravinu ve vyhledávání a formulář se předvyplní, pokud ji chceš upravit.</p>
+</section>
+<section aria-hidden="true" class="card database-section-hidden">
+<div class="section-head">
+<div>
+<h2>Databáze potravin</h2>
+<p class="muted">Potraviny se načítají z <strong>foods.json</strong>. Na Androidu můžeš importovat i stejný obsah uložený jako <strong>.txt</strong>.</p>
+</div>
+<div class="actions">
+<label class="file-button" for="foodImport">Import JSON/TXT</label>
+<input accept=".json,.txt,application/json,text/plain" class="hidden-file" id="foodImport" type="file"/>
+<button class="secondary" id="exportFoodsBtn">Export potravin</button>
+<button class="danger" id="resetFoodsBtn">Vrátit původní</button>
+</div>
+</div>
+<div class="status muted" id="importStatus">Aktuálně načteno: 0 potravin.</div>
+<p class="muted small">Formát souboru musí být pole objektů. Každá potravina má minimálně <strong>name, kcal, protein, carbs, fat</strong> hodnoty na 100 g.</p>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="app.js?v=20260720-pro-ui"></script>
 </body>
 </html>
