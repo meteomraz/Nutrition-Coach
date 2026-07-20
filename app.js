@@ -871,7 +871,7 @@ function totals(type = currentDayType){
   return getReport(type).reduce((a,x)=>({kcal:a.kcal+x.kcal, protein:a.protein+x.protein, carbs:a.carbs+x.carbs, fat:a.fat+x.fat}), {kcal:0,protein:0,carbs:0,fat:0});
 }
 
-function metric(label, value, target, unit=''){
+function metric(label, value, target, unit='', macroKey='kcal'){
   const numericValue = Number(value || 0);
   const numericTarget = Math.max(Number(target || 0), 0);
   const rawPct = numericTarget > 0 ? Math.round((numericValue / numericTarget) * 100) : 0;
@@ -880,9 +880,9 @@ function metric(label, value, target, unit=''){
   const diff = round(Math.max(numericTarget - numericValue, 0));
   const status = exceeded ? `Přesah ${round(numericValue - numericTarget)}${unit}` : `Zbývá ${diff}${unit}`;
   return `<div class="metric metric-visual ${exceeded ? 'over-limit over-target' : ''}" data-exceeded="${exceeded}">
-    <div class="macro-ring" style="--progress:${pct * 3.6}deg" role="img" aria-label="${label}: ${rawPct} procent cíle">
+    <button class="macro-ring" style="--progress:${pct * 3.6}deg" type="button" onclick="showMacroBreakdown('${macroKey}')" aria-label="Zobrazit přehled potravin pro ${label}. Aktuálně ${rawPct} procent cíle">
       <div class="macro-ring-inner"><strong>${rawPct}%</strong><small>${label}</small></div>
-    </div>
+    </button>
     <div class="metric-copy">
       <strong>${round(numericValue)}${unit}</strong>
       <span>Cíl ${numericTarget}${unit}</span>
@@ -890,6 +890,75 @@ function metric(label, value, target, unit=''){
       <div class="progress-track" aria-hidden="true"><div class="progress-fill" style="width:${pct}%"></div></div>
     </div>
   </div>`;
+}
+
+
+const macroBreakdownMeta = {
+  kcal: { label: 'Kalorie', unit: 'kcal' },
+  protein: { label: 'Bílkoviny', unit: 'g' },
+  carbs: { label: 'Sacharidy', unit: 'g' },
+  fat: { label: 'Tuky', unit: 'g' }
+};
+
+function macroBreakdownRows(macroKey){
+  const grouped = new Map();
+  getReport().forEach(item => {
+    const key = normalizeText(item.name);
+    const current = grouped.get(key) || {
+      name: item.name, value: 0, kcal: 0, protein: 0, carbs: 0, fat: 0, grams: 0, meals: new Set()
+    };
+    current.value += Number(item[macroKey] || 0);
+    current.kcal += Number(item.kcal || 0);
+    current.protein += Number(item.protein || 0);
+    current.carbs += Number(item.carbs || 0);
+    current.fat += Number(item.fat || 0);
+    current.grams += Number(item.grams || 0);
+    if(item.meal) current.meals.add(item.meal);
+    grouped.set(key, current);
+  });
+  return [...grouped.values()].sort((a,b) => b.value - a.value);
+}
+
+function showMacroBreakdown(macroKey){
+  const meta = macroBreakdownMeta[macroKey];
+  if(!meta) return;
+  const rows = macroBreakdownRows(macroKey);
+  const modal = $('macroBreakdownModal');
+  const title = $('macroBreakdownTitle');
+  const subtitle = $('macroBreakdownSubtitle');
+  const body = $('macroBreakdownBody');
+  if(!modal || !title || !subtitle || !body) return;
+
+  title.textContent = `Přehled: ${meta.label}`;
+  const total = rows.reduce((sum, row) => sum + row.value, 0);
+  subtitle.textContent = rows.length ? `${rows.length} potravin · celkem ${round(total)} ${meta.unit}` : 'V jídelníčku zatím nejsou žádné potraviny.';
+
+  body.innerHTML = rows.length ? rows.map((row, index) => {
+    const share = total > 0 ? Math.round((row.value / total) * 100) : 0;
+    return `<tr>
+      <td><span class="macro-rank">${index + 1}</span></td>
+      <td><strong>${xmlEsc(row.name)}</strong><small>${xmlEsc([...row.meals].join(', '))}</small></td>
+      <td>${round(row.grams)} g</td>
+      <td class="macro-main-value"><strong>${round(row.value)} ${meta.unit}</strong><span>${share} %</span></td>
+      <td>${round(row.kcal)}</td>
+      <td>${round(row.protein)}</td>
+      <td>${round(row.carbs)}</td>
+      <td>${round(row.fat)}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="8" class="macro-empty">Nejdříve přidej potraviny do jídelníčku.</td></tr>';
+
+  modal.classList.add('is-open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+  $('closeMacroBreakdownBtn')?.focus();
+}
+
+function closeMacroBreakdown(){
+  const modal = $('macroBreakdownModal');
+  if(!modal) return;
+  modal.classList.remove('is-open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
 }
 
 function mealTotals(items){
@@ -1171,10 +1240,10 @@ function render(){
   const t = totals();
   const targets = getTargets();
   $('summary').innerHTML = [
-    metric('Kalorie', t.kcal, targets.kcal, ' kcal'),
-    metric('Bílkoviny', t.protein, targets.protein, ' g'),
-    metric('Sacharidy', t.carbs, targets.carbs, ' g'),
-    metric('Tuky', t.fat, targets.fat, ' g')
+    metric('Kalorie', t.kcal, targets.kcal, ' kcal', 'kcal'),
+    metric('Bílkoviny', t.protein, targets.protein, ' g', 'protein'),
+    metric('Sacharidy', t.carbs, targets.carbs, ' g', 'carbs'),
+    metric('Tuky', t.fat, targets.fat, ' g', 'fat')
   ].join('');
 
   $('reportBody').innerHTML = renderReportRows();
@@ -1945,3 +2014,12 @@ refreshRecipeSelect();
 
 loadFoods();
 loadTemplates();
+
+
+$('closeMacroBreakdownBtn')?.addEventListener('click', closeMacroBreakdown);
+$('macroBreakdownModal')?.addEventListener('click', (event) => {
+  if(event.target === $('macroBreakdownModal')) closeMacroBreakdown();
+});
+document.addEventListener('keydown', (event) => {
+  if(event.key === 'Escape' && $('macroBreakdownModal')?.classList.contains('is-open')) closeMacroBreakdown();
+});
