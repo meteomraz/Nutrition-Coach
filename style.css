@@ -368,3 +368,49 @@ button:hover,.file-button:hover{box-shadow:0 14px 28px rgba(21,94,239,.30)}
   .workspace-controls .food-actions{grid-template-columns:1fr}
   .workspace-controls #favoriteFoodBtn{width:100%}
 }
+
+/* Správa jídelníčků */
+.plan-manager-card{border-top:5px solid var(--primary)}
+.current-plan-badge{display:inline-flex;align-items:center;max-width:100%;padding:10px 14px;border-radius:999px;background:#fff4e5;color:#9a5b00;border:1px solid #fedf89;font-size:13px;font-weight:800}
+.current-plan-badge.is-saved{background:#ecfdf3;color:#087a4b;border-color:#abefc6}
+.plan-manager-grid{display:grid;grid-template-columns:minmax(240px,.75fr) 1.25fr;gap:16px;align-items:stretch;margin-top:16px}
+.plan-manager-grid label{margin:0}
+.plan-manager-grid select{margin-top:8px}
+.plan-actions{display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:10px;margin-top:16px}
+.plan-actions button{min-height:48px}
+.plan-utilities{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.plan-utilities button{width:auto}
+
+/* Kruhové ukazatele maker a progresní lišty */
+.workspace-preview .summary{grid-template-columns:repeat(4,minmax(150px,1fr))}
+.metric-visual{display:grid!important;grid-template-columns:72px minmax(0,1fr);gap:12px;align-items:center;text-align:left!important;min-height:116px}
+.macro-ring{--progress:0deg;width:68px;height:68px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--primary) var(--progress),#e8eef7 0);position:relative;flex:none}
+.macro-ring::before{content:"";position:absolute;inset:7px;border-radius:50%;background:#fff}
+.macro-ring-inner{position:relative;z-index:1;text-align:center;line-height:1.05}
+.macro-ring-inner strong{display:block!important;font-size:17px!important;color:#101828!important}
+.macro-ring-inner small{display:block;margin-top:4px;font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.metric-copy{min-width:0}
+.metric-copy>strong{display:block;font-size:21px!important;line-height:1.15;white-space:nowrap}
+.metric-copy>span,.metric-copy>em{display:block;font-size:11px;line-height:1.35}
+.metric-copy>em{font-style:normal;font-weight:800;color:#087a4b;margin-top:2px}
+.progress-track{height:10px;margin-top:9px;border-radius:999px;background:#e8eef7;overflow:hidden}
+.progress-fill{height:100%;border-radius:inherit;background:var(--primary);transition:width .25s ease}
+.metric-visual.over-target .macro-ring{background:conic-gradient(#dc2626 var(--progress),#fee2e2 0)}
+.metric-visual.over-target .progress-fill{background:#dc2626}
+.metric-visual.over-target .metric-copy>em{color:#dc2626}
+
+@media(max-width:1200px){
+  .workspace-preview .summary{grid-template-columns:1fr 1fr}
+  .plan-actions{grid-template-columns:1fr 1fr}
+}
+@media(max-width:760px){
+  .plan-manager-grid{grid-template-columns:1fr}
+  .plan-actions{grid-template-columns:1fr}
+  .plan-utilities{display:grid;grid-template-columns:1fr}
+  .plan-utilities button{width:100%}
+}
+@media(max-width:430px){
+  .workspace-preview .summary{grid-template-columns:1fr}
+  .metric-visual{grid-template-columns:64px minmax(0,1fr)}
+  .macro-ring{width:60px;height:60px}
+}

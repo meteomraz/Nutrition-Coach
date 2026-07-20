@@ -1,6 +1,7 @@
 let foods = [];
 let defaultFoods = [];
 let mealTemplates = [];
+let currentPlanId = localStorage.getItem('nutritionCurrentPlanId') || '';
 let customFoods = JSON.parse(localStorage.getItem('nutritionCustomFoods') || '[]');
 let favoriteFoodKeys = JSON.parse(localStorage.getItem('nutritionFavoriteFoods') || '[]');
 
@@ -146,42 +147,95 @@ function reportToTemplateItems(type = currentDayType){
   }));
 }
 
-function saveCurrentTemplate(){
-  const template = getSelectedTemplate();
-  if(!template) return alert('Nejdřív vyber jídelníček, který chceš přepsat.');
-  if(!getReport().length) return alert('Aktuální jídelníček je prázdný. Nejdřív načti nebo vytvoř jídelníček.');
-  const updated = {
-    ...template,
-    targets: getTargets(),
-    items: reportToTemplateItems(),
-    description: `Upraveno v aplikaci ${new Date().toLocaleDateString('cs-CZ')}.`
-  };
-  mealTemplates = mealTemplates.map(t => t.id === template.id ? updated : t);
-  persistTemplates();
-  refreshTemplateSelect();
-  $('templateSelect').value = updated.id;
-  updateTemplatePreview();
-  alert(`Jídelníček uložen: ${updated.name}`);
+function setCurrentPlan(id = ''){
+  currentPlanId = id || '';
+  if(currentPlanId) localStorage.setItem('nutritionCurrentPlanId', currentPlanId);
+  else localStorage.removeItem('nutritionCurrentPlanId');
+  updateCurrentPlanStatus();
 }
 
-function createNewTemplate(){
-  const name = ($('newTemplateName')?.value || '').trim();
-  if(!name) return alert('Vyplň název nového jídelníčku.');
-  if(!getReport().length) return alert('Aktuální jídelníček je prázdný. Přidej položky, které se mají uložit do jídelníčku.');
+function getCurrentPlan(){
+  return mealTemplates.find(t => t.id === currentPlanId) || null;
+}
+
+function updateCurrentPlanStatus(){
+  const el = $('currentPlanStatus');
+  if(!el) return;
+  const plan = getCurrentPlan();
+  el.textContent = plan ? `Aktuální jídelníček: ${plan.name}` : 'Aktuální jídelníček: nový neuložený';
+  el.classList.toggle('is-saved', Boolean(plan));
+}
+
+function createPlanFromCurrent(name, description){
   const created = {
     id: makeTemplateId(name),
     name,
-    description: `Vlastní jídelníček uložený z aktuálního jídelníčku (${dayTypeLabel()}).`,
+    description: description || `Vlastní jídelníček (${dayTypeLabel()}).`,
     targets: getTargets(),
     items: reportToTemplateItems()
   };
   mealTemplates.push(created);
   persistTemplates();
-  refreshTemplateSelect();
-  $('templateSelect').value = created.id;
-  $('newTemplateName').value = '';
+  refreshTemplateSelect(created.id);
+  setCurrentPlan(created.id);
   updateTemplatePreview();
-  alert(`Nový jídelníček vytvořen: ${created.name}`);
+  return created;
+}
+
+function saveCurrentTemplate(){
+  if(!getReport().length) return alert('Aktuální jídelníček je prázdný. Nejdřív přidej potraviny.');
+  const current = getCurrentPlan();
+  if(!current){
+    const name = prompt('Zadejte název jídelníčku:');
+    if(!name || !name.trim()) return;
+    const created = createPlanFromCurrent(name.trim(), `Vlastní jídelníček uložený ${new Date().toLocaleDateString('cs-CZ')}.`);
+    alert(`Jídelníček uložen: ${created.name}`);
+    return;
+  }
+  const updated = {
+    ...current,
+    targets: getTargets(),
+    items: reportToTemplateItems(),
+    description: `Upraveno v aplikaci ${new Date().toLocaleDateString('cs-CZ')}.`
+  };
+  mealTemplates = mealTemplates.map(t => t.id === current.id ? updated : t);
+  persistTemplates();
+  refreshTemplateSelect(updated.id);
+  setCurrentPlan(updated.id);
+  updateTemplatePreview();
+  alert(`Změny uloženy: ${updated.name}`);
+}
+
+function createTemplateCopy(){
+  if(!getReport().length) return alert('Aktuální jídelníček je prázdný. Není co kopírovat.');
+  const source = getCurrentPlan();
+  const baseName = source?.name || 'Nový jídelníček';
+  const suggested = `${baseName} – kopie`;
+  const name = prompt('Název kopie jídelníčku:', suggested);
+  if(!name || !name.trim()) return;
+  const created = createPlanFromCurrent(name.trim(), `Kopie jídelníčku „${baseName}“ vytvořená ${new Date().toLocaleDateString('cs-CZ')}.`);
+  alert(`Kopie vytvořena: ${created.name}`);
+}
+
+function createNewBlankPlan(){
+  const hasContent = getReport().length || ($('clientName')?.value || '').trim() || ($('clientDescription')?.value || '').trim();
+  if(hasContent && !confirm('Opravdu chcete vytvořit nový prázdný jídelníček? Neuložené změny budou ztraceny.')) return;
+  reports[currentDayType] = [];
+  const defaults = currentDayType === 'training'
+    ? { kcal: 3000, protein: 220, carbs: 350, fat: 70 }
+    : { kcal: 2600, protein: 220, carbs: 220, fat: 85 };
+  targetPresets[currentDayType] = defaults;
+  localStorage.setItem('nutritionTargetPresets', JSON.stringify(targetPresets));
+  if($('clientName')) $('clientName').value = '';
+  if($('clientDescription')) $('clientDescription').value = '';
+  clientName = '';
+  clientDescription = '';
+  localStorage.removeItem('nutritionClientName');
+  localStorage.removeItem('nutritionClientDescription');
+  setCurrentPlan('');
+  applyTargetsForDayType();
+  save();
+  render();
 }
 
 function deleteCurrentTemplate(){
@@ -189,6 +243,7 @@ function deleteCurrentTemplate(){
   if(!template) return alert('Nejdřív vyber jídelníček, který chceš smazat.');
   if(!confirm(`Opravdu smazat jídelníček „${template.name}“ z tohoto prohlížeče?`)) return;
   mealTemplates = mealTemplates.filter(t => t.id !== template.id);
+  if(currentPlanId === template.id) setCurrentPlan('');
   persistTemplates();
   refreshTemplateSelect();
   updateTemplatePreview();
@@ -219,7 +274,7 @@ function templateTotals(template){
   }), {kcal:0,protein:0,carbs:0,fat:0});
 }
 
-function refreshTemplateSelect(){
+function refreshTemplateSelect(preferredId = ""){
   if(!$('templateSelect')) return;
   if(!mealTemplates.length){
     $('templateSelect').innerHTML = '<option value="">Jídelníčky nenalezeny</option>';
@@ -229,7 +284,10 @@ function refreshTemplateSelect(){
   $('templateSelect').innerHTML = mealTemplates
     .map(t => `<option value="${t.id}">${t.name}</option>`)
     .join('');
+  const wanted = preferredId || currentPlanId;
+  if(wanted && mealTemplates.some(t => t.id === wanted)) $('templateSelect').value = wanted;
   updateTemplatePreview();
+  updateCurrentPlanStatus();
 }
 
 function getSelectedTemplate(){
@@ -285,7 +343,8 @@ function applyTemplate(append = false){
   }
   save();
   render();
-  alert(`${append ? 'Jídelníček přidán' : 'Jídelníček načten'}: ${template.name}`);
+  if(!append) setCurrentPlan(template.id);
+  alert(`${append ? 'Jídelníček přidán' : 'Jídelníček otevřen'}: ${template.name}`);
 }
 
 function recalcItemByGrams(item, newGrams){
@@ -811,21 +870,23 @@ function totals(type = currentDayType){
 }
 
 function metric(label, value, target, unit=''){
-  const numericValue = Number(value) || 0;
-  const numericTarget = Number(target) || 0;
-  const rawPct = numericTarget ? Math.round(numericValue / numericTarget * 100) : 0;
-  const pct = Math.min(100, rawPct);
+  const numericValue = Number(value || 0);
+  const numericTarget = Math.max(Number(target || 0), 0);
+  const rawPct = numericTarget > 0 ? Math.round((numericValue / numericTarget) * 100) : 0;
+  const pct = Math.min(Math.max(rawPct, 0), 100);
   const exceeded = numericTarget > 0 && numericValue > numericTarget;
-  const diff = numericTarget ? round(numericTarget - numericValue) : 0;
-  const status = exceeded ? `Přesah: ${round(numericValue - numericTarget)}${unit}` : `Zbývá: ${diff}${unit}`;
-  const fillStyle = exceeded ? `width:${pct}%;background:#dc2626;` : `width:${pct}%`;
-
-  return `<div class="metric ${exceeded ? 'over-limit over-target' : ''}" data-exceeded="${exceeded}">
-    <span>${label}</span>
-    <strong>${round(numericValue)}${unit}</strong>
-    <span>Cíl: ${numericTarget}${unit} · ${rawPct}%</span>
-    <em>${status}</em>
-    <div class="bar"><div class="fill" style="${fillStyle}"></div></div>
+  const diff = round(Math.max(numericTarget - numericValue, 0));
+  const status = exceeded ? `Přesah ${round(numericValue - numericTarget)}${unit}` : `Zbývá ${diff}${unit}`;
+  return `<div class="metric metric-visual ${exceeded ? 'over-limit over-target' : ''}" data-exceeded="${exceeded}">
+    <div class="macro-ring" style="--progress:${pct * 3.6}deg" role="img" aria-label="${label}: ${rawPct} procent cíle">
+      <div class="macro-ring-inner"><strong>${rawPct}%</strong><small>${label}</small></div>
+    </div>
+    <div class="metric-copy">
+      <strong>${round(numericValue)}${unit}</strong>
+      <span>Cíl ${numericTarget}${unit}</span>
+      <em>${status}</em>
+      <div class="progress-track" aria-hidden="true"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
   </div>`;
 }
 
@@ -1681,9 +1742,9 @@ if($('clearCustomFoodBtn')) $('clearCustomFoodBtn').onclick = clearCustomFoodFor
 if($('deleteCustomFoodBtn')) $('deleteCustomFoodBtn').onclick = deleteCustomFood;
 $('templateSelect').addEventListener('change', updateTemplatePreview);
 $('loadTemplateBtn').onclick = () => applyTemplate(false);
-$('appendTemplateBtn').onclick = () => applyTemplate(true);
 $('saveTemplateBtn').onclick = saveCurrentTemplate;
-$('createTemplateBtn').onclick = createNewTemplate;
+if($('copyTemplateBtn')) $('copyTemplateBtn').onclick = createTemplateCopy;
+if($('newBlankTemplateBtn')) $('newBlankTemplateBtn').onclick = createNewBlankPlan;
 if($('deleteTemplateBtn')) $('deleteTemplateBtn').onclick = deleteCurrentTemplate;
 $('exportTemplatesBtn').onclick = exportTemplates;
 $('resetTemplatesBtn').onclick = resetTemplates;

@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>Nutrition Coach – profesionální jídelníčky</title>
-<link href="style.css?v=20260720-pro-ui" rel="stylesheet"/>
+<link href="style.css?v=20260720-plan-manager" rel="stylesheet"/>
 </head>
 <body>
 <main class="app">
@@ -88,7 +88,7 @@
 <h2>Jídelníček aktuálního typu dne</h2>
 <div class="actions">
 <button class="secondary" id="excelBtn">Export Excel – oba dny</button>
-<button class="secondary" id="pdfBtn">Export PDF</button><button class="secondary save-plan-btn" id="saveTemplateBtn" type="button">Uložit jídelníček</button>
+<button class="secondary" id="pdfBtn">Export PDF</button>
 <label class="checkbox-inline"><input checked="" id="includeReplacementsPdf" type="checkbox"/> Náhrady do PDF</label>
 <button class="danger" id="clearBtn">Vymazat aktuální jídelníček</button>
 </div>
@@ -157,36 +157,33 @@
 </div>
 <p class="muted small" id="generatorStatus">Generátor používá cíle vybraného dne a položky z databáze potravin. Pokud něco chybí, použije nejbližší dostupnou surovinu.</p>
 </section>
-<section class="card support-card">
+<section class="card support-card plan-manager-card">
 <div class="section-head">
 <div>
-<h2>Uložené jídelníčky</h2>
-<p class="muted">Vyber uložený jídelníček podle cíle. Načte se do aktuálního typu dne a můžeš ho dál upravovat.</p>
+<p class="section-kicker">Správa souboru</p>
+<h2>Jídelníčky</h2>
+<p class="muted">Ukládej změny, otevírej existující jídelníčky nebo vytvoř kopii aktuálního.</p>
 </div>
-<div class="actions">
-<button class="secondary" id="loadTemplateBtn" type="button">Načíst jídelníček</button>
-<button class="secondary" id="appendTemplateBtn" type="button">Přidat jídelníček k aktuálnímu</button>
-
-<button class="danger" id="deleteTemplateBtn" type="button">Smazat jídelníček</button>
+<div class="current-plan-badge" id="currentPlanStatus">Aktuální jídelníček: nový neuložený</div>
 </div>
-</div>
-<div class="template-panel">
-<label>Vybrat jídelníček
-          <select id="templateSelect"></select>
+<div class="plan-manager-grid">
+<label>Uložené jídelníčky
+  <select id="templateSelect"></select>
 </label>
 <div class="template-preview muted" id="templatePreview">Jídelníčky se načítají…</div>
 </div>
-<div class="template-create">
-<label>Název nového jídelníčku
-          <input id="newTemplateName" placeholder="např. Martin dieta 2600 kcal" type="text">
-</input></label>
-<div class="actions">
-<button id="createTemplateBtn" type="button">Vytvořit nový jídelníček z aktuálního</button>
+<div class="plan-actions">
+<button class="secondary" id="loadTemplateBtn" type="button">📂 Otevřít jídelníček</button>
+<button class="save-plan-btn" id="saveTemplateBtn" type="button">💾 Uložit jídelníček</button>
+<button class="secondary" id="copyTemplateBtn" type="button">📄 Vytvořit kopii</button>
+<button class="secondary" id="newBlankTemplateBtn" type="button">➕ Nový prázdný jídelníček</button>
+</div>
+<div class="plan-utilities">
 <button class="secondary" id="exportTemplatesBtn" type="button">Export jídelníčků</button>
+<button class="danger" id="deleteTemplateBtn" type="button">Smazat vybraný</button>
 <button class="danger" id="resetTemplatesBtn" type="button">Vrátit původní jídelníčky</button>
 </div>
-</div>
-<p class="muted small">Úprava jídelníčku: načti jídelníček, změň jídla, množství a makra v tabulce a klikni na <strong>Uložit jídelníček</strong>. Ukládá se do prohlížeče; pro přenos na jiný telefon použij Export jídelníčků.</p>
+<p class="muted small">Uložit mění právě otevřený jídelníček. Vytvořit kopii uloží aktuální obsah pod novým názvem. Nový prázdný jídelníček začne od nuly.</p>
 </section>
 <section class="card support-card">
 <div class="section-head">
@@ -248,6 +245,6 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="app.js?v=20260720-pro-ui"></script>
+<script src="app.js?v=20260720-plan-manager"></script>
 </body>
 </html>
