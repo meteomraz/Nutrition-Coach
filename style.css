@@ -414,3 +414,24 @@ button:hover,.file-button:hover{box-shadow:0 14px 28px rgba(21,94,239,.30)}
   .metric-visual{grid-template-columns:64px minmax(0,1fr)}
   .macro-ring{width:60px;height:60px}
 }
+
+/* Recepty */
+.recipe-card{margin-top:22px}
+.recipe-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(290px,.8fr);gap:20px}
+.recipe-editor,.recipe-library{border:1px solid var(--border,#d9e2ec);border-radius:18px;padding:18px;background:rgba(255,255,255,.55)}
+.recipe-editor h3,.recipe-library h3{margin:0 0 14px}
+.recipe-form-grid{display:grid;grid-template-columns:1.2fr 1.4fr .8fr auto;gap:12px;align-items:end}
+.recipe-add-wrap{display:flex;align-items:end}
+.recipe-add-wrap button{white-space:nowrap}
+.unit-chip{display:inline-flex;min-width:44px;align-items:center;justify-content:center;border:1px solid var(--border,#d9e2ec);border-radius:10px;background:#f8fafc;font-weight:700}
+.recipe-draft,.recipe-preview{margin-top:14px;border:1px dashed var(--border,#cbd5e1);border-radius:14px;padding:12px;min-height:76px}
+.recipe-ingredient{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(148,163,184,.25)}
+.recipe-ingredient:last-child{border-bottom:0}
+.recipe-ingredient-values{font-size:.82rem;color:var(--muted,#64748b);text-align:right}
+.recipe-total{margin:12px 0;font-weight:700}
+.recipe-insert-grid{display:grid;grid-template-columns:1fr .65fr;gap:12px;margin-top:14px}
+.recipe-preview-title{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px}
+.recipe-preview ul{margin:8px 0 0;padding-left:20px}
+.recipe-preview li{margin:5px 0}
+@media(max-width:900px){.recipe-layout{grid-template-columns:1fr}.recipe-form-grid{grid-template-columns:1fr 1fr}.recipe-add-wrap{grid-column:1/-1}.recipe-add-wrap button{width:100%}}
+@media(max-width:560px){.recipe-form-grid,.recipe-insert-grid{grid-template-columns:1fr}.recipe-ingredient{grid-template-columns:1fr auto}.recipe-ingredient-values{grid-column:1/-1;text-align:left}}

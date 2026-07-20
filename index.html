@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>Nutrition Coach – profesionální jídelníčky</title>
-<link href="style.css?v=20260720-plan-manager" rel="stylesheet"/>
+<link href="style.css?v=20260720-recipes" rel="stylesheet"/>
 </head>
 <body>
 <main class="app">
@@ -108,6 +108,68 @@
 </section></div></section>
 
 
+
+
+<section class="card recipe-card feature-card">
+  <div class="section-head">
+    <div>
+      <p class="section-kicker">Knihovna jídel</p>
+      <h2>Recepty</h2>
+      <p class="muted">Sestav recept z potravin, ulož ho a později vlož celý recept do jídelníčku jako jednotlivé položky včetně výživových hodnot.</p>
+    </div>
+  </div>
+
+  <div class="recipe-layout">
+    <div class="recipe-editor">
+      <h3>Vytvořit recept</h3>
+      <div class="recipe-form-grid">
+        <label>Název receptu
+          <input id="recipeName" type="text" placeholder="např. Ovesná proteinová kaše" />
+        </label>
+        <label>Potravina
+          <input id="recipeFoodSearch" type="text" list="foodSuggestions" autocomplete="off" placeholder="Začni psát název potraviny" />
+        </label>
+        <label>Množství
+          <div class="quantity-row">
+            <input id="recipeFoodAmount" type="number" min="1" step="1" value="100" />
+            <span class="unit-chip" id="recipeFoodUnit">g</span>
+          </div>
+        </label>
+        <div class="recipe-add-wrap">
+          <button id="addRecipeIngredientBtn" type="button">Přidat surovinu</button>
+        </div>
+      </div>
+      <div id="recipeDraft" class="recipe-draft muted">Recept zatím neobsahuje žádné suroviny.</div>
+      <div class="recipe-total" id="recipeDraftTotal"></div>
+      <div class="actions">
+        <button id="saveRecipeBtn" type="button">💾 Uložit recept</button>
+        <button class="secondary" id="clearRecipeDraftBtn" type="button">Vyčistit rozepsaný recept</button>
+      </div>
+    </div>
+
+    <div class="recipe-library">
+      <h3>Uložené recepty</h3>
+      <label>Vyber recept
+        <select id="recipeSelect"></select>
+      </label>
+      <div id="recipePreview" class="recipe-preview muted">Zatím není uložen žádný recept.</div>
+      <div class="recipe-insert-grid">
+        <label>Vložit do jídla
+          <select id="recipeMealType">
+            <option>Snídaně</option><option>Svačina</option><option>Oběd</option><option>Odpolední svačina</option><option>Večeře</option><option>Druhá večeře</option>
+          </select>
+        </label>
+        <label>Násobek porce
+          <input id="recipeMultiplier" type="number" min="0.1" step="0.1" value="1" />
+        </label>
+      </div>
+      <div class="actions">
+        <button id="insertRecipeBtn" type="button">➕ Vložit recept do jídelníčku</button>
+        <button class="danger" id="deleteRecipeBtn" type="button">Smazat recept</button>
+      </div>
+    </div>
+  </div>
+</section>
 
 <section class="card generator-card feature-card">
 <div class="section-head">
@@ -245,6 +307,6 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="app.js?v=20260720-plan-manager"></script>
+<script src="app.js?v=20260720-recipes"></script>
 </body>
 </html>

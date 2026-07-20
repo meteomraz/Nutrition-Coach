@@ -4,6 +4,8 @@ let mealTemplates = [];
 let currentPlanId = localStorage.getItem('nutritionCurrentPlanId') || '';
 let customFoods = JSON.parse(localStorage.getItem('nutritionCustomFoods') || '[]');
 let favoriteFoodKeys = JSON.parse(localStorage.getItem('nutritionFavoriteFoods') || '[]');
+let recipes = JSON.parse(localStorage.getItem('nutritionRecipes') || '[]');
+let recipeDraft = [];
 
 const legacyReport = localStorage.getItem('nutritionReport');
 let reports = JSON.parse(localStorage.getItem('nutritionReportsByDayType') || 'null') || {
@@ -986,6 +988,185 @@ function renderReportRows(){
   return knownMealRows + otherRows;
 }
 
+
+function persistRecipes(){
+  localStorage.setItem('nutritionRecipes', JSON.stringify(recipes));
+}
+
+function recipeId(name){
+  const base = normalizeText(name).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'recept';
+  let id = base;
+  let n = 2;
+  while(recipes.some(r => r.id === id)) id = `${base}-${n++}`;
+  return id;
+}
+
+function findRecipeFood(){
+  const value = $('recipeFoodSearch')?.value || '';
+  const normalized = normalizeText(value);
+  if(!normalized) return null;
+  return foods.find(f => normalizeText(f.name) === normalized)
+    || foods.find(f => normalizeText(f.name).startsWith(normalized))
+    || foods.find(f => normalizeText(f.name).includes(normalized));
+}
+
+function recipeTotals(items = recipeDraft){
+  return items.reduce((sum, item) => ({
+    kcal: round(sum.kcal + Number(item.kcal || 0)),
+    protein: round(sum.protein + Number(item.protein || 0)),
+    carbs: round(sum.carbs + Number(item.carbs || 0)),
+    fat: round(sum.fat + Number(item.fat || 0))
+  }), {kcal:0, protein:0, carbs:0, fat:0});
+}
+
+function updateRecipeUnitHint(){
+  const food = findRecipeFood();
+  if($('recipeFoodUnit')) $('recipeFoodUnit').textContent = food ? amountUnitForFood(food) : 'g';
+}
+
+function addRecipeIngredient(){
+  const food = findRecipeFood();
+  const amount = Number($('recipeFoodAmount')?.value || 0);
+  if(!food || amount <= 0) return alert('Vyber platnou potravinu a zadej množství.');
+  const values = calc(food, amount);
+  recipeDraft.push({
+    name: food.name,
+    grams: amount,
+    amountLabel: formatAmount(food, amount),
+    ...values
+  });
+  $('recipeFoodSearch').value = '';
+  $('recipeFoodAmount').value = 100;
+  updateRecipeUnitHint();
+  renderRecipeDraft();
+}
+
+function removeRecipeIngredient(index){
+  recipeDraft.splice(index, 1);
+  renderRecipeDraft();
+}
+
+function renderRecipeDraft(){
+  const box = $('recipeDraft');
+  const totalBox = $('recipeDraftTotal');
+  if(!box || !totalBox) return;
+  if(!recipeDraft.length){
+    box.classList.add('muted');
+    box.innerHTML = 'Recept zatím neobsahuje žádné suroviny.';
+    totalBox.textContent = '';
+    return;
+  }
+  box.classList.remove('muted');
+  box.innerHTML = recipeDraft.map((item,index) => `
+    <div class="recipe-ingredient">
+      <strong>${xmlEsc(item.name)}</strong>
+      <span>${xmlEsc(item.amountLabel || formatAmount(item.name,item.grams))}</span>
+      <span class="recipe-ingredient-values">${round(item.kcal)} kcal · B ${round(item.protein)} · S ${round(item.carbs)} · T ${round(item.fat)}</span>
+      <button class="danger tiny-btn" type="button" onclick="removeRecipeIngredient(${index})">X</button>
+    </div>`).join('');
+  const t = recipeTotals();
+  totalBox.textContent = `Celý recept: ${t.kcal} kcal | B ${t.protein} g | S ${t.carbs} g | T ${t.fat} g`;
+}
+
+function clearRecipeDraft(){
+  if(recipeDraft.length && !confirm('Vyčistit všechny suroviny rozepsaného receptu?')) return;
+  recipeDraft = [];
+  if($('recipeName')) $('recipeName').value = '';
+  renderRecipeDraft();
+}
+
+function saveRecipe(){
+  const name = ($('recipeName')?.value || '').trim();
+  if(!name) return alert('Zadej název receptu.');
+  if(!recipeDraft.length) return alert('Přidej do receptu alespoň jednu surovinu.');
+  const existing = recipes.find(r => normalizeText(r.name) === normalizeText(name));
+  const data = { name, ingredients: recipeDraft.map(x => ({...x})), updatedAt: new Date().toISOString() };
+  if(existing){
+    if(!confirm(`Recept „${existing.name}“ už existuje. Přepsat ho?`)) return;
+    Object.assign(existing, data);
+  }else{
+    recipes.push({ id: recipeId(name), ...data });
+  }
+  persistRecipes();
+  refreshRecipeSelect(existing?.id || recipes[recipes.length-1].id);
+  alert('Recept byl uložen.');
+}
+
+function refreshRecipeSelect(selectedId){
+  const select = $('recipeSelect');
+  if(!select) return;
+  const previous = selectedId || select.value;
+  if(!recipes.length){
+    select.innerHTML = '<option value="">Žádný uložený recept</option>';
+  }else{
+    select.innerHTML = recipes.slice().sort((a,b)=>a.name.localeCompare(b.name,'cs'))
+      .map(r => `<option value="${xmlEsc(r.id)}">${xmlEsc(r.name)}</option>`).join('');
+    if(recipes.some(r => r.id === previous)) select.value = previous;
+  }
+  renderRecipePreview();
+}
+
+function selectedRecipe(){
+  return recipes.find(r => r.id === $('recipeSelect')?.value) || null;
+}
+
+function renderRecipePreview(){
+  const box = $('recipePreview');
+  if(!box) return;
+  const recipe = selectedRecipe();
+  if(!recipe){
+    box.classList.add('muted');
+    box.innerHTML = 'Zatím není uložen žádný recept.';
+    return;
+  }
+  box.classList.remove('muted');
+  const t = recipeTotals(recipe.ingredients || []);
+  box.innerHTML = `<div class="recipe-preview-title"><strong>${xmlEsc(recipe.name)}</strong><span>${t.kcal} kcal</span></div>
+    <div class="muted small">B ${t.protein} g · S ${t.carbs} g · T ${t.fat} g</div>
+    <ul>${(recipe.ingredients || []).map(i => `<li>${xmlEsc(i.name)} – ${xmlEsc(i.amountLabel || formatAmount(i.name,i.grams))} <span class="muted">(${round(i.kcal)} kcal)</span></li>`).join('')}</ul>`;
+}
+
+function insertSelectedRecipe(){
+  const recipe = selectedRecipe();
+  if(!recipe) return alert('Vyber uložený recept.');
+  const meal = $('recipeMealType')?.value || 'Snídaně';
+  const multiplier = Number($('recipeMultiplier')?.value || 1);
+  if(multiplier <= 0) return alert('Násobek porce musí být větší než nula.');
+  const items = (recipe.ingredients || []).map(ingredient => {
+    const food = findFoodSmart(ingredient.name) || ingredient;
+    const grams = round(Number(ingredient.grams || 0) * multiplier);
+    return {
+      meal,
+      name: ingredient.name,
+      grams,
+      amount: grams,
+      unitMode: amountUnitForFood(food),
+      amountLabel: formatAmount(food, grams),
+      recipeName: recipe.name,
+      ...(findFoodSmart(ingredient.name) ? calc(food, grams) : {
+        kcal: round(Number(ingredient.kcal || 0) * multiplier),
+        protein: round(Number(ingredient.protein || 0) * multiplier),
+        carbs: round(Number(ingredient.carbs || 0) * multiplier),
+        fat: round(Number(ingredient.fat || 0) * multiplier)
+      })
+    };
+  });
+  if(!items.length) return alert('Vybraný recept neobsahuje žádné suroviny.');
+  getReport().push(...items);
+  save();
+  render();
+  alert(`Recept „${recipe.name}“ byl vložen do části ${meal} jako ${items.length} položek.`);
+}
+
+function deleteSelectedRecipe(){
+  const recipe = selectedRecipe();
+  if(!recipe) return;
+  if(!confirm(`Opravdu smazat recept „${recipe.name}“?`)) return;
+  recipes = recipes.filter(r => r.id !== recipe.id);
+  persistRecipes();
+  refreshRecipeSelect();
+}
+
 function render(){
   const t = totals();
   const targets = getTargets();
@@ -1751,5 +1932,16 @@ $('resetTemplatesBtn').onclick = resetTemplates;
 if($('clientName')) $('clientName').addEventListener('input', (event) => { clientName = event.target.value; localStorage.setItem('nutritionClientName', clientName); render(); });
 if($('clientDescription')) $('clientDescription').addEventListener('input', (event) => { clientDescription = event.target.value; localStorage.setItem('nutritionClientDescription', clientDescription); });
 ['targetKcal','targetProtein','targetCarbs','targetFat'].forEach(id => $(id).addEventListener('input', () => { render(); updateDayTypeHint('Neuložená změna.'); }));
+
+if($('recipeFoodSearch')) $('recipeFoodSearch').addEventListener('input', (event) => { refreshFoodSuggestions(event.target.value); updateRecipeUnitHint(); });
+if($('addRecipeIngredientBtn')) $('addRecipeIngredientBtn').onclick = addRecipeIngredient;
+if($('saveRecipeBtn')) $('saveRecipeBtn').onclick = saveRecipe;
+if($('clearRecipeDraftBtn')) $('clearRecipeDraftBtn').onclick = clearRecipeDraft;
+if($('recipeSelect')) $('recipeSelect').addEventListener('change', renderRecipePreview);
+if($('insertRecipeBtn')) $('insertRecipeBtn').onclick = insertSelectedRecipe;
+if($('deleteRecipeBtn')) $('deleteRecipeBtn').onclick = deleteSelectedRecipe;
+renderRecipeDraft();
+refreshRecipeSelect();
+
 loadFoods();
 loadTemplates();
