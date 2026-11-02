@@ -6568,5 +6568,269 @@
     "tags": [
       "bezlaktozove"
     ]
+  },
+  {
+    "id": "susene-ovoce-jablka-susena-krizaly",
+    "name": "Jablka sušená (křížaly)",
+    "category": "Sušené ovoce",
+    "kcal": 243,
+    "protein": 0.9,
+    "carbs": 65.9,
+    "fat": 0.3,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-banan-suseny-bez-pridaneho-cukru",
+    "name": "Banán sušený (bez přidaného cukru)",
+    "category": "Sušené ovoce",
+    "kcal": 346,
+    "protein": 3.9,
+    "carbs": 80,
+    "fat": 1.8,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-mango-susene-neslazene",
+    "name": "Mango sušené (neslazené)",
+    "category": "Sušené ovoce",
+    "kcal": 319,
+    "protein": 2.5,
+    "carbs": 76,
+    "fat": 1.2,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-ananas-suseny-neslazeny",
+    "name": "Ananas sušený (neslazený)",
+    "category": "Sušené ovoce",
+    "kcal": 330,
+    "protein": 2,
+    "carbs": 80,
+    "fat": 0.5,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-brusinky-susene-slazene",
+    "name": "Brusinky sušené (slazené)",
+    "category": "Sušené ovoce",
+    "kcal": 325,
+    "protein": 0.2,
+    "carbs": 82,
+    "fat": 1.1,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-boruvky-susene",
+    "name": "Borůvky sušené",
+    "category": "Sušené ovoce",
+    "kcal": 317,
+    "protein": 2.5,
+    "carbs": 76,
+    "fat": 1.5,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-jahody-susene-neslazene",
+    "name": "Jahody sušené (neslazené)",
+    "category": "Sušené ovoce",
+    "kcal": 310,
+    "protein": 6,
+    "carbs": 65,
+    "fat": 3,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-maliny-susene",
+    "name": "Maliny sušené",
+    "category": "Sušené ovoce",
+    "kcal": 300,
+    "protein": 8,
+    "carbs": 54,
+    "fat": 4,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-tresne-susene",
+    "name": "Třešně sušené",
+    "category": "Sušené ovoce",
+    "kcal": 333,
+    "protein": 1.3,
+    "carbs": 80.5,
+    "fat": 0.7,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-visne-susene",
+    "name": "Višně sušené",
+    "category": "Sušené ovoce",
+    "kcal": 333,
+    "protein": 1.3,
+    "carbs": 80.5,
+    "fat": 0.7,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-hrusky-susene",
+    "name": "Hrušky sušené",
+    "category": "Sušené ovoce",
+    "kcal": 262,
+    "protein": 1.9,
+    "carbs": 69.7,
+    "fat": 0.6,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-broskve-susene",
+    "name": "Broskve sušené",
+    "category": "Sušené ovoce",
+    "kcal": 239,
+    "protein": 3.6,
+    "carbs": 61.3,
+    "fat": 0.8,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-nektarinky-susene",
+    "name": "Nektarinky sušené",
+    "category": "Sušené ovoce",
+    "kcal": 240,
+    "protein": 3.5,
+    "carbs": 62,
+    "fat": 0.8,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-kaki-susene",
+    "name": "Kaki sušené",
+    "category": "Sušené ovoce",
+    "kcal": 274,
+    "protein": 1.4,
+    "carbs": 73.4,
+    "fat": 0.6,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-moruse-susene",
+    "name": "Moruše sušené",
+    "category": "Sušené ovoce",
+    "kcal": 340,
+    "protein": 10,
+    "carbs": 70,
+    "fat": 2,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-goji-kustovnice-susene",
+    "name": "Goji (kustovnice) sušené",
+    "category": "Sušené ovoce",
+    "kcal": 349,
+    "protein": 14.3,
+    "carbs": 77.1,
+    "fat": 0.4,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-rybiz-suseny",
+    "name": "Rybíz sušený",
+    "category": "Sušené ovoce",
+    "kcal": 310,
+    "protein": 4,
+    "carbs": 68,
+    "fat": 1,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-aronie-susena",
+    "name": "Aronie sušená",
+    "category": "Sušené ovoce",
+    "kcal": 320,
+    "protein": 3,
+    "carbs": 73,
+    "fat": 1.5,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-kokos-suseny-neslazeny",
+    "name": "Kokos sušený (neslazený)",
+    "category": "Sušené ovoce",
+    "kcal": 660,
+    "protein": 6.9,
+    "carbs": 23.7,
+    "fat": 64.5,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-datle-medjool-susene",
+    "name": "Datle Medjool sušené",
+    "category": "Sušené ovoce",
+    "kcal": 277,
+    "protein": 1.8,
+    "carbs": 75,
+    "fat": 0.2,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-fiky-susene-bio",
+    "name": "Fíky sušené (bio)",
+    "category": "Sušené ovoce",
+    "kcal": 249,
+    "protein": 3.3,
+    "carbs": 63.9,
+    "fat": 0.9,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-svestky-susene-bez-pecek",
+    "name": "Švestky sušené (bez pecek)",
+    "category": "Sušené ovoce",
+    "kcal": 240,
+    "protein": 2.2,
+    "carbs": 63.9,
+    "fat": 0.4,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-merunky-susene-nesirene",
+    "name": "Meruňky sušené (nesířené)",
+    "category": "Sušené ovoce",
+    "kcal": 241,
+    "protein": 3.4,
+    "carbs": 62.6,
+    "fat": 0.5,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
+  },
+  {
+    "id": "susene-ovoce-papaja-susena-neslazena",
+    "name": "Papája sušená (neslazená)",
+    "category": "Sušené ovoce",
+    "kcal": 300,
+    "protein": 1.5,
+    "carbs": 74,
+    "fat": 0.5,
+    "unit": "100g",
+    "source": "Orientační hodnoty na 100 g; ověř dle etikety konkrétního výrobku"
   }
 ]
